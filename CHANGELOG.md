@@ -8,7 +8,7 @@
 
 - **改动与原因**：按厂家《闸门设备通过mqtt对接协议》（三诚 SCZM-LG，固件 VER:V2.4.05.000000.0000）实现首台单螺杆闸门（hbdxscz001）只读采集：新增 `src/adapters/gate/`（契约与 normalizeGate）、`src/modules/telemetry/gate-mqtt.ts`（GATE_MQTT_ENABLED 默认关、advisory lock、persistBatch 入库、单条报文隔离）、`workers/gate.ts`（常驻订阅与 --replay 回放）、`tools/setup-gate.ts`（来源/设备/测点登记，verified 均为 false）、单元与集成测试及[契约状态文档](docs/contracts/gate-sdsc.md)。新增依赖 mqtt@^5.16.0。本阶段只被动订阅上行主题，不实现、不预埋任何下行查询/控制，控制 blocked 约束未动。
 - **影响范围**：package.json（worker:gate、registry:gate 脚本与 mqtt 依赖）、pnpm-lock.yaml、.env.example（GATE_* 变量）、README 设备接入表、docs/README.md 索引。无数据库迁移；未接入前不改变任何现有服务。
-- **验证**：`corepack pnpm typecheck` 通过；新增单元用例 6/6 通过（合成契约与合成报文，已明确标注）；全量 `corepack pnpm test:unit` 89 通过、4 失败，该 4 项为 verification-hardening/Q01 检查器在本机 Windows 无符号链接权限（EPERM symlink）的既有环境问题，未改代码的基线同样失败 4 项。`corepack pnpm build` 通过。集成测试 tests/integration/gate-mqtt.test.ts 已编写但**未执行**（本机无 Docker/PostgreSQL）；未运行任何写库的 setup/migrate；真实 broker 与设备联调未执行（broker 地址未知、厂家 DTU 尚未指向我方）。
+- **验证**：`corepack pnpm typecheck` 通过；新增单元用例 6/6 通过（合成契约与合成报文，已明确标注）；全量 `corepack pnpm test:unit` 89 通过、4 失败，该 4 项为 verification-hardening/Q01 检查器在本机 Windows 无符号链接权限（EPERM symlink）的既有环境问题，未改代码的基线同样失败 4 项。`corepack pnpm build` 通过。集成测试 tests/integration/gate-mqtt.test.ts 已于 2026-10-10 在 luminous 服务器 agri_test 执行通过（修正合成样本采样时间以落在测点绑定有效期内）；真实 broker 与设备联调未执行（厂家 DTU 尚未指向我方）。同日已在 luminous 部署 Mosquitto broker（liangzihu-farm-mqtt，仅本地监听 1883、强制鉴权、匿名拒绝已实测），完成 hbdxscz001 来源/设备/6 测点登记（verified 均为 false）及私有契约配置；gate worker 因契约未核实按设计拒绝启动（GATE_CONTRACT_NOT_READY 已实测）。
 - **运行影响**：默认全部关闭，无运行影响。正式接入需：部署环境提供 broker 地址与账号（凭据只放 .env.local）、厂家将 DTU 指向我方 broker、现场核实后将来源与设备 verified 置真并绑定测点对象。后续工作项：下行 rw_prot 查询/控制、Modbus RTU 备用通道，均未实现。
 ## 2026-10-09 · 17 · GIS 演示交互修订
 
