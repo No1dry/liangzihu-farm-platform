@@ -4,6 +4,12 @@
 
 从 2026-10-04 起，每次代码、配置、依赖、数据库或文档调整均须随交付更新本文件。同一任务的连续修改合为一条，同日不同任务另起条目；历史补记注明来源。日期采用北京时间，序号只区分当天记录，不是软件版本号。
 
+## 2026-10-13 · 01 · 三诚闸门接入路线确定为订阅厂家 MQTT（方案 B）
+
+- **改动与原因**：与厂家协商确定只读接入走"订阅厂家 MQTT 服务器上行主题"（方案 B）：厂家可开账号（仅读写权限，我方只订不发）；DTU 远程改址为保留备选；厂家 API 因数据限制与延迟被厂家自述不推荐，放弃。厂家确认 hbdxscz001 为 MQTT JSON 上报、双吊点接线图适用单螺杆机型，并提供一条真实历史报文。更新 `docs/contracts/gate-sdsc.md` 厂家确认记录。
+- **验证**：厂家真实报文经本地 normalizeGate 解析验证通过（err:"0" 判有效、字符串数值、未登记字段跳过、sys_time 采样时间正确），未入库。
+- **运行影响**：无。待厂家经安全方式交付 broker 地址与账号后配置 `GATE_MQTT_URL` 等即可订阅；契约与来源 verified 保持 false。发现报文 SN/IMEI 与《闸门编号与型号对应表》登记不一致，待厂家核实；设备当前不在线，联调待其通电。
+
 ## 2026-10-10 · 01 · 三诚闸门只读 MQTT 采集接入（第一阶段，未联调）
 
 - **改动与原因**：按厂家《闸门设备通过mqtt对接协议》（三诚 SCZM-LG，固件 VER:V2.4.05.000000.0000）实现首台单螺杆闸门（hbdxscz001）只读采集：新增 `src/adapters/gate/`（契约与 normalizeGate）、`src/modules/telemetry/gate-mqtt.ts`（GATE_MQTT_ENABLED 默认关、advisory lock、persistBatch 入库、单条报文隔离）、`workers/gate.ts`（常驻订阅与 --replay 回放）、`tools/setup-gate.ts`（来源/设备/测点登记，verified 均为 false）、单元与集成测试及[契约状态文档](docs/contracts/gate-sdsc.md)。新增依赖 mqtt@^5.16.0。本阶段只被动订阅上行主题，不实现、不预埋任何下行查询/控制，控制 blocked 约束未动。
