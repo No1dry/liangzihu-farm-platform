@@ -57,7 +57,7 @@ export async function runGateMqtt(pool:Pool,config:GateMqttConfiguration,options
     locked=(await lock.query('SELECT pg_try_advisory_lock(hashtextextended($1,0)) AS locked',['gate-mqtt:'+config.fields.sourceId])).rows[0].locked;
     if(!locked)return {state:'busy' as const};
     const client=(options.connect??mqtt.connect)(settings.url,{clientId:settings.clientId,username:settings.username??undefined,password:settings.password??undefined,reconnectPeriod:10000,connectTimeout:10000});
-    await new Promise<void>((resolve,reject)=>{client.once('connect',()=>client.subscribe(config.fields.topicPrefix+'#',e=>e?reject(e):resolve()));client.once('error',reject);});
+    await new Promise<void>((resolve,reject)=>{client.once('connect',()=>client.subscribe(config.fields.subscribeTopic??config.fields.topicPrefix+'#',e=>e?reject(e):resolve()));client.once('error',reject);});
     client.on('error',()=>{markUnavailable(pool,config.fields.sourceId,'GATE_MQTT_FAILED').catch(()=>{});});
     let chain=Promise.resolve();
     client.on('message',(topic,payload)=>{chain=chain.then(async()=>{
