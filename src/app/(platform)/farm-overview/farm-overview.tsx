@@ -41,9 +41,9 @@ function savedState():SavedState|null{try{const raw=sessionStorage.getItem(state
 export default function FarmOverview(){
  const [mode,setMode]=useState<'real'|'demo'>('real');
  const [addedDemo,setAddedDemo]=useState<DemoItem[]>([]),[demoFormOpen,setDemoFormOpen]=useState(false),[demoKind,setDemoKind]=useState<'field'|'pond'|'gate'|'pump'|'drone'|'harvester'>('field'),[demoName,setDemoName]=useState(''),[demoRegionId,setDemoRegionId]=useState(demoRegions[0].id),[drawing,setDrawing]=useState(false);
- const [basemap,setBasemap]=useState<'vector'|'satellite'>(()=>savedState()?.basemap??'vector');
+ const [basemap,setBasemap]=useState<'vector'|'satellite'>('vector');
  const [annotationsVisible,setAnnotationsVisible]=useState(true);
- const [categoryVisibility,setCategoryVisibility]=useState<Record<string,boolean>>(()=>savedState()?.visibility??defaultVisibility);
+ const [categoryVisibility,setCategoryVisibility]=useState<Record<string,boolean>>(defaultVisibility);
  const [layerPanelOpen,setLayerPanelOpen]=useState(false);
  const {data,error,loading,reload}=useApi<MapData>('/api/v1/farm-overview');
  const lastLoaded=useRef<MapData|null>(null);if(data)lastLoaded.current=data;
@@ -103,7 +103,7 @@ export default function FarmOverview(){
  const stopDrawing=()=>{const map=mapRef.current,draw=drawRef.current;if(map&&draw)map.removeInteraction(draw);drawRef.current=null;drawingRef.current=false;setDrawing(false);};
  const startDrawing=()=>{const map=mapRef.current,name=demoName.trim();if(mode!=='demo'||!map||!name||!demoRegionId)return;stopDrawing();const area=demoKind==='field'||demoKind==='pond',symbol=demoKind,kind=area?demoKind:demoKind==='gate'||demoKind==='pump'?'facility':'mobile';const draw=new Draw({type:area?'Polygon':'Point'});drawRef.current=draw;drawingRef.current=true;setDrawing(true);map.addInteraction(draw);draw.on('drawend',event=>{const geometry=event.feature.getGeometry();if(!geometry)return;const encoded=new GeoJSON().writeGeometryObject(geometry,{featureProjection:'EPSG:3857',dataProjection:'EPSG:4326'}) as DemoItem['geometry'];if(!encoded)return;const id=`demo:added:${crypto.randomUUID()}`,regionName=demoRegions.find(row=>row.id===demoRegionId)?.name??'演示片区';const newItem:DemoItem={id,farmId:'demo:farm:main',name,code:`演示-${id.slice(-8)}`,kind,symbol,regionId:demoRegionId,geometry:encoded,detail:kind==='mobile'?`登记归属：${regionName}；演示坐标，非真实 GPS`:kind==='facility'?'演示设施；无控制指令':kind==='field'?'演示农田；非测绘边界':'演示塘口；非测绘边界',status:'临时演示',object_source:'现场临时合成演示；非测绘、非真实资料',object_recorded_at:new Date().toISOString(),boundary_status:'draft',version:1};skipInitialFit.current=true;setAddedDemo(rows=>[...rows,newItem]);setSelectedId(id);setSelectionVersion(value=>value+1);setDemoName('');stopDrawing();});};
 
- useEffect(()=>{if(initialised.current)return;initialised.current=true;const state=savedState();if(!state)return;restored.current=state;skipInitialFit.current=true;setQuery(state.query);setSelectedId(state.selectedId);setDirectoryCollapsed(state.directoryCollapsed);},[]);
+ useEffect(()=>{if(initialised.current)return;initialised.current=true;const state=savedState();if(!state)return;restored.current=state;skipInitialFit.current=true;setQuery(state.query);setSelectedId(state.selectedId);setDirectoryCollapsed(state.directoryCollapsed);setBasemap(state.basemap);setCategoryVisibility(state.visibility);},[]);
 
  useEffect(()=>{selectedRef.current=selectedId;sourceRef.current?.changed();},[selectedId]);
  useEffect(()=>{if(!validBrowserKey(key)||!target.current)return;
