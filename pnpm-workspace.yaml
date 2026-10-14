@@ -1,0 +1,8 @@
+packages:
+  - .
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - onnxruntime-node
+  - protobufjs

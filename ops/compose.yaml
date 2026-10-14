@@ -1,0 +1,28 @@
+name: liangzihu-farm-platform
+
+services:
+  db:
+    image: liangzihu-farm-platform-db:18-3.6-vector0.8.6
+    build:
+      context: .
+      dockerfile: Dockerfile.database
+    platform: linux/amd64
+    container_name: liangzihu-farm-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run pnpm db:setup to prepare credentials}
+    ports:
+      - '127.0.0.1:55432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U postgres -d postgres']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+
+volumes:
+  pgdata:
