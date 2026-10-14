@@ -58,6 +58,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.locator('[data-testid="boundary-form"]').waitFor();
    await page.waitForTimeout(500);
    const beforeWkt=(await pool.query("SELECT ST_AsText(boundary) AS w FROM objects WHERE id=$1",[field.id])).rows[0].w;
+   
    const map=page.locator('[data-testid="map-editor-map"]');
    await map.waitFor();
    const box=await map.boundingBox();assert(box);
@@ -65,7 +66,8 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    const resolution=Number(await map.getAttribute('data-view-resolution'));
    const size:[number,number]=[box.width,box.height];
    const vertex=toPixel([114.64,30.26],center,resolution,size);
-   const target=toPixel([114.645,30.265],center,resolution,size);
+   const target=toPixel([114.637,30.253],center,resolution,size);
+   
    await page.mouse.move(box.x+vertex[0],box.y+vertex[1]);await page.mouse.down();await page.waitForTimeout(80);
    await page.mouse.move(box.x+target[0],box.y+target[1]);await page.waitForTimeout(80);
    await page.mouse.up();await page.waitForTimeout(200);
@@ -83,11 +85,12 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.getByRole('button',{name:'复位视图'}).click();await page.waitForTimeout(600);
    const pondCenter=await map.evaluate(el=>{const c=(el as HTMLElement).dataset.viewCenter?.split(',').map(Number)??[0,0];return [c[0],c[1]] as [number,number];});
    const pondResolution=Number(await map.getAttribute('data-view-resolution'));
-   const p1=toPixel([114.66,30.24],pondCenter,pondResolution,size),p2=toPixel([114.72,30.24],pondCenter,pondResolution,size),p3=toPixel([114.72,30.25],pondCenter,pondResolution,size),p4=toPixel([114.66,30.25],pondCenter,pondResolution,size);
+   const p1=toPixel([114.56,30.22],pondCenter,pondResolution,size),p2=toPixel([114.62,30.22],pondCenter,pondResolution,size),p3=toPixel([114.62,30.23],pondCenter,pondResolution,size),p4=toPixel([114.56,30.23],pondCenter,pondResolution,size);
    await page.mouse.click(box.x+p1[0],box.y+p1[1]);await page.waitForTimeout(80);
    await page.mouse.click(box.x+p2[0],box.y+p2[1]);await page.waitForTimeout(80);
    await page.mouse.click(box.x+p3[0],box.y+p3[1]);await page.waitForTimeout(80);
-   await page.mouse.dblclick(box.x+p4[0],box.y+p4[1]);await page.waitForTimeout(200);
+   await page.mouse.dblclick(box.x+p4[0],box.y+p4[1]);await page.waitForTimeout(500);
+   await page.getByText('多边形绘制完成，填写依据后保存。').waitFor();
    await page.locator('[data-testid="boundary-form"] textarea').fill('M2-A 塘口绘制草稿测试');
    await page.locator('[data-testid="boundary-form"] button[type=submit]').click();
    await page.getByText(/已保存“合成编辑塘口”/).waitFor();
@@ -136,7 +139,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    const conflictResolution=Number(await map.getAttribute('data-view-resolution'));
    const conflictSize:[number,number]=[conflictBox.width,conflictBox.height];
    const v2=toPixel([114.62,30.24],conflictCenter,conflictResolution,conflictSize);
-   const t2=toPixel([114.615,30.235],conflictCenter,conflictResolution,conflictSize);
+   const t2=toPixel([114.623,30.243],conflictCenter,conflictResolution,conflictSize);
    await page.mouse.move(conflictBox.x+v2[0],conflictBox.y+v2[1]);await page.mouse.down();await page.waitForTimeout(80);
    await page.mouse.move(conflictBox.x+t2[0],conflictBox.y+t2[1]);await page.waitForTimeout(80);
    await page.mouse.up();await page.waitForTimeout(200);
@@ -167,7 +170,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    const cc=await map.evaluate(el=>{const c=(el as HTMLElement).dataset.viewCenter?.split(',').map(Number)??[0,0];return [c[0],c[1]] as [number,number];});
    const cr=Number(await map.getAttribute('data-view-resolution'));
    const cs:[number,number]=[cb.width,cb.height];
-   const v3=toPixel([114.615,30.235],cc,cr,cs);const t3=toPixel([114.60,30.22],cc,cr,cs);
+   const v3=toPixel([114.623,30.243],cc,cr,cs);const t3=toPixel([114.626,30.246],cc,cr,cs);
    await page.mouse.move(cb.x+v3[0],cb.y+v3[1]);await page.mouse.down();await page.waitForTimeout(80);
    await page.mouse.move(cb.x+t3[0],cb.y+t3[1]);await page.waitForTimeout(80);
    await page.mouse.up();await page.waitForTimeout(200);
