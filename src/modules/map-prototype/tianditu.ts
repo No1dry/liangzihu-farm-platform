@@ -1,6 +1,6 @@
 export const INITIAL_CENTER_4326: [number, number] = [114.635, 30.25];
 
-export type TiandituLayer = 'img' | 'cia';
+export type TiandituLayer = 'img' | 'cia' | 'vec' | 'cva';
 
 export function validBrowserKey(key: string): boolean {
   return /^[A-Za-z0-9]{32}$/.test(key);

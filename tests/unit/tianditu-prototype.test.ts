@@ -20,6 +20,13 @@ test('天地图浏览器 Key 格式和 WMTS 行列映射', () => {
   assert.equal(url.searchParams.get('TILECOL'), '1676');
   assert.equal(url.searchParams.get('tk'), key);
   assert.equal(new URL(tiandituWmtsUrls('cia', key)[0]).searchParams.get('LAYER'), 'cia');
+  const vecUrl = new URL(tiandituWmtsUrls('vec', key)[0]);
+  assert.equal(vecUrl.pathname, '/vec_w/wmts');
+  assert.equal(vecUrl.searchParams.get('LAYER'), 'vec');
+  assert.equal(vecUrl.searchParams.get('TILEMATRIXSET'), 'w');
+  const cvaUrl = new URL(tiandituWmtsUrls('cva', key)[0]);
+  assert.equal(cvaUrl.pathname, '/cva_w/wmts');
+  assert.equal(cvaUrl.searchParams.get('LAYER'), 'cva');
 });
 
 test('初始 WGS84 经纬度经 EPSG:3857 转换后可回到原位置', () => {

@@ -24,10 +24,10 @@ test('D1 卫星总览只展示授权对象，搜索定位与覆盖抽屉在桌�
   await page.getByRole('searchbox',{name:'搜索名称或编号'}).fill('D1-FIELD');
   assert.equal(await page.getByRole('button',{name:/合成东片农田/}).count(),1);
   assert.equal(await page.getByRole('button',{name:/合成无边界塘口/}).count(),0);
-  const zoomBeforeDirectory=await page.getByRole('application',{name:'天地图卫星影像及已授权农业对象边界'}).getAttribute('data-view-zoom');
+  const zoomBeforeDirectory=await page.getByRole('application',{name:'天地图矢量底图及已授权农业对象边界'}).getAttribute('data-view-zoom');
   await page.getByRole('button',{name:/合成东片农田/}).click();
   await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'合成东片农田'}).waitFor();
-  const map=page.getByRole('application',{name:'天地图卫星影像及已授权农业对象边界'});
+  const map=page.getByRole('application',{name:'天地图矢量底图及已授权农业对象边界'});
   await map.waitFor();const center=await map.evaluate(el=>(el.querySelector('.ol-viewport') as HTMLElement)?.style.width??'');
   await page.waitForTimeout(350);assert.equal(await map.getAttribute('data-view-zoom'),zoomBeforeDirectory);
   await mkdir('docs/acceptance/d1',{recursive:true});

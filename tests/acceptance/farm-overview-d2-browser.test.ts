@@ -34,7 +34,7 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
       await mkdir('docs/acceptance/d3',{recursive:true});
       await page.getByRole('button',{name:'定位村庄 合成西村'}).waitFor();
       await page.screenshot({path:'docs/acceptance/d3/2026-10-09-D3多村总览-合成样本.png',fullPage:true});
-      const map=page.getByRole('application',{name:'天地图卫星影像及已授权农业对象边界'});
+      const map=page.getByRole('application',{name:'天地图矢量底图及已授权农业对象边界'});
       await page.locator('.ol-zoom-out').evaluate(button=>{for(let i=0;i<3;i++)(button as HTMLButtonElement).click();});await page.waitForTimeout(500);
       const beforeVillage=await map.getAttribute('data-view-zoom');
       await page.getByRole('button',{name:'定位村庄 合成东村'}).click();await page.waitForTimeout(450);
