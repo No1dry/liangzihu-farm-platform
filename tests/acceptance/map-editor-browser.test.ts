@@ -71,12 +71,14 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.mouse.move(box.x+vertex[0],box.y+vertex[1]);await page.mouse.down();await page.waitForTimeout(80);
    await page.mouse.move(box.x+target[0],box.y+target[1]);await page.waitForTimeout(80);
    await page.mouse.up();await page.waitForTimeout(200);
+   await page.waitForTimeout(300);
+   await page.screenshot({path:'docs/acceptance/m2/02-顶点拖动编辑中.png',fullPage:true});
    await page.locator('[data-testid="boundary-form"] textarea').fill('M2-A 拖动顶点修改测试');
    await page.locator('[data-testid="boundary-form"] button[type=submit]').click();
    await page.getByText(/已保存“合成编辑农田”/).waitFor();
    const afterWkt=(await pool.query("SELECT ST_AsText(boundary) AS w FROM objects WHERE id=$1",[field.id])).rows[0].w;
    assert.notEqual(afterWkt,beforeWkt,'拖动顶点后 DB 边界应变化');
-   await page.screenshot({path:'docs/acceptance/m2/02-农田修改保存后.png',fullPage:true});
+   await page.screenshot({path:'docs/acceptance/m2/03-农田修改保存后.png',fullPage:true});
 
    // 2. 新建塘口并绘制多边形保存为草稿
    await page.getByRole('button',{name:/合成编辑塘口/}).click();
@@ -94,6 +96,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.locator('[data-testid="boundary-form"] textarea').fill('M2-A 塘口绘制草稿测试');
    await page.locator('[data-testid="boundary-form"] button[type=submit]').click();
    await page.getByText(/已保存“合成编辑塘口”/).waitFor();
+   await page.screenshot({path:'docs/acceptance/m2/04-塘口草稿保存后.png',fullPage:true});
    const pondRow=(await pool.query("SELECT boundary_status,ST_AsText(boundary) AS w FROM objects WHERE id=$1",[pond.id])).rows[0];
    assert.equal(pondRow.boundary_status,'draft');assert.ok(pondRow.w);
 
@@ -102,6 +105,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.getByRole('button',{name:/合成编辑塘口/}).waitFor();
    await page.getByRole('button',{name:/合成编辑塘口/}).click();
    await page.locator('[data-testid="boundary-form"]').waitFor();
+   await page.screenshot({path:'docs/acceptance/m2/06-刷新后重新打开.png',fullPage:true});
    const reopened=(await pool.query("SELECT ST_AsText(boundary) AS w FROM objects WHERE id=$1",[pond.id])).rows[0].w;
    assert.equal(reopened,pondRow.w);
 
@@ -148,6 +152,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await ownerContext.request.post(app.origin+'/api/v1/map',{headers:{Origin:app.origin,'Content-Type':'application/json'},data:{objectId:field.id,version:(await pool.query('SELECT version FROM objects WHERE id=$1',[field.id])).rows[0].version,sourceCrs:4326,geometry:{type:'Polygon',coordinates:[[[114.62,30.24],[114.64,30.24],[114.64,30.26],[114.62,30.26],[114.62,30.24]]]},status:'draft',source:'外部会话抢先更新'}});
    await page.locator('[data-testid="boundary-form"] button[type=submit]').click();
    await page.getByText(/边界版本已变化/).waitFor();
+   await page.screenshot({path:'docs/acceptance/m2/05-版本冲突保留几何.png',fullPage:true});
    const conflictTemp=(await pool.query("SELECT ST_AsText(boundary) AS w FROM objects WHERE id=$1",[field.id])).rows[0].w;
    await page.getByRole('button',{name:'刷新版本后重试'}).click();
    await page.getByText(/对象版本已刷新/).waitFor();
