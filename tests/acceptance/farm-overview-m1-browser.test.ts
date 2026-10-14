@@ -18,8 +18,9 @@ test('M1 默认矢量底图、底图切换与持久化、类别显隐、图例�
   await page.goto(app.origin+'/farm-overview');
   await page.getByRole('heading',{name:'农场空间总览'}).waitFor();
   await page.getByRole('button',{name:/M1合成农田/}).waitFor();
-  const map=page.getByRole('application',{name:'天地图矢量底图及已授权农业对象边界'});
+  const map=page.getByRole('application');
   await map.waitFor();
+  assert.equal(await map.getAttribute('aria-label'),'天地图矢量底图及已授权农业对象边界');
   assert.equal(await map.getAttribute('data-basemap'),'vector','M1 默认底图应为天地图矢量');
   assert.equal(await map.getAttribute('data-annotations'),'true');
   assert.equal(await map.getAttribute('data-mode'),'real');
