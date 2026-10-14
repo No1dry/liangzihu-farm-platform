@@ -11,7 +11,7 @@ export function readableCurrent(ids: string[], binding: { objectId: string; bind
 }
 export async function getPointsCurrent(c: PoolClient, actor: Actor, at = new Date()) {
     const ids = await listAccessibleObjects(c, actor, 'read');
-    const rows = (await c.query(`SELECT p.id AS point_id,b.binding_id,b.object_id,b.verified,b.conflict,pc.quality,pc.reasons,pc.sampled_at,o.value::float8,o.unit,o.object_id AS current_object_id,pc.binding_id AS current_binding_id
+    const rows = (await c.query(`SELECT p.id AS point_id,b.binding_id,b.object_id,b.verified,b.conflict,pc.quality,pc.reasons,pc.sampled_at,o.value::float8,o.unit,o.object_id AS current_object_id,o.binding_id AS current_binding_id
     FROM points p JOIN devices d ON d.id=p.device_id
     LEFT JOIN LATERAL(SELECT b2.id AS binding_id,b2.object_id,b2.verified,count(*) OVER ()>1 AS conflict FROM point_bindings b2
     WHERE b2.point_id=p.id AND b2.valid_from<=$2 AND (b2.valid_to IS NULL OR $2<b2.valid_to) ORDER BY b2.valid_from DESC) b ON true

@@ -1,0 +1,21 @@
+flowchart TD
+  START(["收到上行报文<br/>上行 publish 主题"]) --> TOPIC["主题尾段取设备编号<br/>gateDeviceFromTopic<br/>校验字符集"]
+  TOPIC --> CONTRACT{"私有契约<br/>verified = true ?"}
+  CONTRACT -- "否" --> REJ1["整体拒绝<br/>GATE_CONTRACT_NOT_READY"]
+  CONTRACT -- "是" --> PARSE["解析 normalizeGate<br/>要求 dir=up<br/>r_data 数组 ≤ 1000 行"]
+  PARSE --> TIME["采样时间<br/>sys_time 优先、id 兜底<br/>都缺不伪造：quality 降 suspect<br/>记 unknown_sample_time"]
+  TIME --> FIELD{"逐字段检查"}
+  FIELD -- "带 err=1" --> ERR["value 置空<br/>quality = invalid<br/>rawValue 保留原值"]
+  FIELD -- "value 非数字" --> NONUM["quality = invalid<br/>记 invalid_number<br/>rawValue 保留"]
+  FIELD -- "正常数字或数字字符串" --> MAP{"externalDeviceId + metric<br/>唯一命中测点映射 ?"}
+  ERR --> MAP
+  NONUM --> MAP
+  MAP -- "缺失或重复" --> REJ2["整体拒绝<br/>UNMAPPED_DEVICE"]
+  MAP -- "唯一" --> GUARD{"入库前 guard<br/>来源 verified / provider=sdsc<br/>契约版本一致 / 主体未撤权<br/>测点绑定对象授权"}
+  GUARD -- "不通过" --> QUAR["隔离区<br/>quarantined_readings"]
+  GUARD -- "通过" --> SAVE["幂等入库 persistBatch<br/>raw_receipts 原文存档 sha256<br/>observations 按 identity+content 哈希去重<br/>broker 重投与重启不重复"]
+  SAVE --> CUR{"point_current 更新条件<br/>绑定 verified 且<br/>新鲜度与质量通过 ?"}
+  CUR -- "满足" --> CURS["更新当前值<br/>point_current<br/>网页 /devices 可见"]
+  CUR -- "不满足" --> SKIP["只留历史观测<br/>不更新当前值"]
+  REJ1 -. "解析失败 / 未映射 / 未核实<br/>统一进隔离区留痕" .-> QUAR
+  REJ2 -.-> QUAR

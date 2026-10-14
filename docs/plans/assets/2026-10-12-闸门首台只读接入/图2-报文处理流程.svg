@@ -1,0 +1,195 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 795.0884166666666 2273.9359999999997" width="795.0884166666666" height="2273.9359999999997" style="--bg:#FFFFFF;--fg:#27272A;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<polyline class="edge" data-from="START" data-to="TOPIC" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="307.9169999999999,93.80000000000001 307.9169999999999,133.8" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TOPIC" data-to="CONTRACT" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="307.9169999999999,204.5 307.9169999999999,244.5" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CONTRACT" data-to="REJ1" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="否" points="281.98183333333327,374.17583333333334 281.98183333333327,796.961 161.00999999999993,796.961 161.00999999999993,869.261" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CONTRACT" data-to="PARSE" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="是" points="333.8521666666666,374.1758333333333 333.8521666666666,412.111 484.40924999999993,412.111 484.40924999999993,484.411" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PARSE" data-to="TIME" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="484.40924999999993,555.111 484.40924999999993,595.111" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="TIME" data-to="FIELD" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="484.40924999999993,682.711 484.40924999999993,722.711" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="FIELD" data-to="ERR" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="带 err=1" points="449.3967499999999,827.7484999999999 449.3967499999999,890.761 335.41249999999997,890.761 335.41249999999997,963.0609999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="FIELD" data-to="NONUM" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="value 非数字" points="484.40924999999993,862.761 484.40924999999993,890.761 513.9944999999999,890.761 513.9944999999999,963.0609999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="FIELD" data-to="MAP" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="正常数字或数字字符串" points="519.42175,827.7484999999999 519.42175,890.761 626.7025,890.761 626.7025,1061.761 567.5319999999999,1061.761 567.5319999999999,1127.2985" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ERR" data-to="MAP" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="335.41249999999997,1033.761 335.41249999999997,1061.761 460.45699999999994,1061.761 460.45699999999994,1127.2984999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="NONUM" data-to="MAP" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="513.9944999999999,1033.761 513.9944999999999,1073.761" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MAP" data-to="REJ2" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="缺失或重复" points="478.30283333333324,1252.2193333333335 478.30283333333324,1376.2109999999998 337.10049999999995,1376.2109999999998 337.10049999999995,1618.055" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MAP" data-to="GUARD" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="唯一" points="549.6861666666666,1252.2193333333332 549.6861666666666,1315.9109999999998 565.8439999999999,1315.9109999999998 565.8439999999999,1388.2109999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="GUARD" data-to="QUAR" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="不通过" points="525.9533333333333,1587.6643333333332 525.9533333333333,1699.855 369.97249999999997,1699.855 369.97249999999997,1719.855" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="GUARD" data-to="SAVE" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="通过" points="605.7346666666666,1587.6643333333332 605.7346666666666,1719.855" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SAVE" data-to="CUR" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="605.7346666666666,1807.455 605.7346666666666,1855.4549999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CUR" data-to="CURS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="满足" points="571.1545,2028.355833333333 571.1545,2090.9359999999997 521.8159166666667,2090.9359999999997 521.8159166666666,2163.236" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CUR" data-to="SKIP" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="不满足" points="640.3148333333334,2028.355833333333 640.3148333333334,2090.9359999999997 689.6534166666665,2090.9359999999997 689.6534166666665,2163.236" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REJ1" data-to="QUAR" data-style="dotted" data-arrow-start="false" data-arrow-end="true" data-label="解析失败 / 未映射 / 未核实
+统一进隔离区留痕" points="161.00999999999993,923.0609999999999 161.00999999999993,1699.855 283.04849999999993,1699.855 283.04849999999993,1719.855" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="REJ2" data-to="QUAR" data-style="dotted" data-arrow-start="false" data-arrow-end="true" points="337.10049999999995,1671.855 337.10049999999995,1699.855 326.5105,1699.855 326.5105,1719.855" fill="none" stroke="var(--_line)" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="CONTRACT" data-to="REJ1" data-label="否">
+  <rect x="146.00999999999993" y="803.961" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="160.77499999999992" y="819.111" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">否</text>
+</g>
+<g class="edge-label" data-from="CONTRACT" data-to="PARSE" data-label="是">
+  <rect x="469.40924999999993" y="419.111" width="29.53" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="484.1742499999999" y="434.26099999999997" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">是</text>
+</g>
+<g class="edge-label" data-from="FIELD" data-to="ERR" data-label="带 err=1">
+  <rect x="307.41249999999997" y="897.761" width="55.072" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="334.94849999999997" y="912.911" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">带 err=1</text>
+</g>
+<g class="edge-label" data-from="FIELD" data-to="NONUM" data-label="value 非数字">
+  <rect x="472.99449999999996" y="897.761" width="81.208" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="513.5985" y="912.911" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">value 非数字</text>
+</g>
+<g class="edge-label" data-from="FIELD" data-to="MAP" data-label="正常数字或数字字符串">
+  <rect x="558.2025" y="897.761" width="136.45000000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="626.4275" y="912.911" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">正常数字或数字字符串</text>
+</g>
+<g class="edge-label" data-from="MAP" data-to="REJ2" data-label="缺失或重复">
+  <rect x="298.1005" y="1552.755" width="77.05000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="336.6255" y="1567.9050000000002" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">缺失或重复</text>
+</g>
+<g class="edge-label" data-from="MAP" data-to="GUARD" data-label="唯一">
+  <rect x="544.8439999999999" y="1322.9109999999998" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="565.549" y="1338.061" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">唯一</text>
+</g>
+<g class="edge-label" data-from="GUARD" data-to="QUAR" data-label="不通过">
+  <rect x="498.95333333333326" y="1662.5549999999998" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="525.5983333333332" y="1677.705" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">不通过</text>
+</g>
+<g class="edge-label" data-from="GUARD" data-to="SAVE" data-label="通过">
+  <rect x="584.7346666666666" y="1662.5549999999998" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="605.4396666666667" y="1677.705" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">通过</text>
+</g>
+<g class="edge-label" data-from="CUR" data-to="CURS" data-label="满足">
+  <rect x="500.8159166666666" y="2097.9359999999997" width="41.41" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="521.5209166666666" y="2113.086" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">满足</text>
+</g>
+<g class="edge-label" data-from="CUR" data-to="SKIP" data-label="不满足">
+  <rect x="662.6534166666665" y="2097.9359999999997" width="53.29" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="689.2984166666665" y="2113.086" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">不满足</text>
+</g>
+<g class="edge-label" data-from="REJ1" data-to="QUAR" data-label="解析失败 / 未映射 / 未核实
+统一进隔离区留痕">
+  <rect x="86.00999999999993" y="1632.255" width="149.51800000000003" height="44.6" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="160.76899999999995" y="1654.555" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)"><tspan x="160.76899999999995" dy="-3.3000000000000007">解析失败 / 未映射 / 未核实</tspan><tspan x="160.76899999999995" dy="14.3">统一进隔离区留痕</tspan></text>
+</g>
+<g class="node" data-id="START" data-label="收到上行报文
+上行 publish 主题" data-shape="stadium">
+  <rect x="233.58999999999992" y="40" width="148.654" height="53.800000000000004" rx="26.900000000000002" ry="26.900000000000002" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="307.9169999999999" y="66.9" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="307.9169999999999" dy="-3.9000000000000012">收到上行报文</tspan><tspan x="307.9169999999999" dy="16.900000000000002">上行 publish 主题</tspan></text>
+</g>
+<g class="node" data-id="TOPIC" data-label="主题尾段取设备编号
+gateDeviceFromTopic
+校验字符集" data-shape="rectangle">
+  <rect x="220.25199999999992" y="133.8" width="175.32999999999998" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="307.9169999999999" y="169.15" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="307.9169999999999" dy="-12.350000000000001">主题尾段取设备编号</tspan><tspan x="307.9169999999999" dy="16.900000000000002">gateDeviceFromTopic</tspan><tspan x="307.9169999999999" dy="16.900000000000002">校验字符集</tspan></text>
+</g>
+<g class="node" data-id="CONTRACT" data-label="私有契约
+verified = true ?" data-shape="diamond">
+  <polygon points="307.9169999999999,244.5 385.7224999999999,322.3055 307.9169999999999,400.111 230.11149999999992,322.3055" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="307.9169999999999" y="322.3055" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="307.9169999999999" dy="-3.9000000000000012">私有契约</tspan><tspan x="307.9169999999999" dy="16.900000000000002">verified = true ?</tspan></text>
+</g>
+<g class="node" data-id="REJ1" data-label="整体拒绝
+GATE_CONTRACT_NOT_READY" data-shape="rectangle">
+  <rect x="40" y="869.261" width="242.0199999999999" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="161.00999999999993" y="896.161" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="161.00999999999993" dy="-3.9000000000000012">整体拒绝</tspan><tspan x="161.00999999999993" dy="16.900000000000002">GATE_CONTRACT_NOT_READY</tspan></text>
+</g>
+<g class="node" data-id="PARSE" data-label="解析 normalizeGate
+要求 dir=up
+r_data 数组 ≤ 1000 行" data-shape="rectangle">
+  <rect x="401.1902499999999" y="484.411" width="166.43800000000005" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="484.40924999999993" y="519.761" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="484.40924999999993" dy="-12.350000000000001">解析 normalizeGate</tspan><tspan x="484.40924999999993" dy="16.900000000000002">要求 dir=up</tspan><tspan x="484.40924999999993" dy="16.900000000000002">r_data 数组 ≤ 1000 行</tspan></text>
+</g>
+<g class="node" data-id="TIME" data-label="采样时间
+sys_time 优先、id 兜底
+都缺不伪造：quality 降 suspect
+记 unknown_sample_time" data-shape="rectangle">
+  <rect x="366.36324999999994" y="595.111" width="236.09199999999996" height="87.60000000000001" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="484.40924999999993" y="638.911" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="484.40924999999993" dy="-20.8">采样时间</tspan><tspan x="484.40924999999993" dy="16.900000000000002">sys_time 优先、id 兜底</tspan><tspan x="484.40924999999993" dy="16.900000000000002">都缺不伪造：quality 降 suspect</tspan><tspan x="484.40924999999993" dy="16.900000000000002">记 unknown_sample_time</tspan></text>
+</g>
+<g class="node" data-id="FIELD" data-label="逐字段检查" data-shape="diamond">
+  <polygon points="484.40924999999993,722.711 554.4342499999999,792.736 484.40924999999993,862.761 414.38424999999995,792.736" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="484.40924999999993" y="792.736" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">逐字段检查</text>
+</g>
+<g class="node" data-id="ERR" data-label="value 置空
+quality = invalid
+rawValue 保留原值" data-shape="rectangle">
+  <rect x="255.52799999999996" y="963.0609999999999" width="159.769" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="335.41249999999997" y="998.411" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="335.41249999999997" dy="-12.350000000000001">value 置空</tspan><tspan x="335.41249999999997" dy="16.900000000000002">quality = invalid</tspan><tspan x="335.41249999999997" dy="16.900000000000002">rawValue 保留原值</tspan></text>
+</g>
+<g class="node" data-id="NONUM" data-label="quality = invalid
+记 invalid_number
+rawValue 保留" data-shape="rectangle">
+  <rect x="439.29699999999997" y="963.0609999999999" width="149.39499999999998" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="513.9945" y="998.411" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="513.9945" dy="-12.350000000000001">quality = invalid</tspan><tspan x="513.9945" dy="16.900000000000002">记 invalid_number</tspan><tspan x="513.9945" dy="16.900000000000002">rawValue 保留</tspan></text>
+</g>
+<g class="node" data-id="MAP" data-label="externalDeviceId + metric
+唯一命中测点映射 ?" data-shape="diamond">
+  <polygon points="513.9944999999999,1073.761 621.0694999999998,1180.836 513.9944999999999,1287.911 406.9194999999999,1180.836" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="513.9944999999999" y="1180.836" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="513.9944999999999" dy="-3.9000000000000012">externalDeviceId + metric</tspan><tspan x="513.9944999999999" dy="16.900000000000002">唯一命中测点映射 ?</tspan></text>
+</g>
+<g class="node" data-id="REJ2" data-label="整体拒绝
+UNMAPPED_DEVICE" data-shape="rectangle">
+  <rect x="252.02899999999997" y="1618.055" width="170.14299999999997" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="337.10049999999995" y="1644.9550000000002" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="337.10049999999995" dy="-3.9000000000000012">整体拒绝</tspan><tspan x="337.10049999999995" dy="16.900000000000002">UNMAPPED_DEVICE</tspan></text>
+</g>
+<g class="node" data-id="GUARD" data-label="入库前 guard
+来源 verified / provider=sdsc
+契约版本一致 / 主体未撤权
+测点绑定对象授权" data-shape="diamond">
+  <polygon points="565.8439999999999,1388.2109999999998 685.516,1507.8829999999998 565.8439999999999,1627.5549999999998 446.1719999999999,1507.8829999999998" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="565.8439999999999" y="1507.8829999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="565.8439999999999" dy="-20.8">入库前 guard</tspan><tspan x="565.8439999999999" dy="16.900000000000002">来源 verified / provider=sdsc</tspan><tspan x="565.8439999999999" dy="16.900000000000002">契约版本一致 / 主体未撤权</tspan><tspan x="565.8439999999999" dy="16.900000000000002">测点绑定对象授权</tspan></text>
+</g>
+<g class="node" data-id="QUAR" data-label="隔离区
+quarantined_readings" data-shape="rectangle">
+  <rect x="239.58649999999994" y="1719.855" width="173.848" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="326.5105" y="1746.755" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="326.5105" dy="-3.9000000000000012">隔离区</tspan><tspan x="326.5105" dy="16.900000000000002">quarantined_readings</tspan></text>
+</g>
+<g class="node" data-id="SAVE" data-label="幂等入库 persistBatch
+raw_receipts 原文存档 sha256
+observations 按 identity+content 哈希去重
+broker 重投与重启不重复" data-shape="rectangle">
+  <rect x="459.16016666666667" y="1719.855" width="293.1489999999999" height="87.60000000000001" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="605.7346666666666" y="1763.655" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="605.7346666666666" dy="-20.8">幂等入库 persistBatch</tspan><tspan x="605.7346666666666" dy="16.900000000000002">raw_receipts 原文存档 sha256</tspan><tspan x="605.7346666666666" dy="16.900000000000002">observations 按 identity+content 哈希去重</tspan><tspan x="605.7346666666666" dy="16.900000000000002">broker 重投与重启不重复</tspan></text>
+</g>
+<g class="node" data-id="CUR" data-label="point_current 更新条件
+绑定 verified 且
+新鲜度与质量通过 ?" data-shape="diamond">
+  <polygon points="605.7346666666666,1855.455 709.4751666666666,1959.1954999999998 605.7346666666666,2062.9359999999997 501.9941666666666,1959.1954999999998" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="605.7346666666666" y="1959.1954999999998" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="605.7346666666666" dy="-12.350000000000001">point_current 更新条件</tspan><tspan x="605.7346666666666" dy="16.900000000000002">绑定 verified 且</tspan><tspan x="605.7346666666666" dy="16.900000000000002">新鲜度与质量通过 ?</tspan></text>
+</g>
+<g class="node" data-id="CURS" data-label="更新当前值
+point_current
+网页 /devices 可见" data-shape="rectangle">
+  <rect x="443.4134166666666" y="2163.236" width="156.805" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="521.8159166666666" y="2198.586" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="521.8159166666666" dy="-12.350000000000001">更新当前值</tspan><tspan x="521.8159166666666" dy="16.900000000000002">point_current</tspan><tspan x="521.8159166666666" dy="16.900000000000002">网页 /devices 可见</tspan></text>
+</g>
+<g class="node" data-id="SKIP" data-label="只留历史观测
+不更新当前值" data-shape="rectangle">
+  <rect x="624.2184166666666" y="2163.236" width="130.87" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="689.6534166666665" y="2190.136" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="689.6534166666665" dy="-3.9000000000000012">只留历史观测</tspan><tspan x="689.6534166666665" dy="16.900000000000002">不更新当前值</tspan></text>
+</g>
+</svg>
