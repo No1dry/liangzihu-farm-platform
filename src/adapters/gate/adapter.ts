@@ -36,7 +36,7 @@ export function normalizeGate(raw:unknown,contract:GateContract,externalDeviceId
     const candidates=contract.mappings.filter(x=>x.externalDeviceId===externalDeviceId&&x.metric===m.metric);if(candidates.length!==1)throw new AppError(422,'UNMAPPED_DEVICE','设备/指标映射缺失或不唯一；多通道须按真实契约拆分，不能选第一项');const mapping=candidates[0];
     const rawValue=record[contract.valueKey];
     const reasons:string[]=[];let quality:ReadingInput['quality']='valid';
-    if(record[contract.errorKey]==='1'){quality='invalid';reasons.push('vendor_field_error');}
+    if(record[contract.errorKey]!==undefined&&record[contract.errorKey]!=='0'){quality='invalid';reasons.push('vendor_field_error');}
     const numeric=typeof rawValue==='number'?rawValue:typeof rawValue==='string'&&rawValue.trim()!==''?Number(rawValue):NaN;
     let value=Number.isFinite(numeric)?numeric*m.scale+m.offset:null;
     if(value===null||!Number.isFinite(value)){value=null;quality='invalid';reasons.push('invalid_number');}

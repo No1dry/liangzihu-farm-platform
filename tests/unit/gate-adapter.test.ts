@@ -50,6 +50,11 @@ test('err:"1"字段保留原值、值置空并记invalid；不崩溃',()=>{
   const opening=normalizeGate(raw,contract,'G1',at,'synthetic').find(r=>r.metric==='opening')!;
   assert.equal(opening.rawValue,12);assert.equal(opening.value,null);assert.equal(opening.quality,'invalid');assert.ok(opening.reasons.includes('vendor_field_error'));
 });
+test('err非0取值（厂家确认：2=CRC校验不通过、其他值为Modbus错误码）同样记invalid',()=>{
+  for(const err of['2','129']){const raw=sample();raw.params.r_data[2]={name:'opening',value:12,err};
+  const opening=normalizeGate(raw,contract,'G1',at,'synthetic').find(r=>r.metric==='opening')!;
+  assert.equal(opening.value,null);assert.equal(opening.quality,'invalid');assert.ok(opening.reasons.includes('vendor_field_error'));}
+});
 test('缺sys_time用id兜底；两者都缺不伪造采样时间',()=>{
   const raw=sample();delete raw.params.sys_time;
   assert.equal(normalizeGate(raw,contract,'G1',at,'synthetic')[0].sampledAt,'2024-10-11T06:53:21.000Z');
