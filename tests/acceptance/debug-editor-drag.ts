@@ -22,7 +22,7 @@ await withDb(async pool=>{
    await page.goto(app.origin+'/map-editor');
    await page.getByRole('button',{name:/调试农田/}).click();
    await page.locator('[data-testid="boundary-form"]').waitFor();
-   await page.waitForTimeout(900);
+   await page.waitForTimeout(550);
    const map=page.locator('[data-testid="map-editor-map"]');
    const box=(await map.boundingBox())!;
    const before=await map.getAttribute('data-edit-geometry');
@@ -36,7 +36,7 @@ await withDb(async pool=>{
    console.log('lastPointer:',await map.getAttribute('data-last-pointer'));
    console.log('lastHit:',await map.getAttribute('data-last-hit'));
    console.log('modifyStarted(down后):',await map.getAttribute('data-modify-started'));
-   await page.mouse.move(box.x+vx-40,box.y+vy-40,{steps:12});await page.waitForTimeout(120);
+   const R2=6378137,D3=Math.PI/180;const tx=box.width/2+(R2*114.616*D3-center[0])/resolution,ty=box.height/2-(R2*Math.log(Math.tan(Math.PI/4+30.266*D3/2))-center[1])/resolution;await page.mouse.move(box.x+tx,box.y+ty,{steps:12});await page.waitForTimeout(120);
    await page.mouse.up();await page.waitForTimeout(400);
    console.log('modifyStarted:',await map.getAttribute('data-modify-started'));
    console.log('changed:',before!==(await map.getAttribute('data-edit-geometry')));
