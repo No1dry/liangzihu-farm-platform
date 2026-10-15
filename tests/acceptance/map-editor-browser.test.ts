@@ -24,15 +24,22 @@ async function viewState(map:any){const center=await map.evaluate((el:any)=>{con
 async function dragVertex(page:any,map:any,box:Box,from:[number,number],to:[number,number]){
  for(let attempt=0;attempt<3;attempt++){
   await page.waitForTimeout(550);
-  const {center,resolution}=await viewState(map);
+  let {center,resolution}=await viewState(map);
+  let v=toPixel(from,center,resolution,[box.width,box.height]);
+  const cx=box.width/2,cy=box.height/2;
+  if(!(v[0]>60&&v[0]<box.width-380&&v[1]>90&&v[1]<box.height-230)){
+   await page.mouse.move(box.x+cx,box.y+cy,{steps:4});await page.mouse.down();await page.waitForTimeout(100);
+   await page.mouse.move(box.x+2*cx-v[0],box.y+2*cy-v[1],{steps:8});await page.mouse.up();await page.waitForTimeout(400);
+   ({center,resolution}=await viewState(map));
+   v=toPixel(from,center,resolution,[box.width,box.height]);
+  }
   const before=await map.getAttribute('data-edit-geometry');
-  const v=toPixel(from,center,resolution,[box.width,box.height]),t=toPixel(to,center,resolution,[box.width,box.height]);
+  const t=toPixel(to,center,resolution,[box.width,box.height]);
   await page.mouse.move(box.x+v[0],box.y+v[1],{steps:5});await page.mouse.down();await page.waitForTimeout(120);
   await page.mouse.move(box.x+t[0],box.y+t[1],{steps:12});await page.waitForTimeout(120);
   await page.mouse.up();await page.waitForTimeout(300);
   const after=await map.getAttribute('data-edit-geometry');
   if(after&&after!==before)return;
-  console.log('DRAG-DEBUG attempt',attempt,'downMerc:',await map.getAttribute('data-last-pointer'),'expectedVertexMerc:',toMercator(from),'viewCenter:',center,'res:',resolution);
  }
  throw new Error('顶点拖动未改变编辑几何');
 }
