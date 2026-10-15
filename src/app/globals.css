@@ -21,6 +21,11 @@ input { width: 100%; min-height: 46px; padding: 10px 12px; border: 1px solid #bd
 input:focus-visible, button:focus-visible { outline: 3px solid #8ea65b; outline-offset: 3px; }
 button { width: 100%; min-height: 46px; margin-top: 24px; padding: 11px 16px; font: inherit; border: 1px solid #28543d; border-radius: 7px; color: #fff; background: #28543d; cursor: pointer; }
 button:disabled { opacity: .65; cursor: wait; }
+/* OpenLayers 控件按钮不受全局 button 样式影响，否则控件容器会遮挡地图交互 */
+.ol-control button, .ol-control button:hover:not(:disabled) { width: auto; min-height: 0; margin: 0; padding: 2px 6px; border: 0; border-radius: 4px; background: rgba(23,63,52,.82); color: #fff; font-size: 16px; }
+.ol-attribution { font-size: 10px; max-width: 70%; }
+.ol-attribution ul { font-size: 10px; padding: 2px 6px; }
+.ol-attribution button { display: inline; }
 .secondary { color: var(--ink); background: transparent; border-color: #bdcfc1; margin-top: 12px; }
 .availability { border-top: 1px solid var(--line); padding-top: 18px; margin-top: 24px; }
 .form-error { color: #872d25; background: #fff0ec; padding: 12px; font-size: 14px; line-height: 1.7; border-radius: 7px; }
