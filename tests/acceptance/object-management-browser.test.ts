@@ -49,7 +49,7 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    await page.getByRole('button',{name:/在 测试村 下新增对象/}).click();
    await page.getByLabel('类型').selectOption('field');
    await page.getByLabel('名称',{exact:true}).fill('M2B 测试农田');
-   await page.getByLabel('编号',{exact:true}).fill('SYNTH-M2B-FIELD');
+   await page.getByRole('textbox',{name:'编号'}).fill('SYNTH-M2B-FIELD');
    await page.getByLabel('登记依据').fill('M2-B 验收测试');
    await page.getByLabel('所属村庄').selectOption('测试村');
    await Promise.all([page.waitForResponse(response=>response.url().endsWith('/api/v1/objects')&&response.request().method()==='POST'&&response.status()===201),page.waitForResponse(response=>response.url().endsWith('/api/v1/map-regions')&&response.request().method()==='PATCH'&&response.status()===200),page.getByRole('button',{name:'保存对象'}).click()]);
@@ -65,7 +65,7 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    await page.getByRole('button',{name:/在 测试村 下新增对象/}).click();
    await page.getByLabel('类型').selectOption('pond');
    await page.getByLabel('名称',{exact:true}).fill('M2B 测试塘口');
-   await page.getByLabel('编号',{exact:true}).fill('SYNTH-M2B-POND');
+   await page.getByRole('textbox',{name:'编号'}).fill('SYNTH-M2B-POND');
    await page.getByLabel('登记依据').fill('M2-B 验收测试');
    await page.getByLabel('所属村庄').selectOption('测试村');
    await page.getByLabel('现在绘制边界').check();

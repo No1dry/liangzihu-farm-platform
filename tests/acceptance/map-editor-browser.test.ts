@@ -32,6 +32,7 @@ async function dragVertex(page:any,map:any,box:Box,from:[number,number],to:[numb
   await page.mouse.up();await page.waitForTimeout(300);
   const after=await map.getAttribute('data-edit-geometry');
   if(after&&after!==before)return;
+  console.log('DRAG-DEBUG attempt',attempt,'downMerc:',await map.getAttribute('data-last-pointer'),'expectedVertexMerc:',toMercator(from),'viewCenter:',center,'res:',resolution);
  }
  throw new Error('顶点拖动未改变编辑几何');
 }
