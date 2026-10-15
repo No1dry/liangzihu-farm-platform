@@ -87,11 +87,13 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.getByRole('button',{name:'复位视图'}).click();await page.waitForTimeout(600);
    const pondCenter=await map.evaluate(el=>{const c=(el as HTMLElement).dataset.viewCenter?.split(',').map(Number)??[0,0];return [c[0],c[1]] as [number,number];});
    const pondResolution=Number(await map.getAttribute('data-view-resolution'));
-   const p1=toPixel([114.56,30.22],pondCenter,pondResolution,size),p2=toPixel([114.62,30.22],pondCenter,pondResolution,size),p3=toPixel([114.62,30.23],pondCenter,pondResolution,size),p4=toPixel([114.56,30.23],pondCenter,pondResolution,size);
+   const p1=toPixel([114.56,30.22],pondCenter,pondResolution,size),p2=toPixel([114.60,30.215],pondCenter,pondResolution,size),p3=toPixel([114.63,30.22],pondCenter,pondResolution,size),p4=toPixel([114.62,30.235],pondCenter,pondResolution,size),p5=toPixel([114.58,30.238],pondCenter,pondResolution,size),p6=toPixel([114.55,30.23],pondCenter,pondResolution,size);
    await page.mouse.click(box.x+p1[0],box.y+p1[1]);await page.waitForTimeout(80);
    await page.mouse.click(box.x+p2[0],box.y+p2[1]);await page.waitForTimeout(80);
    await page.mouse.click(box.x+p3[0],box.y+p3[1]);await page.waitForTimeout(80);
-   await page.mouse.dblclick(box.x+p4[0],box.y+p4[1]);await page.waitForTimeout(500);
+   await page.mouse.click(box.x+p4[0],box.y+p4[1]);await page.waitForTimeout(80);
+   await page.mouse.click(box.x+p5[0],box.y+p5[1]);await page.waitForTimeout(80);
+   await page.mouse.dblclick(box.x+p6[0],box.y+p6[1]);await page.waitForTimeout(500);
    await page.getByText('多边形绘制完成，填写依据后保存。').waitFor();
    await page.locator('[data-testid="boundary-form"] textarea').fill('M2-A 塘口绘制草稿测试');
    await page.locator('[data-testid="boundary-form"] button[type=submit]').click();
@@ -154,9 +156,9 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.getByText(/边界版本已变化/).waitFor();
    await page.screenshot({path:'docs/acceptance/m2/05-版本冲突保留几何.png',fullPage:true});
    const conflictTemp=(await pool.query("SELECT ST_AsText(boundary) AS w FROM objects WHERE id=$1",[field.id])).rows[0].w;
-   await page.getByRole('button',{name:'刷新版本后重试'}).click();
+   await page.getByRole('button',{name:'查看最新边界'}).click();
    await page.getByText(/对象版本已刷新/).waitFor();
-   await page.locator('[data-testid="boundary-form"] button[type=submit]').click();
+   await page.getByRole('button',{name:'确认重新提交'}).click();
    await page.getByText(/已保存“合成编辑农田”/).waitFor();
    const afterConflict=(await pool.query("SELECT ST_AsText(boundary) AS w FROM objects WHERE id=$1",[field.id])).rows[0].w;
    assert.notEqual(afterConflict,conflictTemp);
@@ -179,8 +181,9 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.mouse.move(cb.x+v3[0],cb.y+v3[1]);await page.mouse.down();await page.waitForTimeout(80);
    await page.mouse.move(cb.x+t3[0],cb.y+t3[1]);await page.waitForTimeout(80);
    await page.mouse.up();await page.waitForTimeout(200);
+   page.once('dialog',dialog=>void dialog.accept());
    await page.locator('[data-testid="boundary-form"] button[type=button]').filter({hasText:'取消'}).click();
-   await page.waitForTimeout(200);
+   await page.getByText('已取消编辑，未保存任何边界。').waitFor();
    const cancelAfter=(await pool.query("SELECT ST_AsText(boundary) AS w FROM objects WHERE id=$1",[field.id])).rows[0].w;
    assert.equal(cancelAfter,cancelBefore);
 
