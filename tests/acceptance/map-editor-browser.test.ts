@@ -19,6 +19,22 @@ function toPixel(lonLat:[number,number],center:[number,number],resolution:number
  const m=toMercator(lonLat);
  return [size[0]/2+(m[0]-center[0])/resolution,size[1]/2-(m[1]-center[1])/resolution];
 }
+type Box={x:number;y:number;width:number;height:number};
+async function viewState(map:any){const center=await map.evaluate((el:any)=>{const c=(el as HTMLElement).dataset.viewCenter?.split(',').map(Number)??[0,0];return [c[0],c[1]] as [number,number];});const resolution=Number(await map.getAttribute('data-view-resolution'));return {center,resolution};}
+async function dragVertex(page:any,map:any,box:Box,from:[number,number],to:[number,number]){
+ for(let attempt=0;attempt<3;attempt++){
+  await page.waitForTimeout(550);
+  const {center,resolution}=await viewState(map);
+  const before=await map.getAttribute('data-edit-geometry');
+  const v=toPixel(from,center,resolution,[box.width,box.height]),t=toPixel(to,center,resolution,[box.width,box.height]);
+  await page.mouse.move(box.x+v[0],box.y+v[1],{steps:5});await page.mouse.down();await page.waitForTimeout(120);
+  await page.mouse.move(box.x+t[0],box.y+t[1],{steps:12});await page.waitForTimeout(120);
+  await page.mouse.up();await page.waitForTimeout(300);
+  const after=await map.getAttribute('data-edit-geometry');
+  if(after&&after!==before)return;
+ }
+ throw new Error('顶点拖动未改变编辑几何');
+}
 
 test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环',{timeout:240000},()=>withDb(async pool=>{
  await mkdir('docs/acceptance/m2',{recursive:true});
@@ -62,15 +78,8 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    const map=page.locator('[data-testid="map-editor-map"]');
    await map.waitFor();
    const box=await map.boundingBox();assert(box);
-   const center=await map.evaluate(el=>{const c=(el as HTMLElement).dataset.viewCenter?.split(',').map(Number)??[0,0];return [c[0],c[1]] as [number,number];});
-   const resolution=Number(await map.getAttribute('data-view-resolution'));
    const size:[number,number]=[box.width,box.height];
-   const vertex=toPixel([114.64,30.26],center,resolution,size);
-   const target=toPixel([114.637,30.253],center,resolution,size);
-   
-   await page.mouse.move(box.x+vertex[0],box.y+vertex[1]);await page.mouse.down();await page.waitForTimeout(80);
-   await page.mouse.move(box.x+target[0],box.y+target[1]);await page.waitForTimeout(80);
-   await page.mouse.up();await page.waitForTimeout(200);
+   await dragVertex(page,map,box,[114.64,30.26],[114.637,30.253]);
    await page.waitForTimeout(300);
    await page.screenshot({path:'docs/acceptance/m2/02-顶点拖动编辑中.png',fullPage:true});
    await page.locator('[data-testid="boundary-form"] textarea').fill('M2-A 拖动顶点修改测试');
@@ -85,8 +94,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.locator('[data-testid="boundary-form"]').waitFor();
    // 塘口暂无边界，视图仍停留在农田范围；先复位到梁子湖全区（zoom 12）再绘制
    await page.getByRole('button',{name:'复位视图'}).click();await page.waitForTimeout(600);
-   const pondCenter=await map.evaluate(el=>{const c=(el as HTMLElement).dataset.viewCenter?.split(',').map(Number)??[0,0];return [c[0],c[1]] as [number,number];});
-   const pondResolution=Number(await map.getAttribute('data-view-resolution'));
+   const {center:pondCenter,resolution:pondResolution}=await viewState(map);
    const p1=toPixel([114.56,30.22],pondCenter,pondResolution,size),p2=toPixel([114.60,30.215],pondCenter,pondResolution,size),p3=toPixel([114.63,30.22],pondCenter,pondResolution,size),p4=toPixel([114.62,30.235],pondCenter,pondResolution,size),p5=toPixel([114.58,30.238],pondCenter,pondResolution,size),p6=toPixel([114.55,30.23],pondCenter,pondResolution,size);
    await page.mouse.click(box.x+p1[0],box.y+p1[1]);await page.waitForTimeout(80);
    await page.mouse.click(box.x+p2[0],box.y+p2[1]);await page.waitForTimeout(80);
@@ -141,14 +149,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.locator('[data-testid="boundary-form"]').waitFor();
    await page.waitForTimeout(500);
    const conflictBox=await map.boundingBox();assert(conflictBox);
-   const conflictCenter=await map.evaluate(el=>{const c=(el as HTMLElement).dataset.viewCenter?.split(',').map(Number)??[0,0];return [c[0],c[1]] as [number,number];});
-   const conflictResolution=Number(await map.getAttribute('data-view-resolution'));
-   const conflictSize:[number,number]=[conflictBox.width,conflictBox.height];
-   const v2=toPixel([114.62,30.24],conflictCenter,conflictResolution,conflictSize);
-   const t2=toPixel([114.623,30.243],conflictCenter,conflictResolution,conflictSize);
-   await page.mouse.move(conflictBox.x+v2[0],conflictBox.y+v2[1]);await page.mouse.down();await page.waitForTimeout(80);
-   await page.mouse.move(conflictBox.x+t2[0],conflictBox.y+t2[1]);await page.waitForTimeout(80);
-   await page.mouse.up();await page.waitForTimeout(200);
+   await dragVertex(page,map,conflictBox,[114.62,30.24],[114.623,30.243]);
    await page.locator('[data-testid="boundary-form"] textarea').fill('M2-A 冲突重试测试');
    // 外部会话更新版本
    await ownerContext.request.post(app.origin+'/api/v1/map',{headers:{Origin:app.origin,'Content-Type':'application/json'},data:{objectId:field.id,version:(await pool.query('SELECT version FROM objects WHERE id=$1',[field.id])).rows[0].version,sourceCrs:4326,geometry:{type:'Polygon',coordinates:[[[114.62,30.24],[114.64,30.24],[114.64,30.26],[114.62,30.26],[114.62,30.24]]]},status:'draft',source:'外部会话抢先更新'}});
@@ -174,13 +175,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.locator('[data-testid="boundary-form"]').waitFor();
    await page.waitForTimeout(500);
    const cb=await map.boundingBox();assert(cb);
-   const cc=await map.evaluate(el=>{const c=(el as HTMLElement).dataset.viewCenter?.split(',').map(Number)??[0,0];return [c[0],c[1]] as [number,number];});
-   const cr=Number(await map.getAttribute('data-view-resolution'));
-   const cs:[number,number]=[cb.width,cb.height];
-   const v3=toPixel([114.623,30.243],cc,cr,cs);const t3=toPixel([114.626,30.246],cc,cr,cs);
-   await page.mouse.move(cb.x+v3[0],cb.y+v3[1]);await page.mouse.down();await page.waitForTimeout(80);
-   await page.mouse.move(cb.x+t3[0],cb.y+t3[1]);await page.waitForTimeout(80);
-   await page.mouse.up();await page.waitForTimeout(200);
+   await dragVertex(page,map,cb,[114.623,30.243],[114.626,30.246]);
    page.once('dialog',dialog=>void dialog.accept());
    await page.locator('[data-testid="boundary-form"] button[type=button]').filter({hasText:'取消'}).click();
    await page.getByText('已取消编辑，未保存任何边界。').waitFor();

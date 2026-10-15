@@ -102,8 +102,8 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByRole('button',{name:'＋ 新增/管理'}).click();
    await page.getByRole('button',{name:'新增农业对象'}).click();
    await page.getByLabel('类型').selectOption('field');
-   await page.getByLabel('名称').fill('隔离验收地块');
-   await page.getByLabel('编号').fill('SYNTH-D31-FIELD');
+   await page.getByLabel('名称',{exact:true}).fill('隔离验收地块');
+   await page.getByLabel('编号',{exact:true}).fill('SYNTH-D31-FIELD');
    await page.getByLabel('登记依据').fill('D3.1 隔离测试');
    await page.getByLabel('所属村庄').selectOption('隔离验收村');
    await Promise.all([page.waitForResponse(response=>response.url().endsWith('/api/v1/objects')&&response.request().method()==='POST'&&response.status()===201),page.waitForResponse(response=>response.url().endsWith('/api/v1/map-regions')&&response.request().method()==='PATCH'&&response.status()===200),page.getByRole('button',{name:'保存对象'}).click()]);
@@ -113,8 +113,8 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByRole('button',{name:'＋ 新增/管理'}).click();
    await page.getByRole('button',{name:'新增农业对象'}).click();
    await page.getByLabel('类型').selectOption('pond');
-   await page.getByLabel('名称').fill('隔离验收塘口');
-   await page.getByLabel('编号').fill('SYNTH-D31-POND');
+   await page.getByLabel('名称',{exact:true}).fill('隔离验收塘口');
+   await page.getByLabel('编号',{exact:true}).fill('SYNTH-D31-POND');
    await page.getByLabel('登记依据').fill('D3.1 隔离测试');
    await page.getByLabel('所属村庄').selectOption('隔离验收村');
    await Promise.all([page.waitForResponse(response=>response.url().endsWith('/api/v1/objects')&&response.request().method()==='POST'&&response.status()===201),page.waitForResponse(response=>response.url().endsWith('/api/v1/map-regions')&&response.request().method()==='PATCH'&&response.status()===200),page.getByRole('button',{name:'保存对象'}).click()]);
@@ -139,8 +139,8 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByRole('button',{name:'＋ 新增/管理'}).click();
    await page.getByRole('button',{name:'新增农业对象'}).click();
    await page.getByLabel('类型').selectOption('facility');
-   await page.getByLabel('名称').fill('隔离验收水闸');
-   await page.getByLabel('编号').fill('SYNTH-D31-GATE');
+   await page.getByLabel('名称',{exact:true}).fill('隔离验收水闸');
+   await page.getByLabel('编号',{exact:true}).fill('SYNTH-D31-GATE');
    await page.getByLabel('登记依据').fill('D3.1 隔离测试');
    await page.getByLabel('所属村庄').selectOption('隔离验收村');
    await Promise.all([page.waitForResponse(response=>response.url().endsWith('/api/v1/objects')&&response.request().method()==='POST'&&response.status()===201),page.waitForResponse(response=>response.url().endsWith('/api/v1/map-regions')&&response.request().method()==='PATCH'&&response.status()===200),page.getByRole('button',{name:'保存对象'}).click()]);
