@@ -24,17 +24,9 @@ async function viewState(map:any){const center=await map.evaluate((el:any)=>{con
 async function dragVertex(page:any,map:any,box:Box,from:[number,number],to:[number,number]){
  for(let attempt=0;attempt<3;attempt++){
   await page.waitForTimeout(550);
-  let {center,resolution}=await viewState(map);
-  let v=toPixel(from,center,resolution,[box.width,box.height]);
-  const cx=box.width/2,cy=box.height/2;
-  if(!(v[0]>60&&v[0]<box.width-380&&v[1]>90&&v[1]<box.height-230)){
-   await page.mouse.move(box.x+cx,box.y+cy,{steps:4});await page.mouse.down();await page.waitForTimeout(100);
-   await page.mouse.move(box.x+2*cx-v[0],box.y+2*cy-v[1],{steps:8});await page.mouse.up();await page.waitForTimeout(400);
-   ({center,resolution}=await viewState(map));
-   v=toPixel(from,center,resolution,[box.width,box.height]);
-  }
+  const {center,resolution}=await viewState(map);
   const before=await map.getAttribute('data-edit-geometry');
-  const t=toPixel(to,center,resolution,[box.width,box.height]);
+  const v=toPixel(from,center,resolution,[box.width,box.height]),t=toPixel(to,center,resolution,[box.width,box.height]);
   await page.mouse.move(box.x+v[0],box.y+v[1],{steps:5});await page.mouse.down();await page.waitForTimeout(120);
   await page.mouse.move(box.x+t[0],box.y+t[1],{steps:12});await page.waitForTimeout(120);
   await page.mouse.up();await page.waitForTimeout(300);
@@ -87,7 +79,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await map.waitFor();
    const box=await map.boundingBox();assert(box);
    const size:[number,number]=[box.width,box.height];
-   await dragVertex(page,map,box,[114.64,30.26],[114.637,30.253]);
+   await dragVertex(page,map,box,[114.62,30.26],[114.616,30.266]);
    await page.waitForTimeout(300);
    await page.screenshot({path:'docs/acceptance/m2/02-顶点拖动编辑中.png',fullPage:true});
    await page.locator('[data-testid="boundary-form"] textarea').fill('M2-A 拖动顶点修改测试');
@@ -157,7 +149,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.locator('[data-testid="boundary-form"]').waitFor();
    await page.waitForTimeout(500);
    const conflictBox=await map.boundingBox();assert(conflictBox);
-   await dragVertex(page,map,conflictBox,[114.62,30.24],[114.623,30.243]);
+   await dragVertex(page,map,conflictBox,[114.62,30.26],[114.616,30.254]);
    await page.locator('[data-testid="boundary-form"] textarea').fill('M2-A 冲突重试测试');
    // 外部会话更新版本
    await ownerContext.request.post(app.origin+'/api/v1/map',{headers:{Origin:app.origin,'Content-Type':'application/json'},data:{objectId:field.id,version:(await pool.query('SELECT version FROM objects WHERE id=$1',[field.id])).rows[0].version,sourceCrs:4326,geometry:{type:'Polygon',coordinates:[[[114.62,30.24],[114.64,30.24],[114.64,30.26],[114.62,30.26],[114.62,30.24]]]},status:'draft',source:'外部会话抢先更新'}});
@@ -183,7 +175,7 @@ test('M2-A 地图编辑：绘制、修改、保存、版本冲突与权限闭环
    await page.locator('[data-testid="boundary-form"]').waitFor();
    await page.waitForTimeout(500);
    const cb=await map.boundingBox();assert(cb);
-   await dragVertex(page,map,cb,[114.623,30.243],[114.626,30.246]);
+   await dragVertex(page,map,cb,[114.616,30.254],[114.62,30.26]);
    page.once('dialog',dialog=>void dialog.accept());
    await page.locator('[data-testid="boundary-form"] button[type=button]').filter({hasText:'取消'}).click();
    await page.getByText('已取消编辑，未保存任何边界。').waitFor();
