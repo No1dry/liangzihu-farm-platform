@@ -90,7 +90,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
 
       await page.getByRole('button', { name: '未登记塘口', exact: true }).click();
       await page.getByRole('complementary', { name: '对象详情' }).getByRole('heading', { name: '未登记塘口' }).waitFor();
-      await page.getByText('尚未登记地图位置', { exact: true }).waitFor();
+      await page.getByRole('status').filter({ hasText: '尚未登记地图位置' }).waitFor();
       await page.waitForTimeout(350);
       assert.equal(await map.getAttribute('data-view-center'), afterRegionCenter, '无边界对象点击不应移动视图');
 
