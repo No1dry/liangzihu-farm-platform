@@ -2,11 +2,12 @@
 
 import { useEffect,useMemo,useRef,useState, type FormEvent } from 'react';
 import RegionManagement from './region-management';
+import { useApi } from '@/components/platform/use-api';
 import styles from './farm-overview.module.css';
 
 type Region={id:string;farmId:string;name:string;version:number;archivedAt:string|null;links:{objectId:string}[]};
-type ConfigItem={id:string;name:string;code:string;kind:string;archived_at:string|null};
-type View='new-village'|'new-object'|'change-region'|'region-maintenance';
+type ConfigItem={id:string;name:string;code:string;kind:string;version:number;archived_at:string|null};
+type View='new-village'|'new-object'|'change-region'|'region-maintenance'|'recycle-bin';
 type SavedResult={view:View;id:string;drawNow?:boolean};
 
 const kindLabels:Record<string,string>={field:'农田',pond:'塘口',facility:'固定设施'};
@@ -56,14 +57,14 @@ function suggestCode(name:string,existing:string[]):string{
   return `${prefix}-${n}`;
 }
 
-export default function ManagementDrawer({view,onClose,onSaved,regions,configurable,defaultRegionId,objectId,objectFarmId,currentRegionId,mode,demoReadOnly,onSwitchMode}:{view:View|null;onClose:()=>void;onSaved:(result:SavedResult)=>void;regions:Region[];configurable:ConfigItem[];defaultRegionId?:string;objectId?:string;objectFarmId?:string;currentRegionId?:string;mode:'real'|'demo';demoReadOnly?:boolean;onSwitchMode?:()=>void}){
+export default function ManagementDrawer({view,onClose,onSaved,regions,configurable,allConfigurable,defaultRegionId,objectId,objectFarmId,currentRegionId,mode,demoReadOnly,onSwitchMode}:{view:View|null;onClose:()=>void;onSaved:(result:SavedResult)=>void;regions:Region[];configurable:ConfigItem[];allConfigurable:ConfigItem[];defaultRegionId?:string;objectId?:string;objectFarmId?:string;currentRegionId?:string;mode:'real'|'demo';demoReadOnly?:boolean;onSwitchMode?:()=>void}){
   const farms=useMemo(()=>configurable.filter(i=>i.kind==='farm'&&!i.archived_at),[configurable]);
   const manageableRegionIds=useMemo(()=>new Set(regions.filter(r=>farms.some(f=>f.id===r.farmId)).map(r=>r.id)),[regions,farms]);
-  const title=view==='new-village'?'新增村庄':view==='new-object'?'新增农业对象':view==='change-region'?'更改所属村庄':'维护村庄与关联';
+  const title=view==='new-village'?'新增村庄':view==='new-object'?'新增农业对象':view==='change-region'?'更改所属村庄':view==='recycle-bin'?'回收站':'维护村庄与关联';
   return <aside className={styles.managementDrawer} aria-label={title} aria-live="polite">
     <div className={styles.drawerTop}><span className={styles.eyebrow}>{mode==='demo'?'DEMO · READ-ONLY':'MANAGEMENT'}</span><button type="button" onClick={onClose} aria-label={`关闭${title}`}>×</button></div>
     <h2>{title}</h2>
-    {mode==='demo'||demoReadOnly?<div className={styles.drawerHint}><p>当前是只读演示，新增与修改功能不可用。</p>{onSwitchMode&&<button type="button" onClick={onSwitchMode}>退出演示并登记真实资料 ↗</button>}</div>:view==='region-maintenance'?<RegionMaintenancePanel regions={regions} onSaved={()=>onSaved({view:'region-maintenance',id:''})} configurable={configurable}/>:<ManagementForm key={view+ (objectId??'') + (defaultRegionId??'')} view={view} regions={regions.filter(r=>manageableRegionIds.has(r.id))} farms={farms} configurable={configurable} defaultRegionId={defaultRegionId} objectId={objectId} objectFarmId={objectFarmId} currentRegionId={currentRegionId} onSaved={onSaved} onClose={onClose}/>}
+    {mode==='demo'||demoReadOnly?<div className={styles.drawerHint}><p>当前是只读演示，新增与修改功能不可用。</p>{onSwitchMode&&<button type="button" onClick={onSwitchMode}>退出演示并登记真实资料 ↗</button>}</div>:view==='region-maintenance'?<RegionMaintenancePanel regions={regions} onSaved={()=>onSaved({view:'region-maintenance',id:''})} configurable={configurable}/>:view==='recycle-bin'?<RecycleBinPanel allConfigurable={allConfigurable} onSaved={()=>onSaved({view:'recycle-bin',id:''})}/>:<ManagementForm key={view+ (objectId??'') + (defaultRegionId??'')} view={view} regions={regions.filter(r=>manageableRegionIds.has(r.id))} farms={farms} configurable={configurable} defaultRegionId={defaultRegionId} objectId={objectId} objectFarmId={objectFarmId} currentRegionId={currentRegionId} onSaved={onSaved} onClose={onClose}/>}
   </aside>;
 }
 
@@ -206,4 +207,33 @@ function ManagementForm({view,regions,farms,configurable,defaultRegionId,objectI
   </form>;
 
   return null;
+}
+
+function RecycleBinPanel({allConfigurable,onSaved}:{allConfigurable:ConfigItem[];onSaved:()=>void}){
+  const {data:regionsData,reload:reloadRegions}=useApi<{items:Region[]}>('/api/v1/map-regions');
+  const [busy,setBusy]=useState<string|null>(null);
+  const [error,setError]=useState('');
+  const archivedObjects=allConfigurable.filter(i=>i.archived_at&&['field','pond','facility'].includes(i.kind));
+  const archivedRegions=(regionsData?.items??[]).filter(r=>r.archivedAt);
+  const restore=async(item:ConfigItem|Region)=>{
+    setBusy(item.id);setError('');
+    try{
+      if('farmId' in item){
+        const region=item;
+        const res=await fetch('/api/v1/map-regions',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'archive',id:region.id,version:region.version,archived:false,reason:'从回收站恢复'})});
+        const data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.message??'村庄恢复失败');
+      }else{
+        const obj=item;
+        const res=await fetch('/api/v1/objects/archive',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:obj.id,version:obj.version,archived:false,reason:'从回收站恢复'})});
+        const data=await res.json().catch(()=>null);if(!res.ok)throw new Error(data?.message??'对象恢复失败');
+      }
+      await reloadRegions();onSaved();
+    }catch(err){setError(err instanceof Error?err.message:'恢复失败');}finally{setBusy(null);}
+  };
+  return <div className={styles.recycleBin}>
+    <p className={styles.drawerHint}>已归档的村庄和对象会保留历史与关联记录。恢复村庄不会自动恢复历史关联。</p>
+    {error&&<p className={styles.formError} role="alert">{error}</p>}
+    <section><h3>已归档对象</h3>{archivedObjects.length===0&&<p className={styles.drawerHint}>没有已归档对象</p>}<ul>{archivedObjects.map(o=><li key={o.id}><span>{kindLabels[o.kind]??o.kind} · {o.name} · {o.code}{o.archived_at&&<small> · 归档于 {new Date(o.archived_at).toLocaleDateString('zh-CN')}</small>}</span><button type="button" disabled={busy===o.id} onClick={()=>restore(o)}>{busy===o.id?'恢复中…':'恢复'}</button></li>)}</ul></section>
+    <section><h3>已归档村庄</h3>{archivedRegions.length===0&&<p className={styles.drawerHint}>没有已归档村庄</p>}<ul>{archivedRegions.map(r=><li key={r.id}><span>{r.name}{r.archivedAt&&<small> · 归档于 {new Date(r.archivedAt).toLocaleDateString('zh-CN')}</small>}</span><button type="button" disabled={busy===r.id} onClick={()=>restore(r)}>{busy===r.id?'恢复中…':'恢复'}</button></li>)}</ul></section>
+  </div>;
 }

@@ -53,7 +53,7 @@ export async function setObjectArchive(c: PoolClient, actor: Actor, input: Recor
     await assertAccess(c, actor, { objectId: id, action: 'configure', at: new Date().toISOString() });
     const old = (await c.query('SELECT * FROM objects WHERE id=$1 FOR UPDATE', [id])).rows[0];
     if (!old) throw new AppError(404, 'OBJECT_NOT_FOUND', '对象不存在');
-    if (!['field', 'pond'].includes(old.kind)) throw new AppError(422, 'ARCHIVE_KIND', 'D2 仅支持正式地块和塘口归档');
+    if (!['field', 'pond', 'facility'].includes(old.kind)) throw new AppError(422, 'ARCHIVE_KIND', '仅支持正式地块、塘口和固定设施归档');
     if (old.version !== integer(input.version, '版本')) throw new AppError(409, 'VERSION_CONFLICT', '对象已更新，请刷新后重试');
     if (typeof input.archived !== 'boolean' || Boolean(old.archived_at) === input.archived) throw new AppError(400, 'ARCHIVE_STATE', '归档状态没有变化');
     const reason = text(input.reason, '归档或恢复依据', 1000);
