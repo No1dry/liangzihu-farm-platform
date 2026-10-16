@@ -135,7 +135,7 @@ export default function FarmOverview(){
  const persistState=()=>{if(mode!=='real')return;if(justSwitched.current){justSwitched.current=false;return;}const view=mapRef.current?.getView(),center=view?.getCenter(),zoom=view?.getZoom();if(center&&zoom!==undefined)sessionStorage.setItem(stateKey,JSON.stringify({query,selectedId,expandedKeys,center,zoom,directoryCollapsed,basemap,visibility:categoryVisibility} satisfies SavedState));};
  const saveReturnState=()=>persistState();
  // 底图与类别显隐变化即写回会话状态，页面刷新后保持底图选择（D1/D5）。
- useEffect(()=>{persistState();},[basemap,categoryVisibility,expandedKeys,query,selectedId,directoryCollapsed]);
+ useEffect(()=>{persistState();},[basemap,categoryVisibility,query,selectedId,directoryCollapsed]);
  const close=()=>{setSelectedId(null);setSelectedRegionId(null);setSelectedMobileId(null);setMapMessage('');returnFocus.current?.focus();};
  const mapLabel=mode==='demo'?(basemap==='vector'?'天地图矢量底图及合成演示对象':'天地图卫星影像及合成演示对象'):(basemap==='vector'?'天地图矢量底图及已授权农业对象边界':'天地图卫星影像及已授权农业对象边界');
  return <section className={styles.page} aria-label="农场空间总览">
