@@ -82,7 +82,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       const zoomB = Number(await map.getAttribute('data-view-zoom'));
       const resB = 156543.03392804097 / Math.pow(2, zoomB);
       const R2 = 6378137, D2R = Math.PI / 180;
-      const mx = R2 * 114.625 * D2R, my = R2 * Math.log(Math.tan(Math.PI / 4 + 30.245 * D2R / 2));
+      const mx = R2 * 114.621 * D2R, my = R2 * Math.log(Math.tan(Math.PI / 4 + 30.241 * D2R / 2));
       const px = boxB.width / 2 + (mx - centerB[0]) / resB, py = boxB.height / 2 - (my - centerB[1]) / resB;
       await page.mouse.click(boxB.x + px, boxB.y + py); await page.waitForTimeout(400);
       await page.getByRole('complementary', { name: '对象详情' }).getByRole('heading', { name: '东片田' }).waitFor();
