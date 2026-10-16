@@ -30,7 +30,7 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
       const createdWest=await ownerContext.request.post(app.origin+'/api/v1/map-regions',{headers:{Origin:app.origin},data:{farmId:farm,name:'合成西村',source:'D3 浏览器验收合成资料'}});assert.equal(createdWest.status(),201);
       const westRegion=await createdWest.json();
       const assignedWest=await ownerContext.request.patch(app.origin+'/api/v1/map-regions',{headers:{Origin:app.origin},data:{action:'assign',objectId:west.id,regionId:westRegion.id,source:'D3 浏览器验收合成资料'}});assert.equal(assignedWest.status(),200);
-      await page.getByRole('button',{name:'刷新授权资料'}).click();await page.getByRole('heading',{name:'合成东村',exact:true}).waitFor();
+      await page.getByRole('button',{name:'刷新授权资料'}).click();await page.getByRole('button',{name:'定位村庄 合成东村',exact:true}).waitFor();
       await mkdir('docs/acceptance/d3',{recursive:true});
       await page.getByRole('button',{name:'定位村庄 合成西村'}).waitFor();
       await page.screenshot({path:'docs/acceptance/d3/2026-10-09-D3多村总览-合成样本.png',fullPage:true});
@@ -65,7 +65,7 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
       await page.setViewportSize({width:390,height:844});
       await page.getByRole('button',{name:'关闭对象详情'}).click();
       await page.getByRole('button',{name:'☰ 对象目录'}).click();
-      await page.getByRole('heading',{name:'合成东村',exact:true}).waitFor();
+      await page.getByRole('button',{name:'定位村庄 合成东村',exact:true}).waitFor();
       await page.waitForTimeout(350);
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
       await page.screenshot({path:'docs/acceptance/d2/2026-10-09-D2村庄目录-手机.png',fullPage:true});

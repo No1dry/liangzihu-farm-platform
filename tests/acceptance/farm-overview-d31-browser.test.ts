@@ -31,7 +31,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByRole('button',{name:'退出演示，返回真实数据'}).click();
    await page.getByText('真实数据',{exact:true}).waitFor();
    const before=await counts();
-   await page.getByRole('button',{name:'查看演示效果',exact:true}).click();
+   await page.getByRole('button',{name:'查看演示效果 ↗',exact:true}).click();
    await page.getByText(/当前所有村庄、地块、设备位置、状态和告警均为合成示例/).waitFor();
    for(const name of ['沙湾示范片区','长岭示范片区','湖东示范片区'])await page.getByRole('button',{name:`定位村庄 ${name}`}).waitFor();
    assert.equal(await page.getByRole('button',{name:'植保无人机 U-01',exact:true}).count(),1,'无人机只应在独立机动设备目录出现一次');
@@ -54,7 +54,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await capture('07-演示机动设备.png');
    await page.setViewportSize({width:390,height:844});
    await page.goto(app.origin+'/farm-overview');
-   await page.getByRole('button',{name:'查看演示效果',exact:true}).click();
+   await page.getByRole('button',{name:'查看演示效果 ↗',exact:true}).click();
    await page.getByRole('button',{name:'☰ 对象目录'}).click();
    await page.getByRole('button',{name:'长岭养殖塘 B',exact:true}).click();
    await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'长岭养殖塘 B'}).waitFor();
@@ -166,7 +166,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    assert.equal((await pool.query("SELECT kind,verified FROM devices WHERE external_id='SYNTH-U01'")).rows[0].verified,false);
    const workerContext=await browser.newContext();try{await workerContext.addCookies([{name:'agri_session',value:await app.authenticate(worker),url:app.origin}]);const workerPage=await workerContext.newPage();await workerPage.goto(app.origin+'/farm-overview');await workerPage.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();await workerPage.getByRole('button',{name:'＋ 新增/管理'}).click();assert.equal(await workerPage.getByRole('button',{name:'新增农业对象'}).count(),0);const denied=await workerContext.request.post(app.origin+'/api/v1/objects',{headers:{Origin:app.origin},data:{parentId:farm,kind:'field',code:'DENIED',name:'越权',source:'测试'}});assert.equal(denied.status(),403);}finally{await workerContext.close();}
    const adminContext=await browser.newContext();try{await adminContext.addCookies([{name:'agri_session',value:await app.authenticate(admin),url:app.origin}]);const denied=await adminContext.request.post(app.origin+'/api/v1/map-regions',{headers:{Origin:app.origin},data:{farmId:farm,name:'管理员无权新村',source:'测试'}});assert.equal(denied.status(),403,'管理员角色不得替代对象配置授权');await permit(pool,admin.id,farm,['read','configure']);const allowed=await adminContext.request.get(app.origin+'/api/v1/objects?action=configure&limit=200');assert.equal(allowed.status(),200);assert((await allowed.json()).items.some((row:{id:string})=>row.id===farm));}finally{await adminContext.close();}
-   const expertContext=await browser.newContext();try{await expertContext.addCookies([{name:'agri_session',value:await app.authenticate(expert),url:app.origin}]);const expertPage=await expertContext.newPage();await expertPage.goto(app.origin+'/farm-overview');await expertPage.getByRole('button',{name:'查看演示效果',exact:true}).waitFor();assert.equal(await expertPage.getByText('合成测试农场').count(),0);await expertPage.getByRole('button',{name:'查看演示效果',exact:true}).click();await expertPage.getByRole('button',{name:'梁子湖农场（演示总览）',exact:true}).waitFor();}finally{await expertContext.close();}
+   const expertContext=await browser.newContext();try{await expertContext.addCookies([{name:'agri_session',value:await app.authenticate(expert),url:app.origin}]);const expertPage=await expertContext.newPage();await expertPage.goto(app.origin+'/farm-overview');await expertPage.getByRole('button',{name:'查看演示效果 ↗',exact:true}).waitFor();assert.equal(await expertPage.getByText('合成测试农场').count(),0);await expertPage.getByRole('button',{name:'查看演示效果 ↗',exact:true}).click();await expertPage.getByRole('button',{name:'梁子湖农场（演示总览）',exact:true}).waitFor();}finally{await expertContext.close();}
    for(const path of ['/map','/map-prototype','/terrain','/imagery','/objects','/devices','/machinery'])assert.equal((await context.request.get(app.origin+path)).status(),200,path);
    assert.deepEqual(errors,[]);
    await context.close();

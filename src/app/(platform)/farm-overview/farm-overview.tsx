@@ -72,7 +72,7 @@ export default function FarmOverview(){
  const treeData=useMemo(()=>buildTreeData({mode,items,regions,farms,demoRegions:mode==='demo'?demoRegions:undefined,demoItems:mode==='demo'?demoRows as FarmObject[]:undefined}),[mode,items,regions,farms]);
  const located=items.filter(item=>item.geometry).length;
  // 模式切换保留底图偏好（D5 会话状态），但清空检索、选中、绘制等浏览上下文；业务类别显隐重置为全显以匹配新会话。
- const switchMode=(next:'real'|'demo')=>{drawRef.current?.setActive(false);drawRef.current=null;drawingRef.current=false;setDrawing(false);setDemoFormOpen(false);sessionStorage.removeItem(stateKey);restored.current=null;restoreApplied.current=false;skipInitialFit.current=false;setQuery('');setSelectedId(null);setSelectedRegionId(null);setSelectedMobileId(null);setExpandedKeys([]);setMapMessage('');setDirectoryOpen(false);setManageOpen(false);setCategoryVisibility(defaultVisibility);setMode(next);};
+ const switchMode=(next:'real'|'demo')=>{drawRef.current?.setActive(false);drawRef.current=null;drawingRef.current=false;setDrawing(false);setDemoFormOpen(false);sessionStorage.removeItem(stateKey);restored.current=null;restoreApplied.current=false;skipInitialFit.current=false;setQuery('');setSelectedId(null);setSelectedRegionId(null);setSelectedMobileId(null);setExpandedKeys([]);knownKeys.current=null;setMapMessage('');setDirectoryOpen(false);setManageOpen(false);setCategoryVisibility(defaultVisibility);setMode(next);};
  useEffect(()=>{if(new URLSearchParams(window.location.search).get('demo')==='1')switchMode('demo');},[]);
  const openRegionManager=()=>{if(mode==='demo'){switchMode('real');return;}setDrawerView('region-maintenance');setDirectoryOpen(false);};
 
