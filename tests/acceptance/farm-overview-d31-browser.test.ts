@@ -75,7 +75,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByLabel('名称',{exact:true}).fill('现场演示无人机');
    await page.getByRole('button',{name:'在地图单击选位置'}).click();
    await demoMap.click({position:{x:360,y:300}});
-   await page.getByRole('button',{name:'现场演示无人机',exact:true}).click();
+   await page.getByRole('button',{name:'现场演示无人机 · 演示坐标，非真实 GPS',exact:true}).click();
    await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'现场演示无人机'}).waitFor();
    await page.getByLabel('演示类型').selectOption('field');
    await page.getByLabel('名称',{exact:true}).fill('现场演示地块');
