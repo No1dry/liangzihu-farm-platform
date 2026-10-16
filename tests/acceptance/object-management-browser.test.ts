@@ -35,7 +35,7 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
 
    await page.goto(app.origin+'/farm-overview');
-   await page.getByRole('button',{name:/合成测试农场/}).waitFor();
+   await page.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();
    await page.getByRole('button',{name:'＋ 新增/管理'}).click();
    await page.getByRole('button',{name:'新增村庄'}).click();
    await page.getByLabel('所属农场').selectOption(farm);
@@ -46,15 +46,16 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    await page.screenshot({path:'docs/acceptance/m2b/01-新增村庄后目录.png',fullPage:true});
 
    // 村庄下新增农田，稍后补位置
-   await page.getByRole('button',{name:/在 测试村 下新增对象/}).click();
+   await page.getByRole('button',{name:'测试村 操作菜单',exact:true}).click();
+   await page.getByRole('menuitem',{name:'在该村新增对象'}).click();
    await page.getByLabel('类型').selectOption('field');
    await page.getByLabel('名称',{exact:true}).fill('M2B 测试农田');
    await page.getByRole('textbox',{name:'编号'}).fill('SYNTH-M2B-FIELD');
    await page.getByLabel('登记依据').fill('M2-B 验收测试');
    await page.getByLabel('所属村庄').selectOption('测试村');
    await Promise.all([page.waitForResponse(response=>response.url().endsWith('/api/v1/objects')&&response.request().method()==='POST'&&response.status()===201),page.waitForResponse(response=>response.url().endsWith('/api/v1/map-regions')&&response.request().method()==='PATCH'&&response.status()===200),page.getByRole('button',{name:'保存对象'}).click()]);
-   await page.getByRole('button',{name:/M2B 测试农田/}).waitFor();
-   await page.getByRole('button',{name:/M2B 测试农田/}).getByText('待登记边界').waitFor();
+   await page.getByRole('button',{name:'M2B 测试农田',exact:true}).waitFor();
+   await page.getByRole('button',{name:'M2B 测试农田',exact:true}).getByText('待登记边界').waitFor();
    await page.screenshot({path:'docs/acceptance/m2b/02-新增农田待补位置.png',fullPage:true});
    const field=(await pool.query("SELECT id FROM objects WHERE code='SYNTH-M2B-FIELD'")).rows[0];
    const link=(await pool.query('SELECT region_id FROM map_region_links WHERE object_id=$1 AND valid_to IS NULL',[field.id])).rows[0];
@@ -62,7 +63,8 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    assert.equal(link.region_id,region.id);
 
    // 村庄下新增塘口，现在绘制不规则六边形边界
-   await page.getByRole('button',{name:/在 测试村 下新增对象/}).click();
+   await page.getByRole('button',{name:'测试村 操作菜单',exact:true}).click();
+   await page.getByRole('menuitem',{name:'在该村新增对象'}).click();
    await page.getByLabel('类型').selectOption('pond');
    await page.getByLabel('名称',{exact:true}).fill('M2B 测试塘口');
    await page.getByRole('textbox',{name:'编号'}).fill('SYNTH-M2B-POND');
@@ -97,8 +99,8 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    // 返回农场总览恢复选中
    assert.equal(await page.getByRole('link',{name:'返回农场总览 ↗'}).count(),2,'保存成功后应出现消息区返回链接');
    await page.getByRole('link',{name:'返回农场总览 ↗'}).nth(1).click();
-   await page.getByRole('button',{name:/合成测试农场/}).waitFor();
-   await page.getByRole('button',{name:/M2B 测试塘口/}).waitFor();
+   await page.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();
+   await page.getByRole('button',{name:'M2B 测试塘口',exact:true}).waitFor();
    await page.screenshot({path:'docs/acceptance/m2b/04-绘制后返回总览.png',fullPage:true});
 
    // 更改所属村庄
@@ -109,7 +111,7 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    await page.getByLabel('维护依据').fill('M2-B 更改归属测试');
    await page.getByRole('button',{name:'保存村庄'}).click();
    await page.getByRole('button',{name:'定位村庄 测试二村'}).waitFor();
-   await page.getByRole('button',{name:/M2B 测试农田/}).click();
+   await page.getByRole('button',{name:'M2B 测试农田',exact:true}).click();
    await page.getByRole('complementary',{name:'对象详情'}).getByRole('button',{name:'更改所属村庄'}).click();
    await page.getByLabel('新归属村庄').selectOption('测试二村');
    await page.getByLabel('变更依据').fill('M2-B 归属调整');
@@ -126,7 +128,7 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    await workerContext.addCookies([{name:'agri_session',value:await app.authenticate(worker),url:app.origin}]);
    const workerPage=await workerContext.newPage();
    await workerPage.goto(app.origin+'/farm-overview');
-   await workerPage.getByRole('button',{name:/合成测试农场/}).waitFor();
+   await workerPage.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();
    await workerPage.getByRole('button',{name:'＋ 新增/管理'}).click();
    assert.equal(await workerPage.getByRole('button',{name:'新增农业对象'}).count(),0);
    const denied=await workerContext.request.post(app.origin+'/api/v1/objects',{headers:{Origin:app.origin},data:{parentId:farm,kind:'field',code:'DENIED',name:'越权',source:'测试'}});
@@ -136,7 +138,7 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    // 手机 390px 核心流程
    await page.setViewportSize({width:390,height:844});
    await page.goto(app.origin+'/farm-overview');
-   await page.getByRole('button',{name:/合成测试农场/}).waitFor();
+   await page.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();
    await page.getByRole('button',{name:'☰ 对象目录'}).click();
    await page.getByRole('button',{name:'＋ 新增/管理'}).click();
    assert.equal(await page.getByRole('button',{name:'新增农业对象'}).count(),1);

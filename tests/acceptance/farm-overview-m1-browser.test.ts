@@ -17,7 +17,7 @@ test('M1 默认矢量底图、底图切换与持久化、类别显隐、图例�
   await mkdir('docs/acceptance/m1',{recursive:true});
   await page.goto(app.origin+'/farm-overview');
   await page.getByRole('heading',{name:'农场空间总览'}).waitFor();
-  await page.getByRole('button',{name:/M1合成农田/}).waitFor();
+  await page.getByRole('button',{name:'M1合成农田',exact:true}).waitFor();
   const map=page.getByRole('application');
   await map.waitFor();
   assert.equal(await map.getAttribute('aria-label'),'天地图矢量底图及已授权农业对象边界');
@@ -62,7 +62,7 @@ test('M1 默认矢量底图、底图切换与持久化、类别显隐、图例�
   await page.getByRole('button',{name:'查看演示效果 ↗'}).click();
   await page.getByRole('application',{name:'天地图矢量底图及合成演示对象'}).waitFor();
   assert.equal(await map.getAttribute('data-mode'),'demo');
-  await page.getByRole('button',{name:/沙湾东片水稻田/}).waitFor();
+  await page.getByRole('button',{name:'沙湾东片水稻田',exact:true}).waitFor();
   await page.getByRole('button',{name:'图层'}).click();
   await page.getByRole('dialog',{name:'地图图层设置'}).getByText('演示区域（非测绘边界）').waitFor();
   await page.keyboard.press('Escape');
@@ -74,7 +74,7 @@ test('M1 默认矢量底图、底图切换与持久化、类别显隐、图例�
   await page.setViewportSize({width:390,height:844});
   await page.getByRole('button',{name:'☰ 对象目录'}).click();
   await page.getByRole('searchbox',{name:'搜索名称或编号'}).waitFor();
-  await page.getByRole('button',{name:/M1合成塘口/}).click();
+  await page.getByRole('button',{name:'M1合成塘口',exact:true}).click();
   await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'M1合成塘口'}).waitFor();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
   await page.waitForTimeout(350);

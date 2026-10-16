@@ -18,14 +18,14 @@ test('D1 卫星总览只展示授权对象，搜索定位与覆盖抽屉在桌�
   await context.addCookies([{name:'agri_session',value:await app.authenticate(actor),url:app.origin}]);
   await page.goto(app.origin+'/farm-overview');
   await page.getByRole('heading',{name:'农场空间总览'}).waitFor();
-  await page.getByRole('button',{name:/合成东片农田/}).waitFor();
+  await page.getByRole('button',{name:'合成东片农田',exact:true}).waitFor();
   assert.equal(await page.getByText('未授权对象不可见').count(),0);
   const api=await context.request.get(app.origin+'/api/v1/map');assert.equal(api.status(),200);assert.equal((await api.text()).includes('未授权对象不可见'),false);
   await page.getByRole('searchbox',{name:'搜索名称或编号'}).fill('D1-FIELD');
-  assert.equal(await page.getByRole('button',{name:/合成东片农田/}).count(),1);
-  assert.equal(await page.getByRole('button',{name:/合成无边界塘口/}).count(),0);
+  assert.equal(await page.getByRole('button',{name:'合成东片农田',exact:true}).count(),1);
+  assert.equal(await page.getByRole('button',{name:'合成无边界塘口',exact:true}).count(),0);
   const zoomBeforeDirectory=await page.getByRole('application',{name:'天地图矢量底图及已授权农业对象边界'}).getAttribute('data-view-zoom');
-  await page.getByRole('button',{name:/合成东片农田/}).click();
+  await page.getByRole('button',{name:'合成东片农田',exact:true}).click();
   await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'合成东片农田'}).waitFor();
   const map=page.getByRole('application',{name:'天地图矢量底图及已授权农业对象边界'});
   await map.waitFor();const center=await map.evaluate(el=>(el.querySelector('.ol-viewport') as HTMLElement)?.style.width??'');
@@ -57,7 +57,7 @@ test('D1 卫星总览只展示授权对象，搜索定位与覆盖抽屉在桌�
   await page.getByRole('button',{name:'关闭对象详情'}).click();
   await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'☰ 对象目录'}).click();
   await page.getByRole('searchbox',{name:'搜索名称或编号'}).fill('');
-  await page.getByRole('button',{name:/合成无边界塘口/}).click();
+  await page.getByRole('button',{name:'合成无边界塘口',exact:true}).click();
   await page.getByRole('complementary',{name:'对象详情'}).getByText('待登记',{exact:true}).waitFor();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
   await page.waitForTimeout(350);

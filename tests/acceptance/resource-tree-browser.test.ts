@@ -43,17 +43,17 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.goto(app.origin + '/farm-overview');
       await page.getByRole('heading', { name: '农场空间总览' }).waitFor();
 
-      await page.getByRole('button', { name: '东片田' }).waitFor();
-      await page.getByRole('button', { name: '北片田' }).waitFor();
-      await page.getByRole('button', { name: '1号闸' }).waitFor();
-      await page.getByRole('button', { name: '未登记塘口' }).waitFor();
+      await page.getByRole('button', { name: '东片田', exact: true }).waitFor();
+      await page.getByRole('button', { name: '北片田', exact: true }).waitFor();
+      await page.getByRole('button', { name: '1号闸', exact: true }).waitFor();
+      await page.getByRole('button', { name: '未登记塘口', exact: true }).waitFor();
       await page.getByRole('button', { name: '甲村 操作菜单' }).waitFor();
 
       const map = page.getByRole('application', { name: /天地图.*已授权农业对象边界/ });
       const initialCenter = await map.getAttribute('data-view-center');
 
       const zoomBeforeObject = Number(await map.getAttribute('data-view-zoom'));
-      await page.getByRole('button', { name: '东片田' }).click();
+      await page.getByRole('button', { name: '东片田', exact: true }).click();
       await page.getByRole('complementary', { name: '对象详情' }).getByRole('heading', { name: '东片田' }).waitFor();
       await page.waitForTimeout(350);
       const afterObjectCenter = await map.getAttribute('data-view-center');
@@ -68,7 +68,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       assert.notEqual(afterRegionCenter, afterObjectCenter, '点击村庄后地图中心应移动到关联范围');
 
       const zoomAfterRegion = Number(await map.getAttribute('data-view-zoom'));
-      await page.getByRole('button', { name: '北片田' }).click();
+      await page.getByRole('button', { name: '北片田', exact: true }).click();
       await page.waitForTimeout(350);
       const zoomAfterSmallField = Number(await map.getAttribute('data-view-zoom'));
       assert(zoomAfterSmallField > zoomAfterRegion, '视野内小农田点击后应进一步放大');
@@ -88,7 +88,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.getByRole('complementary', { name: '对象详情' }).getByRole('heading', { name: '东片田' }).waitFor();
       await page.getByRole('button', { name: '关闭对象详情' }).click();
 
-      await page.getByRole('button', { name: '未登记塘口' }).click();
+      await page.getByRole('button', { name: '未登记塘口', exact: true }).click();
       await page.getByRole('complementary', { name: '对象详情' }).getByRole('heading', { name: '未登记塘口' }).waitFor();
       await page.getByText('尚未登记地图位置', { exact: true }).waitFor();
       await page.waitForTimeout(350);
@@ -97,12 +97,12 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       const search = page.getByRole('searchbox', { name: '搜索名称或编号' });
       await search.fill('北片田');
       await page.waitForTimeout(250);
-      assert.equal(await page.getByRole('button', { name: '北片田' }).count(), 1);
-      assert.equal(await page.getByRole('button', { name: '东片田' }).count(), 0);
+      assert.equal(await page.getByRole('button', { name: '北片田', exact: true }).count(), 1);
+      assert.equal(await page.getByRole('button', { name: '东片田', exact: true }).count(), 0);
       assert.equal(await page.getByRole('button', { name: '乙村 操作菜单' }).count(), 1);
       await search.fill('');
       await page.waitForTimeout(250);
-      await page.getByRole('button', { name: '东片田' }).waitFor();
+      await page.getByRole('button', { name: '东片田', exact: true }).waitFor();
 
       // 归档村庄：历史保留、对象不连带；恢复后关联不自动恢复
       await page.getByRole('button', { name: '甲村 操作菜单' }).click();
@@ -132,7 +132,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await workerContext.addCookies([{ name: 'agri_session', value: await app.authenticate(worker), url: app.origin }]);
       const workerPage = await workerContext.newPage();
       await workerPage.goto(app.origin + '/farm-overview');
-      await workerPage.getByRole('button', { name: '北片田' }).waitFor();
+      await workerPage.getByRole('button', { name: '北片田', exact: true }).waitFor();
       await workerPage.getByRole('button', { name: '北片田 操作菜单' }).click();
       await workerPage.getByRole('menuitem', { name: '地图定位' }).waitFor();
       assert.equal(await workerPage.getByRole('menuitem', { name: '移至回收站' }).count(), 0, '无配置权不应出现归档菜单');
@@ -143,7 +143,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.getByRole('button', { name: '东片田 操作菜单' }).click();
       await page.getByRole('menuitem', { name: '移至回收站' }).click();
       await page.waitForTimeout(500);
-      assert.equal(await page.getByRole('button', { name: '东片田' }).count(), 0);
+      assert.equal(await page.getByRole('button', { name: '东片田', exact: true }).count(), 0);
 
       await page.getByRole('button', { name: '回收站' }).click();
       await page.getByRole('complementary', { name: '回收站' }).waitFor();
@@ -151,7 +151,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await restoreRow.getByRole('button', { name: '恢复' }).click();
       await page.waitForTimeout(500);
       await page.getByRole('button', { name: '关闭回收站' }).click();
-      await page.getByRole('button', { name: '东片田' }).waitFor();
+      await page.getByRole('button', { name: '东片田', exact: true }).waitFor();
 
       await page.setViewportSize({ width: 390, height: 844 });
       await page.getByRole('button', { name: '☰ 对象目录' }).click();

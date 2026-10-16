@@ -21,7 +21,7 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
       const ownerContext=await browser.newContext({viewport:{width:1440,height:900},locale:'zh-CN'});
       await ownerContext.addCookies([{name:'agri_session',value:await app.authenticate(owner),url:app.origin}]);
       const page=await ownerContext.newPage(),errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));
-      await page.goto(app.origin+'/farm-overview');await page.getByRole('button',{name:/合成东村地块/}).waitFor();
+      await page.goto(app.origin+'/farm-overview');await page.getByRole('button',{name:'合成东村地块',exact:true}).waitFor();
       const created=await ownerContext.request.post(app.origin+'/api/v1/map-regions',{headers:{Origin:app.origin},data:{farmId:farm,name:'合成东村',source:'浏览器验收合成资料'}});assert.equal(created.status(),201);
       const region=await created.json();
       const assigned=await ownerContext.request.patch(app.origin+'/api/v1/map-regions',{headers:{Origin:app.origin},data:{action:'assign',objectId:field.id,regionId:region.id,source:'浏览器验收合成资料'}});assert.equal(assigned.status(),200);
@@ -30,7 +30,7 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
       const createdWest=await ownerContext.request.post(app.origin+'/api/v1/map-regions',{headers:{Origin:app.origin},data:{farmId:farm,name:'合成西村',source:'D3 浏览器验收合成资料'}});assert.equal(createdWest.status(),201);
       const westRegion=await createdWest.json();
       const assignedWest=await ownerContext.request.patch(app.origin+'/api/v1/map-regions',{headers:{Origin:app.origin},data:{action:'assign',objectId:west.id,regionId:westRegion.id,source:'D3 浏览器验收合成资料'}});assert.equal(assignedWest.status(),200);
-      await page.getByRole('button',{name:'刷新授权资料'}).click();await page.getByRole('heading',{name:/合成东村/}).waitFor();
+      await page.getByRole('button',{name:'刷新授权资料'}).click();await page.getByRole('heading',{name:'合成东村',exact:true}).waitFor();
       await mkdir('docs/acceptance/d3',{recursive:true});
       await page.getByRole('button',{name:'定位村庄 合成西村'}).waitFor();
       await page.screenshot({path:'docs/acceptance/d3/2026-10-09-D3多村总览-合成样本.png',fullPage:true});
@@ -44,14 +44,14 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
       await page.getByRole('button',{name:'定位村庄 合成西村'}).click();await page.waitForTimeout(450);
       assert.notEqual(await map.getAttribute('data-view-center'),eastCenter,'跨村搜索后应定位另一片关联边界');
       await page.getByRole('searchbox',{name:'搜索名称或编号'}).fill('合成东村');
-      await page.getByRole('button',{name:/合成东村地块/}).click();
+      await page.getByRole('button',{name:'合成东村地块',exact:true}).click();
       await page.getByRole('complementary',{name:'对象详情'}).getByText(/未关闭告警 0/).waitFor();
       await page.getByRole('complementary',{name:'对象详情'}).getByText('资料与记录').click();
       assert.equal(await page.getByRole('complementary',{name:'对象详情'}).getByText('浏览器验收合成资料').count(),1);
       assert.equal(await page.getByRole('complementary',{name:'对象详情'}).getByText('记录时间').count(),1);
       await page.waitForTimeout(350);
       const centerBeforeReturn=await map.getAttribute('data-view-center'),zoomBeforeReturn=await map.getAttribute('data-view-zoom');
-      await page.getByRole('complementary',{name:'对象详情'}).getByRole('link',{name:/查看对象详情/}).click();
+      await page.getByRole('complementary',{name:'对象详情'}).getByRole('link',{name:'查看对象详情',exact:true}).click();
       const saved=await page.evaluate(()=>sessionStorage.getItem('farm-overview-return-v1'));assert(saved,'离开地图前应保存返回状态');
       assert.equal(JSON.parse(saved).zoom,Number(zoomBeforeReturn));
       await page.getByRole('link',{name:'返回农场地图'}).click();
@@ -65,14 +65,14 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
       await page.setViewportSize({width:390,height:844});
       await page.getByRole('button',{name:'关闭对象详情'}).click();
       await page.getByRole('button',{name:'☰ 对象目录'}).click();
-      await page.getByRole('heading',{name:/合成东村/}).waitFor();
+      await page.getByRole('heading',{name:'合成东村',exact:true}).waitFor();
       await page.waitForTimeout(350);
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
       await page.screenshot({path:'docs/acceptance/d2/2026-10-09-D2村庄目录-手机.png',fullPage:true});
       await page.route('**/api/v1/farm-overview',route=>route.abort());
       await page.getByRole('button',{name:'刷新授权资料'}).click();
       await page.getByRole('alert').getByText(/正在显示上次成功读取的资料/).waitFor();
-      assert.equal(await page.getByRole('button',{name:/合成东村地块/}).count(),1,'离线时保留已加载目录');
+      assert.equal(await page.getByRole('button',{name:'合成东村地块',exact:true}).count(),1,'离线时保留已加载目录');
       await page.screenshot({path:'docs/acceptance/d3/2026-10-09-D3断网保留-合成样本.png',fullPage:true});
       await page.unroute('**/api/v1/farm-overview');
       await page.getByRole('button',{name:'重试'}).click();
@@ -84,7 +84,7 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
         await workerContext.addCookies([{name:'agri_session',value:await app.authenticate(worker),url:app.origin}]);
         const workerOverview=await workerContext.request.get(app.origin+'/api/v1/farm-overview');assert.equal(workerOverview.status(),200);
         assert.equal((await workerOverview.json()).items.length,1);
-        const workerPage=await workerContext.newPage();await workerPage.goto(app.origin+'/farm-overview');await workerPage.getByRole('button',{name:/合成东村地块/}).waitFor();
+        const workerPage=await workerContext.newPage();await workerPage.goto(app.origin+'/farm-overview');await workerPage.getByRole('button',{name:'合成东村地块',exact:true}).waitFor();
         assert.equal(await workerPage.getByText('维护村庄与对象关联').count(),0);
         const denied=await workerContext.request.post(app.origin+'/api/v1/map-regions',{headers:{Origin:app.origin},data:{farmId:farm,name:'越权村庄',source:'测试'}});assert.equal(denied.status(),403);
       }finally{await workerContext.close();}

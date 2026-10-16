@@ -23,7 +23,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    page.on('pageerror',error=>errors.push(error.message));
    const capture=async(name:string)=>{await page.evaluate(()=>window.scrollTo(0,0));await page.waitForTimeout(280);await page.screenshot({path:'docs/acceptance/farm-overview-demo/'+name});};
    await mkdir('docs/acceptance/farm-overview-demo',{recursive:true});
-   await page.goto(app.origin+'/farm-overview');await page.getByRole('button',{name:/合成测试农场/}).waitFor();
+   await page.goto(app.origin+'/farm-overview');await page.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();
    assert.equal(await page.getByText('演示模式',{exact:true}).count(),0);
    await capture('01-真实空状态.png');
    await page.goto(app.origin+'/farm-overview?demo=1');
@@ -31,32 +31,32 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByRole('button',{name:'退出演示，返回真实数据'}).click();
    await page.getByText('真实数据',{exact:true}).waitFor();
    const before=await counts();
-   await page.getByRole('button',{name:/查看演示效果/}).click();
+   await page.getByRole('button',{name:'查看演示效果',exact:true}).click();
    await page.getByText(/当前所有村庄、地块、设备位置、状态和告警均为合成示例/).waitFor();
    for(const name of ['沙湾示范片区','长岭示范片区','湖东示范片区'])await page.getByRole('button',{name:`定位村庄 ${name}`}).waitFor();
-   assert.equal(await page.getByRole('button',{name:/植保无人机 U-01/}).count(),1,'无人机只应在独立机动设备目录出现一次');
+   assert.equal(await page.getByRole('button',{name:'植保无人机 U-01',exact:true}).count(),1,'无人机只应在独立机动设备目录出现一次');
    assert.equal(await page.getByText('3 片区').count(),1);
    await capture('02-演示全场.png');
-   await page.getByRole('button',{name:/梁子湖农场（演示总览）/}).click();
+   await page.getByRole('button',{name:'梁子湖农场（演示总览）',exact:true}).click();
    await page.getByRole('complementary',{name:'对象详情'}).getByText('5',{exact:true}).first().waitFor();
    await capture('03-演示农场详情.png');
    await page.getByRole('button',{name:'定位村庄 长岭示范片区'}).click();
    await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'长岭示范片区'}).waitFor();
    await capture('04-演示片区详情.png');
-   await page.getByRole('button',{name:/长岭养殖塘 B/}).click();
+   await page.getByRole('button',{name:'长岭养殖塘 B',exact:true}).click();
    await page.getByText(/演示溶解氧 4.2 mg\/L/).waitFor();
    await capture('05-演示塘口详情.png');
-   await page.getByRole('button',{name:/沙湾 1 号水闸/}).click();
+   await page.getByRole('button',{name:'沙湾 1 号水闸',exact:true}).click();
    await page.getByText(/演示开度 65%/).waitFor();
    await capture('06-演示设施详情.png');
-   await page.getByRole('button',{name:/植保无人机 U-01/}).first().click();
+   await page.getByRole('button',{name:'植保无人机 U-01',exact:true}).first().click();
    await page.getByText(/演示坐标，非真实 GPS/).last().waitFor();
    await capture('07-演示机动设备.png');
    await page.setViewportSize({width:390,height:844});
    await page.goto(app.origin+'/farm-overview');
-   await page.getByRole('button',{name:/查看演示效果/}).click();
+   await page.getByRole('button',{name:'查看演示效果',exact:true}).click();
    await page.getByRole('button',{name:'☰ 对象目录'}).click();
-   await page.getByRole('button',{name:/长岭养殖塘 B/}).click();
+   await page.getByRole('button',{name:'长岭养殖塘 B',exact:true}).click();
    await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'长岭养殖塘 B'}).waitFor();
    await page.waitForTimeout(350);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
@@ -69,25 +69,25 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByLabel('名称',{exact:true}).fill('现场演示水泵');
    await page.getByRole('button',{name:'在地图单击选位置'}).click();
    await demoMap.click({position:{x:320,y:280}});
-   await page.getByRole('button',{name:/现场演示水泵/}).click();
+   await page.getByRole('button',{name:'现场演示水泵',exact:true}).click();
    await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'现场演示水泵'}).waitFor();
    await page.getByLabel('演示类型').selectOption('drone');
    await page.getByLabel('名称',{exact:true}).fill('现场演示无人机');
    await page.getByRole('button',{name:'在地图单击选位置'}).click();
    await demoMap.click({position:{x:360,y:300}});
-   await page.getByRole('button',{name:/现场演示无人机/}).click();
+   await page.getByRole('button',{name:'现场演示无人机',exact:true}).click();
    await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'现场演示无人机'}).waitFor();
    await page.getByLabel('演示类型').selectOption('field');
    await page.getByLabel('名称',{exact:true}).fill('现场演示地块');
    await page.getByRole('button',{name:'在地图逐点绘制，双击结束'}).click();
    for(const position of [{x:250,y:250},{x:360,y:250},{x:380,y:360}])await demoMap.click({position});
    await demoMap.dblclick({position:{x:260,y:370}});
-   await page.getByRole('button',{name:/现场演示地块/}).click();
+   await page.getByRole('button',{name:'现场演示地块',exact:true}).click();
    await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'现场演示地块'}).waitFor();
    await page.getByText('6 农田').waitFor();
    assert.deepEqual(writes,[],'演示模式不得调用正式写接口');assert.deepEqual(await counts(),before,'演示浏览不得改变正式表');
    await page.getByRole('button',{name:'退出演示，返回真实数据'}).click();
-   await page.getByRole('button',{name:/合成测试农场/}).waitFor();
+   await page.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();
    assert.equal(await page.getByText('沙湾示范片区').count(),0);
    assert.equal(await page.evaluate(()=>sessionStorage.getItem('farm-overview-return-v1')),null);
    await page.setViewportSize({width:1440,height:900});
@@ -107,7 +107,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByLabel('登记依据').fill('D3.1 隔离测试');
    await page.getByLabel('所属村庄').selectOption('隔离验收村');
    await Promise.all([page.waitForResponse(response=>response.url().endsWith('/api/v1/objects')&&response.request().method()==='POST'&&response.status()===201),page.waitForResponse(response=>response.url().endsWith('/api/v1/map-regions')&&response.request().method()==='PATCH'&&response.status()===200),page.getByRole('button',{name:'保存对象'}).click()]);
-   await page.getByRole('button',{name:/隔离验收地块/}).waitFor();
+   await page.getByRole('button',{name:'隔离验收地块',exact:true}).waitFor();
    const field=(await pool.query("SELECT id,boundary_status,boundary FROM objects WHERE code='SYNTH-D31-FIELD'")).rows[0];
    assert.equal(field.boundary_status,'unknown');assert.equal(field.boundary,null);
    await page.getByRole('button',{name:'＋ 新增/管理'}).click();
@@ -118,7 +118,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByLabel('登记依据').fill('D3.1 隔离测试');
    await page.getByLabel('所属村庄').selectOption('隔离验收村');
    await Promise.all([page.waitForResponse(response=>response.url().endsWith('/api/v1/objects')&&response.request().method()==='POST'&&response.status()===201),page.waitForResponse(response=>response.url().endsWith('/api/v1/map-regions')&&response.request().method()==='PATCH'&&response.status()===200),page.getByRole('button',{name:'保存对象'}).click()]);
-   await page.getByRole('button',{name:/隔离验收塘口/}).waitFor();
+   await page.getByRole('button',{name:'隔离验收塘口',exact:true}).waitFor();
    const pond=(await pool.query("SELECT kind,boundary_status FROM objects WHERE code='SYNTH-D31-POND'")).rows[0];
    assert.equal(pond.kind,'pond');assert.equal(pond.boundary_status,'unknown');
    await page.goto(app.origin+'/map#boundary-draft');
@@ -135,7 +135,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    assert.equal((await pool.query('SELECT boundary_status FROM objects WHERE id=$1',[field.id])).rows[0].boundary_status,'draft');
    assert.equal((await pool.query('SELECT status FROM boundary_versions WHERE object_id=$1',[field.id])).rows[0].status,'draft');
    await page.goto(app.origin+'/farm-overview');
-   await page.getByRole('button',{name:/合成测试农场/}).waitFor();
+   await page.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();
    await page.getByRole('button',{name:'＋ 新增/管理'}).click();
    await page.getByRole('button',{name:'新增农业对象'}).click();
    await page.getByLabel('类型').selectOption('facility');
@@ -144,7 +144,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByLabel('登记依据').fill('D3.1 隔离测试');
    await page.getByLabel('所属村庄').selectOption('隔离验收村');
    await Promise.all([page.waitForResponse(response=>response.url().endsWith('/api/v1/objects')&&response.request().method()==='POST'&&response.status()===201),page.waitForResponse(response=>response.url().endsWith('/api/v1/map-regions')&&response.request().method()==='PATCH'&&response.status()===200),page.getByRole('button',{name:'保存对象'}).click()]);
-   await page.getByRole('button',{name:/隔离验收水闸/}).waitFor();
+   await page.getByRole('button',{name:'隔离验收水闸',exact:true}).waitFor();
    assert.equal((await pool.query("SELECT kind FROM objects WHERE code='SYNTH-D31-GATE'")).rows[0].kind,'facility');
    await page.goto(app.origin+'/devices#register');
    await page.getByLabel('关联对象').selectOption(farm);
@@ -164,9 +164,9 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await deviceForm.getByText('已保存').waitFor();
    await page.getByRole('cell',{name:'隔离验收无人机'}).waitFor();
    assert.equal((await pool.query("SELECT kind,verified FROM devices WHERE external_id='SYNTH-U01'")).rows[0].verified,false);
-   const workerContext=await browser.newContext();try{await workerContext.addCookies([{name:'agri_session',value:await app.authenticate(worker),url:app.origin}]);const workerPage=await workerContext.newPage();await workerPage.goto(app.origin+'/farm-overview');await workerPage.getByRole('button',{name:/合成测试农场/}).waitFor();await workerPage.getByRole('button',{name:'＋ 新增/管理'}).click();assert.equal(await workerPage.getByRole('button',{name:'新增农业对象'}).count(),0);const denied=await workerContext.request.post(app.origin+'/api/v1/objects',{headers:{Origin:app.origin},data:{parentId:farm,kind:'field',code:'DENIED',name:'越权',source:'测试'}});assert.equal(denied.status(),403);}finally{await workerContext.close();}
+   const workerContext=await browser.newContext();try{await workerContext.addCookies([{name:'agri_session',value:await app.authenticate(worker),url:app.origin}]);const workerPage=await workerContext.newPage();await workerPage.goto(app.origin+'/farm-overview');await workerPage.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();await workerPage.getByRole('button',{name:'＋ 新增/管理'}).click();assert.equal(await workerPage.getByRole('button',{name:'新增农业对象'}).count(),0);const denied=await workerContext.request.post(app.origin+'/api/v1/objects',{headers:{Origin:app.origin},data:{parentId:farm,kind:'field',code:'DENIED',name:'越权',source:'测试'}});assert.equal(denied.status(),403);}finally{await workerContext.close();}
    const adminContext=await browser.newContext();try{await adminContext.addCookies([{name:'agri_session',value:await app.authenticate(admin),url:app.origin}]);const denied=await adminContext.request.post(app.origin+'/api/v1/map-regions',{headers:{Origin:app.origin},data:{farmId:farm,name:'管理员无权新村',source:'测试'}});assert.equal(denied.status(),403,'管理员角色不得替代对象配置授权');await permit(pool,admin.id,farm,['read','configure']);const allowed=await adminContext.request.get(app.origin+'/api/v1/objects?action=configure&limit=200');assert.equal(allowed.status(),200);assert((await allowed.json()).items.some((row:{id:string})=>row.id===farm));}finally{await adminContext.close();}
-   const expertContext=await browser.newContext();try{await expertContext.addCookies([{name:'agri_session',value:await app.authenticate(expert),url:app.origin}]);const expertPage=await expertContext.newPage();await expertPage.goto(app.origin+'/farm-overview');await expertPage.getByRole('button',{name:/查看演示效果/}).waitFor();assert.equal(await expertPage.getByText('合成测试农场').count(),0);await expertPage.getByRole('button',{name:/查看演示效果/}).click();await expertPage.getByRole('button',{name:/梁子湖农场（演示总览）/}).waitFor();}finally{await expertContext.close();}
+   const expertContext=await browser.newContext();try{await expertContext.addCookies([{name:'agri_session',value:await app.authenticate(expert),url:app.origin}]);const expertPage=await expertContext.newPage();await expertPage.goto(app.origin+'/farm-overview');await expertPage.getByRole('button',{name:'查看演示效果',exact:true}).waitFor();assert.equal(await expertPage.getByText('合成测试农场').count(),0);await expertPage.getByRole('button',{name:'查看演示效果',exact:true}).click();await expertPage.getByRole('button',{name:'梁子湖农场（演示总览）',exact:true}).waitFor();}finally{await expertContext.close();}
    for(const path of ['/map','/map-prototype','/terrain','/imagery','/objects','/devices','/machinery'])assert.equal((await context.request.get(app.origin+path)).status(),200,path);
    assert.deepEqual(errors,[]);
    await context.close();
