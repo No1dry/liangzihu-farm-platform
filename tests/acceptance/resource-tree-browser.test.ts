@@ -121,8 +121,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.getByRole('complementary', { name: '回收站' }).waitFor();
       await page.locator('li', { hasText: '甲村' }).getByRole('button', { name: '恢复' }).click();
       await page.waitForTimeout(500);
-      await page.getByRole('button', { name: '关闭回收站' }).click();
-      await page.getByRole('button', { name: '定位村庄 甲村' }).waitFor();
+            await page.getByRole('button', { name: '定位村庄 甲村' }).waitFor();
       const activeLinks = (await pool.query('SELECT count(*) AS n FROM map_region_links WHERE region_id=$1 AND valid_to IS NULL', [regionA])).rows[0];
       assert.equal(Number(activeLinks.n), 0, '恢复村庄不得自动恢复历史关联');
 
@@ -152,8 +151,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       const restoreRow = page.locator('li', { hasText: '东片田' });
       await restoreRow.getByRole('button', { name: '恢复' }).click();
       await page.waitForTimeout(500);
-      await page.getByRole('button', { name: '关闭回收站' }).click();
-      await page.getByRole('button', { name: '东片田', exact: true }).waitFor();
+            await page.getByRole('button', { name: '东片田', exact: true }).waitFor();
 
       await page.setViewportSize({ width: 390, height: 844 });
       await page.getByRole('button', { name: '☰ 对象目录' }).click();
