@@ -141,6 +141,8 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       assert.equal(deny.status(), 403);
       await workerContext.close();
 
+      console.log('TREE-DEBUG:', (await page.locator('div[class*=treeWrap]').innerText()).split('\n').join('|'));
+      console.log('MENU-BTN count:', await page.getByRole('button', { name: '东片田 操作菜单' }).count(), 'TITLE count:', await page.getByRole('button', { name: '东片田', exact: true }).count());
       await page.getByRole('button', { name: '东片田 操作菜单' }).click();
       await page.getByRole('menuitem', { name: '移至回收站' }).click();
       await page.waitForTimeout(500);
