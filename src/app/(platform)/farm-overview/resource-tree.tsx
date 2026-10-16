@@ -115,7 +115,7 @@ export default function ResourceTree(props:ResourceTreeProps){
     if(node.kind==='object'&&node.item){onSelectObject(node.item);}
     else if(node.kind==='region'&&node.region){onFitRegion(node.region);}
     else if(node.kind==='farm'&&node.farm){
-      fitFarm(node.farm);
+      if(node.item)onSelectObject(node.item);else fitFarm(node.farm);
     }
   };
 
@@ -133,10 +133,11 @@ export default function ResourceTree(props:ResourceTreeProps){
   };
 
   if(loading)return <p role="status" className={styles.treeStatus}>正在读取已授权对象…</p>;
-  if(error)return <div role="alert" className={styles.treeError}>{error}{offline&&hasData&&<p>正在显示上次成功读取的资料，当前状态尚未重新核实。</p>}<button type="button" onClick={()=>onReload()}>重试</button></div>;
+  if(error&&!offline)return <div role="alert" className={styles.treeError}>{error}<button type="button" onClick={()=>onReload()}>重试</button></div>;
   if(!displayTree.length)return <p className={styles.treeEmpty}>当前没有可查看的农业对象。</p>;
 
   return <div ref={rootRef} className={styles.treeWrap}>
+    {offline&&error&&<div role="alert" className={styles.treeError}>{error}<p>正在显示上次成功读取的资料，当前状态尚未重新核实。</p><button type="button" onClick={()=>onReload()}>重试</button></div>}
     <Tree<TreeNodeData>
       ref={treeRef}
       prefixCls="rc-tree"

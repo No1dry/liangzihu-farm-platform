@@ -22,14 +22,15 @@ function nodeTitleMatch(node:TreeNodeData,query:string):boolean{
 
 export function buildTreeData({mode,items,regions,farms,demoRegions,demoItems}:{mode:'real'|'demo';items:TreeObject[];regions:TreeRegion[];farms:TreeFarm[];demoRegions?:TreeRegion[];demoItems?:TreeObject[]}):TreeNodeData[]{
   if(mode==='demo'){
-    const farm=demoRegions?.[0]?{id:demoRegions[0].farmId,name:'演示农场'}:farms[0]??{id:'demo',name:'演示农场'};
+    const farmItem=(demoItems??[]).find(item=>item.kind==='farm');
+    const farm=farmItem?{id:farmItem.id,name:farmItem.name}:demoRegions?.[0]?{id:demoRegions[0].farmId,name:'演示农场'}:farms[0]??{id:'demo',name:'演示农场'};
     const regionNodes=(demoRegions??[]).filter(r=>!r.archivedAt).map(region=>{
       const children=(demoItems??[]).filter(item=>region.links.some(l=>l.objectId===item.id)&&item.kind!=='mobile').sort((a,b)=>a.name.localeCompare(b.name,'zh-CN')).map(item=>({key:item.id,title:item.name,kind:'object' as const,item,isLeaf:true}));
       return{key:`region:${region.id}`,title:region.name,kind:'region' as const,region,children};
     });
     const unassigned=(demoItems??[]).filter(item=>item.kind!=='farm'&&item.kind!=='mobile'&&!regionNodes.some(r=>r.children?.some(c=>c.key===item.id))).sort((a,b)=>a.name.localeCompare(b.name,'zh-CN')).map(item=>({key:item.id,title:item.name,kind:'object' as const,item,isLeaf:true}));
     const children=[...regionNodes,...(unassigned.length?[{key:`unassigned:${farm.id}`,title:'未归类',kind:'unassigned' as const,children:unassigned}]:[])];
-    return[{key:`farm:${farm.id}`,title:farm.name,kind:'farm',farm,children}];
+    return[{key:`farm:${farm.id}`,title:farm.name,kind:'farm',farm,item:farmItem,children}];
   }
   // real mode
   const farmMap=new Map<string,TreeFarm>();
@@ -44,7 +45,8 @@ export function buildTreeData({mode,items,regions,farms,demoRegions,demoItems}:{
     const assigned=new Set(regionNodes.flatMap(r=>r.children?.map(c=>c.key)??[]));
     const unassigned=items.filter(item=>item.kind!=='farm'&&item.kind!=='mobile'&&!assigned.has(item.id)&&(item.farm_id===farm.id||item.farmId===farm.id)).sort((a,b)=>a.name.localeCompare(b.name,'zh-CN')).map(item=>({key:item.id,title:item.name,kind:'object' as const,item,isLeaf:true}));
     const children=[...regionNodes,...(unassigned.length?[{key:`unassigned:${farm.id}`,title:'未归类',kind:'unassigned' as const,children:unassigned}]:[])];
-    return{key:`farm:${farm.id}`,title:farm.name,kind:'farm' as const,farm,children};
+    const farmItem=items.find(item=>item.kind==='farm'&&item.id===farm.id);
+    return{key:`farm:${farm.id}`,title:farm.name,kind:'farm' as const,farm,item:farmItem,children};
   });
   return roots;
 }
