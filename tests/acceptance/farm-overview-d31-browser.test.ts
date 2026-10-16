@@ -34,7 +34,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByRole('button',{name:'查看演示效果 ↗',exact:true}).click();
    await page.getByText(/当前所有村庄、地块、设备位置、状态和告警均为合成示例/).waitFor();
    for(const name of ['沙湾示范片区','长岭示范片区','湖东示范片区'])await page.getByRole('button',{name:`定位村庄 ${name}`}).waitFor();
-   assert.equal(await page.getByRole('button',{name:'植保无人机 U-01',exact:true}).count(),1,'无人机只应在独立机动设备目录出现一次');
+   assert.equal(await page.getByRole('button',{name:'植保无人机 U-01 · 演示坐标，非真实 GPS',exact:true}).count(),1,'无人机只应在独立机动设备目录出现一次');
    assert.equal(await page.getByText('3 片区').count(),1);
    await capture('02-演示全场.png');
    await page.getByRole('button',{name:'梁子湖农场（演示总览）',exact:true}).click();
@@ -49,7 +49,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByRole('button',{name:'沙湾 1 号水闸',exact:true}).click();
    await page.getByText(/演示开度 65%/).waitFor();
    await capture('06-演示设施详情.png');
-   await page.getByRole('button',{name:'植保无人机 U-01',exact:true}).first().click();
+   await page.getByRole('button',{name:'植保无人机 U-01 · 演示坐标，非真实 GPS',exact:true}).first().click();
    await page.getByText(/演示坐标，非真实 GPS/).last().waitFor();
    await capture('07-演示机动设备.png');
    await page.setViewportSize({width:390,height:844});
