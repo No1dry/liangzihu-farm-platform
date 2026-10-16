@@ -88,11 +88,12 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.getByRole('complementary', { name: '对象详情' }).getByRole('heading', { name: '东片田' }).waitFor();
       await page.getByRole('button', { name: '关闭对象详情' }).click();
 
+      const centerBeforeUnlocated = await map.getAttribute('data-view-center');
       await page.getByRole('button', { name: '未登记塘口', exact: true }).click();
       await page.getByRole('complementary', { name: '对象详情' }).getByRole('heading', { name: '未登记塘口' }).waitFor();
       await page.getByRole('status').filter({ hasText: '尚未登记地图位置' }).waitFor();
       await page.waitForTimeout(350);
-      assert.equal(await map.getAttribute('data-view-center'), afterRegionCenter, '无边界对象点击不应移动视图');
+      assert.equal(await map.getAttribute('data-view-center'), centerBeforeUnlocated, '无边界对象点击不应移动视图');
 
       const search = page.getByRole('searchbox', { name: '搜索名称或编号' });
       await search.fill('北片田');
