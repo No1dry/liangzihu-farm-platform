@@ -83,7 +83,7 @@ export function collectKeys(nodes:TreeNodeData[]):string[]{
 export function getDefaultExpandedKeys(nodes:TreeNodeData[]):string[]{
   return nodes.flatMap(node=>{
     const childKeys=node.children?getDefaultExpandedKeys(node.children):[];
-    return node.kind==='farm'||node.kind==='region'?[String(node.key),...childKeys]:childKeys;
+    return node.kind==='farm'||node.kind==='region'||node.kind==='unassigned'?[String(node.key),...childKeys]:childKeys;
   });
 }
 
