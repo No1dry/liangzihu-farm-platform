@@ -88,8 +88,10 @@ export default function ResourceTree(props:ResourceTreeProps){
 
   const openMenu=(node:TreeNodeData,anchor:DOMRect|{x:number;y:number})=>{
     const rect='left' in anchor?anchor:null;
-    const x=rect?rect.left:anchor.x;
-    const y=rect?rect.top+rect.height:anchor.y;
+    const rawX=rect?rect.left:anchor.x;
+    const rawY=rect?rect.top+rect.height:anchor.y;
+    const x=Math.max(8,Math.min(rawX,window.innerWidth-280));
+    const y=Math.max(8,Math.min(rawY,window.innerHeight-300));
     setMenu({node,x,y});
   };
 

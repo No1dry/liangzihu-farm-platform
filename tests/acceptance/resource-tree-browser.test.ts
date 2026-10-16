@@ -86,6 +86,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       const px = boxB.width / 2 + (mx - centerB[0]) / resB, py = boxB.height / 2 - (my - centerB[1]) / resB;
       await page.mouse.click(boxB.x + px, boxB.y + py); await page.waitForTimeout(400);
       await page.getByRole('complementary', { name: '对象详情' }).getByRole('heading', { name: '东片田' }).waitFor();
+      await page.waitForTimeout(400);
       await page.getByRole('button', { name: '关闭对象详情' }).click();
 
       const centerBeforeUnlocated = await map.getAttribute('data-view-center');
