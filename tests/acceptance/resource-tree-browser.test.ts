@@ -143,7 +143,15 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.getByLabel('变更依据').fill('M2-C 改归属验收');
       await page.getByRole('button', { name: '保存归属' }).click();
       await page.waitForTimeout(700);
-      const northParentText = await page.getByRole('button', { name: '北片田', exact: true }).evaluate(el => el.closest('.rc-tree-treenode')?.textContent ?? '');
+      const northParentText = await page.getByRole('button', { name: '北片田', exact: true }).evaluate(el => {
+        let row = el.closest('.rc-tree-treenode')?.previousElementSibling;
+        while (row) {
+          const kind = row.querySelector('[data-kind]')?.getAttribute('data-kind');
+          if (kind && kind !== 'object') return row.textContent ?? '';
+          row = row.previousElementSibling;
+        }
+        return '';
+      });
       assert(!northParentText.includes('乙村'), '北片田应移出乙村');
       assert(northParentText.includes('丙村'), '北片田应出现在丙村');
       const regionLinks = (await pool.query('SELECT region_id,valid_to FROM map_region_links WHERE object_id=$1 ORDER BY valid_from', [fieldB])).rows;
