@@ -57,3 +57,18 @@
 .boundaryChoice legend{font-weight:700;margin-bottom:6px;}
 .boundaryChoice label{display:flex;align-items:center;gap:6px;font-weight:500;margin:5px 0;}
 .boundaryChoice input[type=radio]{width:auto;min-height:auto;margin:0;accent-color:var(--forest);}
+
+/* D1：桌面三栏布局——右详情为独立列，不再遮挡地图 */
+.workspaceDetailOpen{grid-template-columns:minmax(260px,320px) minmax(0,1fr) minmax(320px,360px)}
+.workspaceDetailOpen .drawer,.workspaceDetailOpen .managementDrawer{position:relative;right:auto;top:auto;bottom:auto;width:auto;max-height:none;border:0;border-left:1px solid #d9e4d3;border-radius:0;box-shadow:none;padding:20px;overflow:auto;background:#fff}
+.workspaceDetailOpen .mapShell{min-width:0}
+@media(max-width:1100px){.workspaceDetailOpen{grid-template-columns:minmax(240px,280px) minmax(0,1fr) minmax(300px,340px)}}
+@media(max-width:760px){.workspaceDetailOpen{display:block}.workspaceDetailOpen .drawer,.workspaceDetailOpen .managementDrawer{position:absolute;left:10px;right:10px;bottom:10px;top:auto;width:auto;max-height:58%;padding:18px;border:1px solid #d9e4d3;border-radius:14px;box-shadow:0 18px 55px #17332645;z-index:4}}
+
+/* D1：压缩页头，地图填满可用视口 */
+.heading{align-items:center;padding:8px 4px 12px}
+.heading h1{font-size:clamp(26px,2.2vw,32px)}
+.heading p{font-size:12px}
+.summary{padding:8px 18px}
+.map{height:calc(100dvh - 260px);min-height:620px;max-height:760px}
+@media(max-width:760px){.map{height:570px;min-height:0}}
