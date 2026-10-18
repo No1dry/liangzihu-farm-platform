@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
+import { mkdir } from 'node:fs/promises';
 import { withDb } from '../support/db';
 import { withApp } from '../support/app';
 import { actorFixture, objectFixture, permit } from '../support/fixtures';
@@ -49,8 +50,10 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.getByRole('button', { name: '未登记塘口', exact: true }).waitFor();
       await page.getByRole('button', { name: '甲村 操作菜单' }).waitFor();
 
+      await mkdir('docs/acceptance/m2c', { recursive: true });
       const map = page.getByRole('application', { name: /天地图.*已授权农业对象边界/ });
       const initialCenter = await map.getAttribute('data-view-center');
+      await page.screenshot({ path: 'docs/acceptance/m2c/2026-10-18-M2C树形目录桌面.png', fullPage: true });
 
       const zoomBeforeObject = Number(await map.getAttribute('data-view-zoom'));
       await page.getByRole('button', { name: '东片田', exact: true }).click();
@@ -160,6 +163,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.getByRole('button', { name: '1号闸 操作菜单' }).click();
       await page.getByRole('menuitem', { name: '地图定位' }).waitFor();
       await page.getByRole('menuitem', { name: '更改所属村庄' }).waitFor();
+      await page.screenshot({ path: 'docs/acceptance/m2c/2026-10-18-M2C节点菜单手机.png', fullPage: true });
 
       assert.deepEqual(errors, []);
     } finally {
