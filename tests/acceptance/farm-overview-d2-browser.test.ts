@@ -46,7 +46,7 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
       await page.getByRole('searchbox',{name:'搜索名称或编号'}).fill('合成东村');
       await page.getByRole('button',{name:'合成东村地块',exact:true}).click();
       await page.getByRole('complementary',{name:'对象详情'}).getByText(/未关闭告警 0/).waitFor();
-      await page.getByRole('complementary',{name:'对象详情'}).getByText('资料与记录').click();
+      await page.getByRole('complementary',{name:'对象详情'}).getByText('历史记录').click();
       assert.equal(await page.getByRole('complementary',{name:'对象详情'}).getByText('浏览器验收合成资料').count(),1);
       assert.equal(await page.getByRole('complementary',{name:'对象详情'}).getByText('记录时间').count(),1);
       await page.waitForTimeout(350);

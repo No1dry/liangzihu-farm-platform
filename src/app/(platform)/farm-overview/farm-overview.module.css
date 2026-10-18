@@ -165,3 +165,5 @@
 /* 新建按钮与目标图一致的深绿实心样式 */
 .manageButton{display:inline-flex!important;align-items:center;justify-content:center;width:auto!important;height:auto!important;padding:6px 12px!important;background:#17513b!important;color:#fff!important;border:0!important;border-radius:7px!important;font-size:12px!important;font-weight:650!important;line-height:1.4}
 .manageButton:hover:not(:disabled){background:#0f402e!important}
+
+.topMode{color:#315a37;font-size:11px;font-weight:650}
