@@ -123,3 +123,7 @@
  .treeMenu{left:12px!important;right:12px!important;bottom:12px!important;top:auto!important;width:auto;max-width:none;z-index:12;padding:10px}
  .treeMenu button,.treeMenu a{min-height:40px;padding:10px 12px;font-size:13px}
 }
+
+/* 修复管理入口定位上下文与层级 */
+.directory{position:relative}
+.management{z-index:6}

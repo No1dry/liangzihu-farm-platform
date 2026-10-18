@@ -34,7 +34,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
   await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionA, fieldA, '测试', actor.id]);
   await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionA, unlocated, '测试', actor.id]);
   await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionB, fieldB, '测试', actor.id]);
-  await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionB, facility, '测试', actor.id]);
+  await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionA, facility, '测试', actor.id]);
   await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionC, fieldC, '测试', actor.id]);
   await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionC, pondC, '测试', actor.id]);
 

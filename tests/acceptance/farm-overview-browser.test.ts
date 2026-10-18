@@ -52,7 +52,8 @@ test('D1 卫星总览只展示授权对象，搜索定位与覆盖抽屉在桌�
   await page.waitForTimeout(300);assert(Number(await map.getAttribute('data-view-zoom'))>=Number(zoomBeforeMapClick)-0.01,'M2-C 起地图点选后缩放不降低');
   const drawerBox=await page.getByRole('complementary',{name:'对象详情'}).boundingBox();assert(drawerBox);
   assert(clickedAt>drawerBox.x,'测试点击点应位于随后出现的抽屉覆盖范围');
-  assert.notEqual(await map.getAttribute('data-view-center'),centerBeforeMapClick,'地图右侧被抽屉遮挡的选中点应触发平移');
+  const mapAfterDetail=await map.boundingBox();assert(mapAfterDetail&&mapAfterDetail.width<bounds.width,'右侧固定详情列出现后地图应收缩');
+  assert(drawerBox.x>=mapAfterDetail.x+mapAfterDetail.width-1,'详情应为独立布局列，不覆盖地图');
   await page.screenshot({path:'docs/acceptance/d1/2026-10-09-农场空间总览-地图点击避让.png',fullPage:true});
   await page.getByRole('button',{name:'关闭对象详情'}).click();
   await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'☰ 对象目录'}).click();
