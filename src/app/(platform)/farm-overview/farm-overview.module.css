@@ -127,3 +127,6 @@
 /* 修复管理入口定位上下文与层级 */
 .directory{position:relative}
 .management{z-index:6}
+
+/* 手机目录按钮需高于详情栏，保证可点击后再互斥关闭 */
+.mapToolbar .mobileDirectory{position:relative;z-index:8}
