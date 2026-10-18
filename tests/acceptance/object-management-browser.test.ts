@@ -55,7 +55,9 @@ test('M2-B 农业对象新增与管理体验重构',{timeout:300000},()=>withDb(
    await page.getByLabel('所属村庄').selectOption('测试村');
    await Promise.all([page.waitForResponse(response=>response.url().endsWith('/api/v1/objects')&&response.request().method()==='POST'&&response.status()===201),page.waitForResponse(response=>response.url().endsWith('/api/v1/map-regions')&&response.request().method()==='PATCH'&&response.status()===200),page.getByRole('button',{name:'保存对象'}).click()]);
    await page.getByRole('button',{name:'M2B 测试农田',exact:true}).waitFor();
-   await page.getByText('SYNTH-M2B-FIELD · 待登记边界').waitFor();
+   const createdFieldButton=page.getByRole('button',{name:'M2B 测试农田',exact:true});
+   assert((await createdFieldButton.getAttribute('title'))?.includes('SYNTH-M2B-FIELD · 待登记边界'),'未登记位置对象的编号与状态应保留在 tooltip');
+   await page.locator('.rc-tree-treenode',{hasText:'M2B 测试农田'}).locator('[data-status="待登记"]').waitFor();
    await page.screenshot({path:'docs/acceptance/m2b/02-新增农田待补位置.png',fullPage:true});
    const field=(await pool.query("SELECT id FROM objects WHERE code='SYNTH-M2B-FIELD'")).rows[0];
    const link=(await pool.query('SELECT region_id FROM map_region_links WHERE object_id=$1 AND valid_to IS NULL',[field.id])).rows[0];

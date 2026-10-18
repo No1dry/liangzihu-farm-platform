@@ -22,7 +22,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
   await pool.query("UPDATE objects SET parent_id=$2,name='东片田',code='M2C-A',kind='field',boundary_status='verified',boundary=ST_GeomFromText('POLYGON((114.62 30.24,114.63 30.24,114.63 30.25,114.62 30.25,114.62 30.24))',4326) WHERE id=$1", [fieldA, farm]);
   await pool.query("UPDATE objects SET parent_id=$2,name='北片田',code='M2C-B',kind='field',boundary_status='draft',boundary=ST_GeomFromText('POLYGON((114.64 30.26,114.65 30.26,114.65 30.27,114.64 30.27,114.64 30.26))',4326) WHERE id=$1", [fieldB, farm]);
   await pool.query("UPDATE objects SET parent_id=$2,name='未登记塘口',code='M2C-U',kind='pond',boundary_status='draft' WHERE id=$1", [unlocated, farm]);
-  await pool.query("UPDATE objects SET parent_id=$2,name='1号闸',code='M2C-F',kind='facility',boundary_status='draft',boundary=ST_GeomFromText('POINT(114.625 30.245)',4326) WHERE id=$1", [facility, farm]);
+  await pool.query("UPDATE objects SET parent_id=$2,name='1号闸',code='M2C-F',kind='facility',boundary_status='draft',boundary=ST_GeomFromText('POINT(114.635 30.255)',4326) WHERE id=$1", [facility, farm]);
   await pool.query("UPDATE objects SET parent_id=$2,name='丙片田',code='M2C-C1',kind='field',boundary_status='draft' WHERE id=$1", [fieldC, farm]);
   await pool.query("UPDATE objects SET parent_id=$2,name='丙塘口',code='M2C-C2',kind='pond',boundary_status='draft' WHERE id=$1", [pondC, farm]);
 
