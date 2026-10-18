@@ -6,6 +6,7 @@ import Tree from '@rc-component/tree';
 import type { TreeProps } from '@rc-component/tree';
 import '@rc-component/tree/assets/index.css';
 import { buildTreeData, filterTreeData, type TreeNodeData } from './resource-tree-helpers';
+import KindIcon from './kind-icon';
 import styles from './farm-overview.module.css';
 
 export type { TreeNodeData };
@@ -20,6 +21,7 @@ const statusLabel=(item:FarmObject)=>{
   if(!item.geometry)return'待登记边界';
   return item.boundary_status==='verified'?'已核实边界':'边界草稿';
 };
+const statusBadge=(item:FarmObject)=>item.geometry?item.boundary_status==='verified'?'已核实':'草稿':'待登记';
 
 export type ResourceTreeProps={
   mode:'real'|'demo';
@@ -102,8 +104,9 @@ export default function ResourceTree(props:ResourceTreeProps){
     const selected=selectedId===String(node.key);
     const label=isRegion?`定位村庄 ${node.title}`:node.title;
     return <span className={`${styles.treeNode} ${selected?styles.treeNodeSelected:''}`} data-kind={node.kind}>
-      <button type="button" className={styles.treeTitleButton} aria-label={label} onClick={e=>{e.stopPropagation();handleTitleClick(node);}}>{node.title}</button>
-      {isObject&&node.item&&<span className={styles.treeMeta}>{node.item.code} · {statusLabel(node.item)}</span>}
+      <KindIcon kind={isObject?node.item?.kind:node.kind} className={styles.kindIcon}/>
+      <button type="button" className={styles.treeTitleButton} aria-label={label} title={node.item?`${node.title}\n${node.item.code} · ${statusLabel(node.item)}`:node.title} onClick={e=>{e.stopPropagation();handleTitleClick(node);}}>{node.title}</button>
+      {isObject&&node.item&&<span className={styles.statusBadge} data-status={statusBadge(node.item)}>{statusBadge(node.item)}</span>}
       <button type="button" className={styles.treeMenuButton} aria-label={`${node.title} 操作菜单`} aria-haspopup="menu" aria-expanded={!!menu&&menu.node.key===node.key} onClick={e=>{e.stopPropagation();openMenu(node,e.currentTarget.getBoundingClientRect());}}>···</button>
       {menu&&menu.node.key===node.key&&<div ref={menuRef} className={styles.treeMenu} role="menu" style={{left:menu.x,top:menu.y}} onClick={e=>e.stopPropagation()}>
         <NodeMenu node={node} canConfigure={canConfigure} canManageFarm={canManageFarm} onSelect={()=>handleTitleClick(node)} onFitRegion={()=>{setMenu(null);node.region&&onFitRegion(node.region);}} onNewObject={()=>{setMenu(null);node.region&&onNewObject(node.region.id);}} onManageRegion={()=>{setMenu(null);onManageRegion();}} onExpand={()=>{setMenu(null);onExpand([...new Set([...expandedKeys,String(node.key)])]);}} onChangeRegion={()=>{setMenu(null);node.item&&onChangeRegion(node.item);}} onEditBoundary={()=>{setMenu(null);node.item&&onEditBoundary(node.item);}} onViewDetail={()=>{setMenu(null);node.item&&onViewDetail(node.item);}} onArchive={()=>handleArchive(node)} onClose={()=>setMenu(null)}/>

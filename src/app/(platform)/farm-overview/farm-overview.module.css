@@ -72,3 +72,54 @@
 .summary{padding:8px 18px}
 .map{height:calc(100dvh - 260px);min-height:620px;max-height:760px}
 @media(max-width:760px){.map{height:570px;min-height:0}}
+
+/* D2：树节点单行与右侧详情精修 */
+.directoryTop{padding:18px 18px 8px;min-height:48px}
+.directoryTop h2{margin:0;color:#203a2c;font-size:16px;font-weight:650}
+.management{position:absolute;top:16px;right:16px;z-index:4;margin:0}
+.manageButton{display:inline-flex!important;align-items:center;justify-content:center;width:32px!important;height:32px;padding:0!important;background:#fff!important;color:#315a37!important;border:1px solid #d7e1d0!important;border-radius:8px!important;font-size:19px!important;font-weight:500!important;line-height:1}
+.manageMenu{position:absolute;right:0;top:38px;z-index:8;width:230px}
+.searchLabel{display:block;margin:8px 18px 10px}
+.searchLabel input{width:100%;min-height:36px;margin-top:0;padding:6px 10px;background:#fff;border:1px solid #d7e1d0;border-radius:8px;font-size:13px}
+.resourceTree :global(.rc-tree-treenode){height:40px;align-items:center;padding:0 6px;margin:0;border-radius:7px}
+.resourceTree :global(.rc-tree-switcher){width:18px;height:18px;margin-top:0}
+.resourceTree :global(.rc-tree-switcher_open):after,.resourceTree :global(.rc-tree-switcher_close):after{content:'';display:block;width:7px;height:7px;border-right:1.4px solid currentColor;border-bottom:1.4px solid currentColor}
+.resourceTree :global(.rc-tree-switcher_open):after{transform:rotate(45deg);margin-top:-3px}
+.resourceTree :global(.rc-tree-switcher_close):after{transform:rotate(-45deg);margin-top:-1px}
+.treeNode{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;width:100%;min-width:0;padding:0}
+.treeNode.treeNodeSelected{background:#e8f2ec;border-radius:6px;box-shadow:inset 2px 0 0 #4b7045}
+.treeTitleButton{flex:1 1 auto;min-width:0;padding:4px 0;background:transparent;border:0;color:#203a2c;font-size:13px;font-weight:500;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.treeTitleButton:hover,.treeTitleButton:focus-visible{background:#edf4e5;outline:1px solid #b8cba7;outline-offset:1px;border-radius:4px}
+.treeNode[data-kind='farm'] .treeTitleButton,.treeNode[data-kind='region'] .treeTitleButton{font-weight:650}
+.kindIcon{flex:0 0 16px;color:#5d822b}
+.kindIcon[data-kind='pond']{color:#167ca4}
+.kindIcon[data-kind='facility']{color:#ae632a}
+.kindIcon[data-kind='mobile']{color:#864da8}
+.kindIcon[data-kind='region']{color:#8a7a45}
+.kindIcon[data-kind='farm']{color:#315a37}
+.statusBadge{flex:0 0 auto;padding:0 4px;border-radius:4px;font-size:10px;font-weight:500;line-height:18px;white-space:nowrap}
+.statusBadge[data-status='草稿']{color:#9a6426;background:#fff6e5;border:1px dashed #d9a95c}
+.statusBadge[data-status='已核实']{color:#47712f;background:#edf5e7;border:1px solid #a9c68a}
+.statusBadge[data-status='待登记']{color:#718175;background:#f3f5f2;border:1px solid #d8dfd6}
+.treeMenuButton{display:flex;flex:0 0 24px;align-items:center;justify-content:center;width:24px;height:24px;margin-left:auto;padding:0;background:transparent;border:0;border-radius:5px;color:#718175;font-weight:700;cursor:pointer;opacity:0;transition:opacity .12s}
+.treeNode:hover .treeMenuButton,.treeMenuButton:focus-visible,.treeNodeSelected .treeMenuButton{opacity:1}
+.treeMenuButton:hover,.treeMenuButton:focus-visible{background:#e8f2ec;outline:1px solid #b8cba7;outline-offset:0}
+.treeFooter{padding:8px 16px 12px;border-top:1px solid #e4eae3}
+.treeFooterButton{flex:0 0 auto;padding:5px 9px;background:transparent;border:0;border-radius:6px;color:#536a51;font-size:12px;font-weight:600;cursor:pointer}
+.treeFooterButton:hover,.treeFooterButton:focus-visible{background:#edf4e5;outline:1px solid #b8cba7;outline-offset:0}
+.detailTitleRow{display:flex;align-items:center;gap:6px;margin-top:12px}
+.detailTitleRow .kind{margin:0}
+.detailKindIcon{display:inline-flex;width:18px;height:18px;color:#4b7045}
+.drawer h2{font-size:22px;line-height:1.35}
+.drawerActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.drawerActions>a,.drawerActions>button,.drawerLinks a,.drawerLinks button{display:inline-flex;align-items:center;min-height:36px;padding:7px 11px;border:1px solid #d7e1d0;border-radius:7px;background:#f4f7ee;color:var(--forest);font-size:12px;font-weight:600;text-decoration:none;cursor:pointer}
+.drawerActions>a:first-child,.drawerActions>button:first-child{background:var(--forest);color:#fff;border-color:var(--forest)}
+.drawerLinks{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.drawerLinks a,.drawerLinks button{min-height:34px;padding:6px 9px;background:#fff}
+.moreActions>summary{cursor:pointer;min-height:36px;padding:7px 11px;border:1px solid #d7e1d0;border-radius:7px;background:#f4f7ee;color:var(--forest);font-size:12px;font-weight:600;list-style:none}
+.moreActions>summary::-webkit-details-marker{display:none}
+@media(max-width:760px){
+ .treeMenuButton{opacity:1}
+ .treeMenu{left:12px!important;right:12px!important;bottom:12px!important;top:auto!important;width:auto;max-width:none;z-index:12;padding:10px}
+ .treeMenu button,.treeMenu a{min-height:40px;padding:10px 12px;font-size:13px}
+}
