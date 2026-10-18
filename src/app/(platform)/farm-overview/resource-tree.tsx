@@ -106,6 +106,7 @@ export default function ResourceTree(props:ResourceTreeProps){
     return <span className={`${styles.treeNode} ${selected?styles.treeNodeSelected:''}`} data-kind={node.kind}>
       <KindIcon kind={isObject?node.item?.kind:node.kind} className={styles.kindIcon}/>
       <button type="button" className={styles.treeTitleButton} aria-label={label} title={node.item?`${node.title}\n${node.item.code} · ${statusLabel(node.item)}`:node.title} onClick={e=>{e.stopPropagation();handleTitleClick(node);}}>{node.title}</button>
+      {node.count!==undefined&&<span className={styles.treeCount}>{node.count}</span>}
       {isObject&&node.item&&<span className={styles.statusBadge} data-status={statusBadge(node.item)}>{statusBadge(node.item)}</span>}
       <button type="button" className={styles.treeMenuButton} aria-label={`${node.title} 操作菜单`} aria-haspopup="menu" aria-expanded={!!menu&&menu.node.key===node.key} onClick={e=>{e.stopPropagation();openMenu(node,e.currentTarget.getBoundingClientRect());}}>···</button>
       {menu&&menu.node.key===node.key&&<div ref={menuRef} className={styles.treeMenu} role="menu" style={{left:menu.x,top:menu.y}} onClick={e=>e.stopPropagation()}>
