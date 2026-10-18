@@ -51,7 +51,7 @@ test('D2 村庄目录、对象概要、旧页面和角色权限浏览器核对',
       assert.equal(await page.getByRole('complementary',{name:'对象详情'}).getByText('记录时间').count(),1);
       await page.waitForTimeout(350);
       const centerBeforeReturn=await map.getAttribute('data-view-center'),zoomBeforeReturn=await map.getAttribute('data-view-zoom');
-      await page.getByRole('complementary',{name:'对象详情'}).getByRole('link',{name:'查看对象详情 ↗',exact:true}).click();
+      await page.getByRole('complementary',{name:'对象详情'}).getByRole('link',{name:'编辑资料',exact:true}).click();
       const saved=await page.evaluate(()=>sessionStorage.getItem('farm-overview-return-v1'));assert(saved,'离开地图前应保存返回状态');
       assert.equal(JSON.parse(saved).zoom,Number(zoomBeforeReturn));
       await page.getByRole('link',{name:'返回农场地图'}).click();
