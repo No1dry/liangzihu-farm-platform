@@ -130,3 +130,5 @@
 
 /* 手机目录按钮需高于详情栏，保证可点击后再互斥关闭 */
 .mapToolbar .mobileDirectory{position:relative;z-index:8}
+
+@media(max-width:760px){.mapToolbar{z-index:8}}
