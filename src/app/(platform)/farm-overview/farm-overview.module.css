@@ -132,3 +132,5 @@
 .mapToolbar .mobileDirectory{position:relative;z-index:8}
 
 @media(max-width:760px){.mapToolbar{z-index:8}}
+
+@media(max-width:760px){.manageButton{font-size:0!important}.manageButton:after{content:'＋';font-size:19px;line-height:1}}
