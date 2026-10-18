@@ -63,6 +63,7 @@ export default function FarmOverview(){
  const items=mode==='demo'?demoRows as FarmObject[]:displayData?.items??[];
  itemsRef.current=items;
  const selected=items.find(item=>item.id===selectedId)??null;
+ const detailOpen=drawerView!==null||selectedId!==null||selectedRegionId!==null||selectedMobileId!==null;
  const mobileDevices=mode==='real'?displayData?.mobileDevices??[]:[];
  const configurable=configure.data?.items.filter(row=>!row.archived_at)??[];
  const canManageFarm=!offline&&configurable.some(row=>row.kind==='farm');
@@ -138,7 +139,6 @@ export default function FarmOverview(){
  useEffect(()=>{persistState();},[basemap,categoryVisibility,query,selectedId,directoryCollapsed]);
  const close=()=>{setSelectedId(null);setSelectedRegionId(null);setSelectedMobileId(null);setMapMessage('');returnFocus.current?.focus();};
  const mapLabel=mode==='demo'?(basemap==='vector'?'天地图矢量底图及合成演示对象':'天地图卫星影像及合成演示对象'):(basemap==='vector'?'天地图矢量底图及已授权农业对象边界':'天地图卫星影像及已授权农业对象边界');
- const detailOpen=drawerView!==null||selectedId!==null||selectedRegionId!==null||selectedMobileId!==null;
  return <section className={styles.page} aria-label="农场空间总览">
   <div className={styles.heading}><div><span className={styles.eyebrow}>FARM OVERVIEW · M1</span><h1>农场空间总览</h1><p>按片区找到农业对象，查看业务概要，再进入原有业务页面。</p></div><div className={styles.headingActions}><Link href="/map-editor" onClick={saveReturnState}>地图编辑 ↗</Link><Link href="/map">图层与原二维地图 ↗</Link><Link href="/imagery">历史航次与影像 ↗</Link><Link href="/terrain">三维地形 ↗</Link><Link href="/map-prototype">私人标点 ↗</Link></div></div>
   {mode==='demo'?<div className={styles.demoBanner} role="status"><strong>演示模式</strong>｜当前所有村庄、地块、设备位置、状态和告警均为合成示例，不代表真实现场。<button type="button" onClick={()=>switchMode('real')}>退出演示，返回真实数据</button></div>:<div className={styles.modeBar}><strong>真实数据</strong><span>仅显示当前账号获授权资料</span><button type="button" onClick={()=>switchMode('demo')}>查看演示效果 ↗</button></div>}
