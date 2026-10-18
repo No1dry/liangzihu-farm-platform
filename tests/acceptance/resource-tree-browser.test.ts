@@ -16,20 +16,27 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
   const fieldB = await objectFixture(pool, actor.id);
   const unlocated = await objectFixture(pool, actor.id);
   const facility = await objectFixture(pool, actor.id);
+  const fieldC = await objectFixture(pool, actor.id);
+  const pondC = await objectFixture(pool, actor.id);
 
   await pool.query("UPDATE objects SET parent_id=$2,name='东片田',code='M2C-A',kind='field',boundary_status='verified',boundary=ST_GeomFromText('POLYGON((114.62 30.24,114.63 30.24,114.63 30.25,114.62 30.25,114.62 30.24))',4326) WHERE id=$1", [fieldA, farm]);
   await pool.query("UPDATE objects SET parent_id=$2,name='北片田',code='M2C-B',kind='field',boundary_status='draft',boundary=ST_GeomFromText('POLYGON((114.64 30.26,114.65 30.26,114.65 30.27,114.64 30.27,114.64 30.26))',4326) WHERE id=$1", [fieldB, farm]);
   await pool.query("UPDATE objects SET parent_id=$2,name='未登记塘口',code='M2C-U',kind='pond',boundary_status='draft' WHERE id=$1", [unlocated, farm]);
   await pool.query("UPDATE objects SET parent_id=$2,name='1号闸',code='M2C-F',kind='facility',boundary_status='draft',boundary=ST_GeomFromText('POINT(114.625 30.245)',4326) WHERE id=$1", [facility, farm]);
+  await pool.query("UPDATE objects SET parent_id=$2,name='丙片田',code='M2C-C1',kind='field',boundary_status='draft' WHERE id=$1", [fieldC, farm]);
+  await pool.query("UPDATE objects SET parent_id=$2,name='丙塘口',code='M2C-C2',kind='pond',boundary_status='draft' WHERE id=$1", [pondC, farm]);
 
-  for (const id of [fieldA, fieldB, unlocated, facility]) await permit(pool, actor.id, id, ['read', 'configure']);
+  for (const id of [fieldA, fieldB, unlocated, facility, fieldC, pondC]) await permit(pool, actor.id, id, ['read', 'configure']);
 
   const regionA = (await pool.query("INSERT INTO map_regions(farm_id,name,source,created_by) VALUES($1,'甲村','测试',$2) RETURNING id", [farm, actor.id])).rows[0].id;
   const regionB = (await pool.query("INSERT INTO map_regions(farm_id,name,source,created_by) VALUES($1,'乙村','测试',$2) RETURNING id", [farm, actor.id])).rows[0].id;
+  const regionC = (await pool.query("INSERT INTO map_regions(farm_id,name,source,created_by) VALUES($1,'丙村','测试',$2) RETURNING id", [farm, actor.id])).rows[0].id;
   await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionA, fieldA, '测试', actor.id]);
   await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionA, unlocated, '测试', actor.id]);
   await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionB, fieldB, '测试', actor.id]);
   await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionB, facility, '测试', actor.id]);
+  await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionC, fieldC, '测试', actor.id]);
+  await pool.query('INSERT INTO map_region_links(region_id,object_id,source,created_by) VALUES($1,$2,$3,$4)', [regionC, pondC, '测试', actor.id]);
 
   await withApp(pool, async app => {
     const browser = await chromium.launch(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {});
@@ -48,7 +55,20 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.getByRole('button', { name: '北片田', exact: true }).waitFor();
       await page.getByRole('button', { name: '1号闸', exact: true }).waitFor();
       await page.getByRole('button', { name: '未登记塘口', exact: true }).waitFor();
+      await page.getByRole('button', { name: '丙片田', exact: true }).waitFor();
+      await page.getByRole('button', { name: '丙塘口', exact: true }).waitFor();
       await page.getByRole('button', { name: '甲村 操作菜单' }).waitFor();
+      await page.getByRole('button', { name: '乙村 操作菜单' }).waitFor();
+      await page.getByRole('button', { name: '丙村 操作菜单' }).waitFor();
+      // 独立折叠/展开：乙村箭头只影响自身，甲/丙不受影响
+      await page.locator('.rc-tree-treenode', { hasText: '乙村' }).locator('.rc-tree-switcher').click();
+      await page.waitForTimeout(200);
+      assert.equal(await page.getByRole('button', { name: '北片田', exact: true }).count(), 0, '折叠乙村应隐藏其子对象');
+      assert.equal(await page.getByRole('button', { name: '东片田', exact: true }).count(), 1, '折叠乙村不应影响甲村对象');
+      assert.equal(await page.getByRole('button', { name: '丙片田', exact: true }).count(), 1, '折叠乙村不应影响丙村对象');
+      await page.locator('.rc-tree-treenode', { hasText: '乙村' }).locator('.rc-tree-switcher').click();
+      await page.waitForTimeout(200);
+      await page.getByRole('button', { name: '北片田', exact: true }).waitFor();
 
       await mkdir('docs/acceptance/m2c', { recursive: true });
       const map = page.getByRole('application', { name: /天地图.*已授权农业对象边界/ });
@@ -99,15 +119,38 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.waitForTimeout(350);
       assert.equal(await map.getAttribute('data-view-center'), centerBeforeUnlocated, '无边界对象点击不应移动视图');
 
+      // 先折叠乙村，搜索时父级临时展开；清空后恢复折叠
+      await page.locator('.rc-tree-treenode', { hasText: '乙村' }).locator('.rc-tree-switcher').click();
+      await page.waitForTimeout(200);
       const search = page.getByRole('searchbox', { name: '搜索名称或编号' });
       await search.fill('北片田');
       await page.waitForTimeout(250);
-      assert.equal(await page.getByRole('button', { name: '北片田', exact: true }).count(), 1);
+      assert.equal(await page.getByRole('button', { name: '北片田', exact: true }).count(), 1, '搜索命中子节点应临时展开父村庄');
       assert.equal(await page.getByRole('button', { name: '东片田', exact: true }).count(), 0);
-      assert.equal(await page.getByRole('button', { name: '乙村 操作菜单' }).count(), 1);
+      assert.equal(await page.getByRole('button', { name: '乙村 操作菜单' }).count(), 1, '搜索时父级村庄仍可见');
       await search.fill('');
       await page.waitForTimeout(250);
+      assert.equal(await page.getByRole('button', { name: '北片田', exact: true }).count(), 0, '清空搜索后应恢复乙村折叠状态');
       await page.getByRole('button', { name: '东片田', exact: true }).waitFor();
+      await page.locator('.rc-tree-treenode', { hasText: '乙村' }).locator('.rc-tree-switcher').click();
+      await page.waitForTimeout(200);
+      await page.getByRole('button', { name: '北片田', exact: true }).waitFor();
+
+      // 更改所属村庄：两个村庄目录立即更新，关联历史保留
+      await page.getByRole('button', { name: '北片田 操作菜单' }).click();
+      await page.getByRole('menuitem', { name: '更改所属村庄' }).click();
+      await page.getByLabel('新归属村庄').selectOption('丙村');
+      await page.getByLabel('变更依据').fill('M2-C 改归属验收');
+      await page.getByRole('button', { name: '保存归属' }).click();
+      await page.waitForTimeout(500);
+      assert.equal(await page.locator('.rc-tree-treenode', { hasText: '乙村' }).getByRole('button', { name: '北片田', exact: true }).count(), 0, '北片田应移出乙村');
+      assert.equal(await page.locator('.rc-tree-treenode', { hasText: '丙村' }).getByRole('button', { name: '北片田', exact: true }).count(), 1, '北片田应出现在丙村');
+      const regionLinks = (await pool.query('SELECT region_id,valid_to FROM map_region_links WHERE object_id=$1 ORDER BY valid_from', [fieldB])).rows;
+      assert.equal(regionLinks.length, 2, '改归属应保留两条关联历史');
+      assert.equal(regionLinks[0].region_id, regionB);
+      assert.ok(regionLinks[0].valid_to, '原关联应已结束');
+      assert.equal(regionLinks[1].region_id, regionC);
+      assert.equal(regionLinks[1].valid_to, null, '新关联应为当前有效');
 
       // 归档村庄：历史保留、对象不连带；恢复后关联不自动恢复
       await page.getByRole('button', { name: '甲村 操作菜单' }).click();
@@ -124,7 +167,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       await page.getByRole('complementary', { name: '回收站' }).waitFor();
       await page.locator('li', { hasText: '甲村' }).getByRole('button', { name: '恢复' }).click();
       await page.waitForTimeout(500);
-            await page.getByRole('button', { name: '定位村庄 甲村' }).waitFor();
+      await page.getByRole('button', { name: '定位村庄 甲村' }).waitFor();
       const activeLinks = (await pool.query('SELECT count(*) AS n FROM map_region_links WHERE region_id=$1 AND valid_to IS NULL', [regionA])).rows[0];
       assert.equal(Number(activeLinks.n), 0, '恢复村庄不得自动恢复历史关联');
 
@@ -156,7 +199,7 @@ test('M2-C 资源树展开/定位/搜索/归档/回收站在桌面与手机可�
       const restoreRow = page.locator('li', { hasText: '东片田' });
       await restoreRow.getByRole('button', { name: '恢复' }).click();
       await page.waitForTimeout(500);
-            await page.getByRole('button', { name: '东片田', exact: true }).waitFor();
+      await page.getByRole('button', { name: '东片田', exact: true }).waitFor();
 
       await page.setViewportSize({ width: 390, height: 844 });
       await page.getByRole('button', { name: '☰ 对象目录' }).click();
