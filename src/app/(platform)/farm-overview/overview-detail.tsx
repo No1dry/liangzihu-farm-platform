@@ -26,6 +26,8 @@ export default function OverviewDetail({mode,item,region,mobile,items,regions,su
  const attention=demo?demoAlerts.find(row=>row.objectId===item?.id):null;
  const relatedTasks=demo?demoTasks.filter(row=>row.regionId===(region?.id??item?.regionId)):[];
  const farmId=item?.kind==='farm'?item.id:null;
+ const ownerFarmId=item?item.farm_id??item.farmId??(item.kind==='farm'?item.id:null):region?.farmId??null;
+ const ownerFarm=ownerFarmId?items.find(row=>row.id===ownerFarmId)??null:null;
  const farmItems=farmId?items.filter(row=>(row.farm_id??row.farmId??(row.kind==='farm'?row.id:null))===farmId):[];
  const farmItemIds=new Set(farmItems.map(row=>row.id));
  const farmAlerts=demo?demoAlerts.filter(row=>farmItemIds.has(row.objectId)):[];
@@ -34,8 +36,8 @@ export default function OverviewDetail({mode,item,region,mobile,items,regions,su
  const hasDevices=!!mobile||!!summary?.point_count||item?.kind==='facility';
  const boundaryStatus=item?.geometry?(item.boundary_status==='verified'?'已核实':'草稿，尚未核实'):'边界待登记';
  return <aside className={styles.drawer} aria-label="对象详情" aria-live="polite">
-  <div className={styles.drawerTop}><span className={styles.eyebrow}>{demo?'DEMO · SYNTHETIC':'AUTHORIZED DETAIL'}</span><button type="button" onClick={onClose} aria-label="关闭对象详情">×</button></div>
-  <div className={styles.detailTitleRow}><KindIcon kind={item?.kind??(region?'region':undefined)} className={styles.detailKindIcon}/><span className={styles.kind}>{kind}{demo?' · 演示':''}</span></div><h2>{title}</h2><p className={styles.detailContext}>{demo?'合成示例 · 非真实现场':region?'经营分组，不代表行政村边界':item&&regionForItem?`所属 ${regionForItem.name}`:mobile?'绑定归属来自原农机业务':'仅当前账号获授权资料'}</p>
+  <div className={styles.drawerTop}><div className={styles.detailHeading}><KindIcon kind={item?.kind??(region?'region':undefined)} className={styles.detailKindIcon}/><h2>{title}</h2></div><button type="button" onClick={onClose} aria-label="关闭对象详情">×</button></div>
+  <div className={styles.detailBadges}><span className={styles.kind}>{kind}{demo?' · 演示':''}</span>{item&&<span className={styles.statusBadge} data-status={item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'}>{item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'}</span>}</div><p className={styles.detailContext}>{demo?'合成示例 · 非真实现场':region?'经营分组，不代表行政村边界':item&&regionForItem?`所属 ${regionForItem.name}`:mobile?'绑定归属来自原农机业务':'仅当前账号获授权资料'}</p>
   <div className={styles.detailTabs} role="tablist" aria-label="对象资料分区">
    <button type="button" role="tab" aria-selected={tab==='basic'} className={tab==='basic'?styles.activeTab:''} onClick={()=>setTab('basic')}>基本信息</button>
    {item&&<button type="button" role="tab" aria-selected={tab==='boundary'} className={tab==='boundary'?styles.activeTab:''} onClick={()=>setTab('boundary')}>边界信息</button>}
@@ -43,10 +45,10 @@ export default function OverviewDetail({mode,item,region,mobile,items,regions,su
    <button type="button" role="tab" aria-selected={tab==='history'} className={tab==='history'?styles.activeTab:''} onClick={()=>setTab('history')}>历史记录</button>
   </div>
   {tab==='basic'&&<div className={styles.detailTabBody}>
+   {(item||region)&&<section className={styles.detailSection}><div className={styles.detailSectionHeader}><h3>基本信息</h3>{!demo&&item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>编辑</Link>}</div><dl className={styles.detailList}>{item&&<div><dt>对象编号</dt><dd>{item.code}</dd></div>}{ownerFarm&&<div><dt>所属农场</dt><dd>{ownerFarm.name}</dd></div>}{regionForItem&&<div><dt>所属村庄</dt><dd>{regionForItem.name}</dd></div>}<div><dt>对象名称</dt><dd>{title}</dd></div>{item&&<div><dt>边界状态</dt><dd>{demo?'演示区域（非测绘边界）':boundaryStatus}</dd></div>}{item&&<div><dt>登记依据</dt><dd>{item.boundary_source??item.object_source??'未提供'}</dd></div>}</dl></section>}
    {item?.kind==='farm'&&<><Facts rows={farmFacts}/>{demo?<div className={styles.attention}>关注事项 · {farmAlerts.length} 条演示提醒{farmAlerts[0]&&<><br/>{farmAlerts[0].text}</>}</div>:<p className={styles.drawerHint}>本农场已授权对象中有 {summaries.filter(row=>farmItemIds.has(row.object_id)).reduce((n,row)=>n+row.open_alerts,0)} 条未关闭告警；仅统计已有授权概要。</p>}</>}
    {region&&<><Facts rows={regionFacts}/><p className={styles.drawerHint}>共关联 {regionRows.length} 个可见农业对象；按关联对象边界定位，片区本身没有正式测绘边界。</p></>}
    {item?.kind==='field'&&<><p className={styles.businessLead}>{demo?item.detail:'暂无可信作物或生长阶段资料；进入原农事模块核对。'}</p>{!demo&&<p className={styles.detailContext}>{summary?`农事记录 ${summary.record_count} · 关联测点 ${summary.point_count}`:'暂无关联记录'}</p>}</>}
-   {item&&!demo&&!item.geometry&&<p className={styles.detailContext}>待登记</p>}
    {item?.kind==='pond'&&<><p className={styles.businessLead}>{demo?item.detail:'暂无可信养殖品种资料。'}</p><p className={styles.metric}>{demo?item.metric:'暂无可信监测数据'}</p>{demo&&item.sampledAt&&<p className={styles.detailContext}>演示采样时间：{time(item.sampledAt)} · 非现场遥测</p>}</>}
    {item?.kind==='facility'&&<><p className={styles.businessLead}>{demo?item.detail:'暂无可信设备状态；设施对象与实体设备须分别登记。'}</p><p className={styles.metric}>{demo?`${item.status} · 演示状态`:'设备状态未知'}</p></>}
    {item?.kind==='mobile'&&<><p className={styles.businessLead}>{item.detail}</p><p className={styles.metric}>{item.status} · 演示状态</p><p className={styles.detailContext}>演示坐标，非真实 GPS；没有终端绑定或真实轨迹。</p></>}

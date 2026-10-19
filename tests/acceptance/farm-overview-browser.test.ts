@@ -6,7 +6,7 @@ import {withDb} from '../support/db';
 import {withApp} from '../support/app';
 import {actorFixture,objectFixture,permit} from '../support/fixtures';
 
-test('D1 卫星总览只展示授权对象，搜索定位与覆盖抽屉在桌面和手机可操作',{timeout:120000},()=>withDb(async pool=>{
+test('D1 卫星总览只展示授权对象，搜索定位与固定详情栏在桌面和手机可操作',{timeout:120000},()=>withDb(async pool=>{
  const actor=await actorFixture(pool,'worker'),expert=await actorFixture(pool,'expert');
  const farm=await objectFixture(pool,actor.id),visible=await objectFixture(pool,actor.id),unlocated=await objectFixture(pool,actor.id),hidden=await objectFixture(pool,actor.id);
  await pool.query("UPDATE objects SET parent_id=$2,name='合成东片农田',code='D1-FIELD',kind='field',boundary_status='draft',boundary=ST_GeomFromText('POLYGON((114.62 30.24,114.64 30.24,114.64 30.26,114.62 30.26,114.62 30.24))',4326) WHERE id=$1",[visible,farm]);
@@ -45,13 +45,12 @@ test('D1 卫星总览只展示授权对象，搜索定位与覆盖抽屉在桌�
   await page.getByRole('button',{name:'全场视图'}).click();await page.waitForTimeout(400);
   const zoomBeforeMapClick=await map.getAttribute('data-view-zoom');
   const centerBeforeMapClick=await map.getAttribute('data-view-center');
-  const bounds=await map.boundingBox();assert(bounds);let clicked=false,clickedAt=0;
-  for(const x of [.6,.58,.55,.5,.4,.7,.3]){for(const y of [.5,.4,.6]){const absoluteX=bounds.x+bounds.width*x;await page.mouse.click(absoluteX,bounds.y+bounds.height*y);await page.waitForTimeout(350);if(await page.getByRole('complementary',{name:'对象详情'}).count()){clicked=true;clickedAt=absoluteX;break;}}if(clicked)break;}
-  assert(clicked,'直接点击地图边界应打开对象抽屉');
+  const bounds=await map.boundingBox();assert(bounds);let clicked=false;
+  for(const x of [.6,.58,.55,.5,.4,.7,.3]){for(const y of [.5,.4,.6]){const absoluteX=bounds.x+bounds.width*x;await page.mouse.click(absoluteX,bounds.y+bounds.height*y);await page.waitForTimeout(350);if(await page.getByRole('complementary',{name:'对象详情'}).count()){clicked=true;break;}}if(clicked)break;}
+  assert(clicked,'直接点击地图边界应打开对象详情');
   await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'合成东片农田'}).waitFor();
   await page.waitForTimeout(300);assert(Number(await map.getAttribute('data-view-zoom'))>=Number(zoomBeforeMapClick)-0.01,'M2-C 起地图点选后缩放不降低');
   const drawerBox=await page.getByRole('complementary',{name:'对象详情'}).boundingBox();assert(drawerBox);
-  assert(clickedAt>drawerBox.x,'测试点击点应位于随后出现的抽屉覆盖范围');
   const mapAfterDetail=await map.boundingBox();assert(mapAfterDetail&&mapAfterDetail.width<bounds.width,'右侧固定详情列出现后地图应收缩');
   assert(drawerBox.x>=mapAfterDetail.x+mapAfterDetail.width-1,'详情应为独立布局列，不覆盖地图');
   await page.screenshot({path:'docs/acceptance/d1/2026-10-09-农场空间总览-地图点击避让.png',fullPage:true});
