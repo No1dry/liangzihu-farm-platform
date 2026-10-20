@@ -36,7 +36,7 @@ export default function OverviewDetail({mode,item,region,mobile,items,regions,su
  const hasDevices=!!mobile||!!summary?.point_count||item?.kind==='facility';
  const boundaryStatus=item?.geometry?(item.boundary_status==='verified'?'已核实':'草稿，尚未核实'):'边界待登记';
  return <aside className={styles.drawer} aria-label="对象详情" aria-live="polite">
-  <div className={styles.drawerTop}><div className={styles.detailHeading}><KindIcon kind={item?.kind??(region?'region':undefined)} className={styles.detailKindIcon}/><h2>{title}</h2></div><button type="button" onClick={onClose} aria-label="关闭对象详情">×</button></div>
+  <div className={styles.drawerTop}><div className={styles.detailHeading}><KindIcon kind={item?.kind??(region?'region':undefined)} className={styles.detailKindIcon}/><h2>{title}</h2></div><button type="button" onClick={onClose} aria-label="关闭对象详情" title="收起右侧详情栏">×</button></div>
   <div className={styles.detailBadges}><span className={styles.kind}>{kind}{demo?' · 演示':''}</span>{item&&<span className={styles.statusBadge} data-status={item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'}>{item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'}</span>}</div><p className={styles.detailContext}>{demo?'合成示例 · 非真实现场':region?'经营分组，不代表行政村边界':item&&regionForItem?`所属 ${regionForItem.name}`:mobile?'绑定归属来自原农机业务':'仅当前账号获授权资料'}</p>
   <div className={styles.detailTabs} role="tablist" aria-label="对象资料分区">
    <button type="button" role="tab" aria-selected={tab==='basic'} className={tab==='basic'?styles.activeTab:''} onClick={()=>setTab('basic')}>基本信息</button>

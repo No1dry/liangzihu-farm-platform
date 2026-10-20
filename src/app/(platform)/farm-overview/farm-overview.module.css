@@ -211,13 +211,14 @@
 .treeWrap{flex:1;min-height:0;overflow:auto;padding:10px 10px 12px}
 .resourceTree{font-size:13px;background:transparent}
 .resourceTree :global(.rc-tree-treenode){height:40px;align-items:center;padding:0 6px;margin:0;border-radius:7px}
-.resourceTree :global(.rc-tree-switcher){width:18px;height:18px;margin-top:0;color:#6d7b70}
+.resourceTree :global(.rc-tree-switcher){width:18px;height:18px;margin-top:0;color:#6d7b70;background:none!important;background-image:none!important}
 .resourceTree :global(.rc-tree-node-content-wrapper){flex:1;min-width:0;border-radius:6px}
 .resourceTree :global(.rc-tree-node-selected){background:transparent;box-shadow:none}
 .treeNode{display:flex;flex-wrap:nowrap;align-items:center;gap:7px;width:100%;min-width:0;padding:0 2px}
+.treeNode:hover{background:#f3f7f1}
 .treeNode.treeNodeSelected{background:#eaf4ec;border-radius:6px;box-shadow:inset 2px 0 0 #5d822b}
 .treeTitleButton{flex:1 1 auto;min-width:0;padding:4px 0;background:transparent;border:0;color:#263f31;font-size:13px;font-weight:500;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-.treeNodeSelected .treeTitleButton,.treeNodeSelected .treeTitleButton:hover,.treeNodeSelected .treeTitleButton:focus-visible{background:transparent!important;color:#173a30!important;outline:none}
+.treeNode .treeTitleButton:hover:not(:disabled),.treeNode .treeTitleButton:focus-visible,.treeNodeSelected .treeTitleButton,.treeNodeSelected .treeTitleButton:hover,.treeNodeSelected .treeTitleButton:focus-visible{background:transparent!important;color:#173a30!important;outline:none}
 .treeNode[data-kind='farm'] .treeTitleButton,.treeNode[data-kind='region'] .treeTitleButton{font-weight:650;color:#203a2c}
 .kindIcon{flex:0 0 16px;color:#5d822b}
 .statusBadge{flex:0 0 auto;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:500;line-height:17px;white-space:nowrap}
