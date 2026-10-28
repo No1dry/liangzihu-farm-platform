@@ -60,10 +60,10 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await page.getByRole('complementary',{name:'对象详情'}).getByRole('heading',{name:'长岭养殖塘 B'}).waitFor();
    await page.waitForTimeout(350);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
-   await page.getByRole('application',{name:'天地图矢量底图及合成演示对象'}).scrollIntoViewIfNeeded();
+   await page.getByRole('application',{name:/天地图矢量底图.*合成演示对象/}).scrollIntoViewIfNeeded();
    await page.screenshot({path:'docs/acceptance/farm-overview-demo/08-演示手机详情.png'});
    await page.setViewportSize({width:1440,height:900});
-   const demoMap=page.getByRole('application',{name:'天地图矢量底图及合成演示对象'});
+   const demoMap=page.getByRole('application',{name:/天地图矢量底图.*合成演示对象/});
    await page.getByRole('button',{name:'＋ 新增演示对象'}).click();
    await page.getByLabel('演示类型').selectOption('pump');
    await page.getByLabel('名称',{exact:true}).fill('现场演示水泵');

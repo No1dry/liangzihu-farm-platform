@@ -20,7 +20,7 @@ test('M1 默认矢量底图、底图切换与持久化、类别显隐、图例�
   await page.getByRole('button',{name:'M1合成农田',exact:true}).waitFor();
   const map=page.getByRole('application');
   await map.waitFor();
-  assert.equal(await map.getAttribute('aria-label'),'天地图矢量底图及已授权农业对象边界');
+  assert((await map.getAttribute('aria-label'))?.includes('天地图矢量底图及已授权农业对象边界'),'地图 aria-label 应说明矢量底图与授权对象边界');
   assert.equal(await map.getAttribute('data-basemap'),'vector','M1 默认底图应为天地图矢量');
   assert.equal(await map.getAttribute('data-annotations'),'true');
   assert.equal(await map.getAttribute('data-mode'),'real');
@@ -32,7 +32,7 @@ test('M1 默认矢量底图、底图切换与持久化、类别显隐、图例�
   await page.screenshot({path:'docs/acceptance/m1/2026-10-14-M1矢量底图默认视图.png',fullPage:true});
 
   await page.getByRole('button',{name:'切换为卫星底图'}).click();
-  await page.getByRole('application',{name:'天地图卫星影像及已授权农业对象边界'}).waitFor();
+  await page.getByRole('application',{name:/天地图卫星影像.*已授权农业对象边界/}).waitFor();
   assert.equal(await map.getAttribute('data-basemap'),'satellite');
   await page.waitForTimeout(1500);
   assert(tileUrls.some(url=>url.includes('/img_w/')),'切换后应请求卫星影像瓦片');
@@ -40,10 +40,10 @@ test('M1 默认矢量底图、底图切换与持久化、类别显隐、图例�
   await page.screenshot({path:'docs/acceptance/m1/2026-10-14-M1卫星底图切换.png',fullPage:true});
 
   await page.reload();
-  await page.getByRole('application',{name:'天地图卫星影像及已授权农业对象边界'}).waitFor();
+  await page.getByRole('application',{name:/天地图卫星影像.*已授权农业对象边界/}).waitFor();
   assert.equal(await map.getAttribute('data-basemap'),'satellite','刷新后应保持卫星底图选择');
   await page.getByRole('button',{name:'切换为矢量底图'}).click();
-  await page.getByRole('application',{name:'天地图矢量底图及已授权农业对象边界'}).waitFor();
+  await page.getByRole('application',{name:/天地图矢量底图.*已授权农业对象边界/}).waitFor();
 
   await page.getByRole('button',{name:'图层'}).click();
   const panel=page.getByRole('dialog',{name:'地图图层设置'});
@@ -60,7 +60,7 @@ test('M1 默认矢量底图、底图切换与持久化、类别显隐、图例�
   assert.equal(await page.getByRole('dialog',{name:'地图图层设置'}).count(),0);
 
   await page.getByRole('button',{name:'查看演示效果 ↗'}).click();
-  await page.getByRole('application',{name:'天地图矢量底图及合成演示对象'}).waitFor();
+  await page.getByRole('application',{name:/天地图矢量底图.*合成演示对象/}).waitFor();
   assert.equal(await map.getAttribute('data-mode'),'demo');
   await page.getByRole('button',{name:'沙湾东片水稻田',exact:true}).waitFor();
   await page.getByRole('button',{name:'图层'}).click();
@@ -69,7 +69,7 @@ test('M1 默认矢量底图、底图切换与持久化、类别显隐、图例�
   assert.equal(await page.getByRole('dialog',{name:'地图图层设置'}).count(),0,'Esc 应关闭图层面板');
   await page.screenshot({path:'docs/acceptance/m1/2026-10-14-M1演示模式分类图标.png',fullPage:true});
   await page.getByRole('button',{name:'退出演示，返回真实数据'}).click();
-  await page.getByRole('application',{name:'天地图矢量底图及已授权农业对象边界'}).waitFor();
+  await page.getByRole('application',{name:/天地图矢量底图.*已授权农业对象边界/}).waitFor();
 
   await page.setViewportSize({width:390,height:844});
   await page.getByRole('button',{name:'☰ 对象目录'}).click();

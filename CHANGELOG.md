@@ -4,6 +4,13 @@
 
 从 2026-10-04 起，每次代码、配置、依赖、数据库或文档调整均须随交付更新本文件。同一任务的连续修改合为一条，同日不同任务另起条目；历史补记注明来源。日期采用北京时间，序号只区分当天记录，不是软件版本号。
 
+## 2026-10-28 · 02 · CAD 竣工图参考图层前端集成
+
+- **改动与原因**：在 `cad-completion-demo` 分支的 `/farm-overview` 增加真实 CAD 竣工图参考图层，供会议演示和地图对照，不写入正式农业资产库。新增可重复转换脚本 `tools/cad/convert_completion_reference.py`，从 EPSG:4547 GeoPackage 筛出土地平整范围 67 条、生产道路 37 条、农渠与排水沟 70 条并转换为 EPSG:4326；异常面、重复线、田埂/施工边界和 279 个未核实设施插入点未导入。新增登录保护接口 `/api/v1/cad-completion-reference` 和三个 OpenLayers 参考图层，置于正式农业对象图层下方；图层面板提供三类开关，工具栏提供“竣工图范围”定位。点击 CAD 要素打开轻量信息卡，展示类别、竣工图、原始图层、handle、面积/长度、可信度及“来源于竣工图，尚未核实为正式农业资产”提示，不触发正式对象详情/归档/编辑。
+- **影响范围**：新增 `data/cad-reference/completion-reference.json`、`src/app/api/v1/cad-completion-reference/route.ts`、`src/app/(platform)/farm-overview/cad-reference-card.tsx`、`tests/acceptance/cad-completion-browser.test.ts`；修改 `farm-overview.tsx`、`layer-panel.tsx`、`farm-overview.module.css` 及两处旧浏览器断言。未修改数据库、依赖、闸门/摄像头代码，未合并 `main`。
+- **验证**：类型检查与生产构建通过；luminous 单测 104/104；CAD 专项浏览器用例及 resource-tree、D1、D3.1、M1 回归逐文件通过；输出整体矢量叠加、卫星细节和点击面积信息卡 3 张真实截图。[验收记录与统计](docs/acceptance/cad-demo/2026-10-28-CAD竣工图参考图层验收记录.md)。本机 Windows 全量单测中既有 symlink 权限用例失败，luminous 同套件通过，非本轮引入。
+- **运行影响**：无数据库迁移、依赖变更或服务重启要求；部署前需确保预处理 GeoJSON 随代码存在且登录用户可访问该接口。
+
 ## 2026-10-28 · 01 · 水闸只读接入现状评估文档
 
 - **改动与原因**：新增[水闸只读接入现状与地图接入评估](docs/plans/2026-10-28-水闸只读接入现状与地图接入评估.md)，整理 luminous `main` 工作区中三诚闸门 MQTT 适配器、采集 worker、登记工具、当前值只读接口、真实报文证据、未提交设备页改动，以及与当前 `m2c2-page-ui` 地图分支的合并边界；同步更新[文档入口](docs/README.md)。本记录用于评审和后续接入决策，不代表水闸已接入地图。
