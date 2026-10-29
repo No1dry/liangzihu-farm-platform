@@ -4,6 +4,12 @@
 
 从 2026-10-04 起，每次代码、配置、依赖、数据库或文档调整均须随交付更新本文件。同一任务的连续修改合为一条，同日不同任务另起条目；历史补记注明来源。日期采用北京时间，序号只区分当天记录，不是软件版本号。
 
+## 2026-10-29 · 06 · M2 F04 农田/塘口业务展示组件
+
+- **改动与原因**：按任务拆解 F04 实施。新增 `detail-area.ts`：管理范围面积由对象登记边界（EPSG:4326）按椭球面计算，亩为主、㎡为辅，随边界核实状态标注口径，并明示与 CAD 竣工图施工参考面积是不同口径，不混用。`detail-data.ts` 增加生产批次适配 `currentBatch`（最新未结束且未被更正，verified=false 只作待核实）与塘口摘要选取 `pickTrustedIndicators`（至多两个可信指标，逐点展示不合并不平均）。详情摘要接入面积/当前生产（农田）与面积/当前养殖/水体指标（塘口）；「农事生产」标签接入批次详情（作物/品种/阶段/批次编号/时间/来源）与各档空态。
+- **影响范围**：新增 `detail-area.ts`、`tests/unit/detail-f04.test.ts`、`tests/acceptance/farm-overview-f04-browser.test.ts`；`detail-data.ts`、`use-object-detail.ts`（批次数据源）、`detail-panel.tsx` 扩展。无数据库、API、依赖变更。
+- **验证**：F04 单测 3/3；F04 浏览器用例（面积口径与 CAD 区分/批次空态/当前养殖/双指标摘要/草稿边界标注）1/1；luminous 全量单测 123/124（唯一失败为既有 S1 flake）；既有 7 个 GIS 浏览器用例回归见实施报告。
+
 ## 2026-10-29 · 05 · M2 F03 只读 API 展示适配与局部失败隔离
 
 - **改动与原因**：按任务拆解 F03 实施。新增纯函数适配层 `detail-data.ts`：请求状态（loading/ready/partial/error/denied）与事实状态（trusted/stale/suspect/pending/unconfigured/conflict）严格分离，0 不等于缺失、读成功不代表可信、空数组只代表可信空查询。新增 `use-object-detail` 钩子：`/api/v1/objects/[id]`（测点+告警）与 `/api/v1/points/current`（批量当前值）双源合成测量分区，请求带对象作用域（切换对象丢弃旧响应），局部重试不重置地图。塘口「水体监测」与通用设施「关联设备」按「指标→测点」展示可信当前值（含采样时间）或明确原因；相关记录接入真实告警并区分 当前(open)/已恢复(recovered)，操作/巡检/维护类别保留 F06 空态。时效判定所需 `max_age_ms` 暂未随测点接口下发，已登记为后端接口缺口，前端不擅自判过期。
