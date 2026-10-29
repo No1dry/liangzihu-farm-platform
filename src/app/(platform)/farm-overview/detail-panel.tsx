@@ -4,7 +4,7 @@ import {useMemo} from 'react';
 import {demoAlerts,demoTasks} from './demo-fixture';
 import KindIcon from './kind-icon';
 import {resolveBusinessClass,resolveActiveTab,tabsFor,classLabels,type BusinessClass,type DetailTabId,type RecordFilter} from './detail-classes';
-import {groupByMetric,factLabels,currentBatch,pickTrustedIndicators,type PointView,type SectionRequestState} from './detail-data';
+import {groupByMetric,factLabels,currentBatch,pickTrustedIndicators,selectOpeningView,orderGateMetrics,type PointView,type SectionRequestState} from './detail-data';
 import {boundaryAreaSqm,formatArea} from './detail-area';
 import {useObjectDetail} from './use-object-detail';
 import styles from './farm-overview.module.css';
@@ -63,19 +63,30 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
     <Facts rows={[{label:'农事记录',value:summary?.record_count??0},{label:'关联测点',value:summary?.point_count??0}]}/>
    </>;
   }
+  if(cls==='gate'){
+   // F05 水闸摘要：实际开度只取可信 opening；多测点无代表不合成；set_opening 不出现在摘要。
+   const opening=selectOpeningView(detail.pointViews);
+   return <>
+    {detail.measurementState==='loading'?<p className={styles.drawerHint}>正在读取测点与当前值…</p>:opening.kind==='single'&&opening.view?<p className={styles.metric}>实际开度 {opening.view.value} {opening.view.valueUnit??'%'}{opening.view.sampledAt&&<><br/><small>采样 {time(opening.view.sampledAt)}</small></>}</p>:opening.kind==='multiple'?<p className={styles.drawerHint}>存在多个可信开度测点且未指定代表测点，请到「运行信息」逐项查看，此处不合成数值。</p>:<p className={styles.drawerHint}>实际开度：暂无已核实的代表开度测点。</p>}
+    <p className={styles.detailContext}>数据上报：上报状态待确认（测点时效参数未随接口下发，缺口已登记）。</p>
+    <Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/>
+   </>;
+  }
+  if(cls==='pump_station')return <><p className={styles.drawerHint}>泵组运行概况：暂无已核实的机组档案；未确认的设备不计入机组，运行/停止/未知不做猜测。</p><p className={styles.detailContext}>数据上报：上报状态待确认（测点时效参数未随接口下发，缺口已登记）。</p><Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/></>;
   return <Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/>;
  })();
 
  // F03 测量分区：按「指标→测点」展示，局部失败隔离与重试，不重置地图。
- const measurementSection=(title:string)=>{
+ const measurementSection=(title:string,ordered?:PointView[])=>{
   const {measurementState,pointViews,retry}=detail;
+  const views=ordered??pointViews;
   if(measurementState==='loading')return <p className={styles.drawerHint}>正在读取测点与当前值…</p>;
   if(measurementState==='denied')return <p className={styles.drawerHint}>当前账号无权读取该对象的测点资料。</p>;
   if(measurementState==='error')return <p className={styles.drawerHint}>测点资料读取失败。<button type="button" onClick={retry}>重试</button></p>;
-  if(!pointViews.length)return <p className={styles.drawerHint}>暂无已登记的关联测点；{title}不展示任何推断数值。</p>;
+  if(!views.length)return <p className={styles.drawerHint}>暂无已登记的关联测点；{title}不展示任何推断数值。</p>;
   return <>
    {measurementState==='partial'&&<p className={styles.drawerHint}>部分数据读取失败，当前值可能不完整。<button type="button" onClick={retry}>重试</button></p>}
-   {groupByMetric(pointViews).map(group=><section key={group.metric} className={styles.detailSection}><h3>{group.metric}</h3><dl className={styles.detailList}>{group.points.map(point=><div key={point.id}><dt>{point.name}</dt><dd>{point.fact==='trusted'?<>{point.value} {point.valueUnit??point.unit}{point.sampledAt&&<><br/><small>采样 {time(point.sampledAt)}</small></>}</>:<span className={styles.factReason} data-fact={point.fact}>{point.reason}</span>}</dd></div>)}</dl></section>)}
+   {groupByMetric(views).map(group=><section key={group.metric} className={styles.detailSection}><h3>{group.metric}</h3><dl className={styles.detailList}>{group.points.map(point=><div key={point.id}><dt>{point.name}</dt><dd>{point.fact==='trusted'?<>{point.value} {point.valueUnit??point.unit}{point.sampledAt&&<><br/><small>采样 {time(point.sampledAt)}</small></>}</>:<span className={styles.factReason} data-fact={point.fact}>{point.reason}</span>}</dd></div>)}</dl></section>)}
   </>;
  };
 
@@ -90,7 +101,20 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
    </div>;
   }
   if(activeTab==='monitoring')return <div className={styles.detailTabBody}>{demo?<><p className={styles.businessLead}>{item.detail??'演示水体资料'}</p>{item.metric&&<p className={styles.metric}>{item.metric}</p>}</>:measurementSection('水体监测')}{!demo&&<p className={styles.drawerHint}>同指标多测点不会自动合并或平均；没有可信当前值时不显示数值。</p>}</div>;
-  if(activeTab==='operation')return <div className={styles.detailTabBody}>{demo?<><p className={styles.businessLead}>{item.detail}</p><p className={styles.metric}>{item.status} · 演示状态</p></>:cls==='gate'?<><p className={styles.businessLead}>实际开度：暂无已核实的代表开度测点。</p><p className={styles.detailContext}>数据上报：上报状态待确认。</p><p className={styles.drawerHint}>水闸子类身份、代表测点与上报周期须经登记核实（后端接口依赖）；未经核实不显示开度数值。本页面只读，不提供控制操作。</p></>:<><p className={styles.businessLead}>泵组运行概况：暂无已核实的机组档案。</p><p className={styles.detailContext}>数据上报：上报状态待确认。</p><p className={styles.drawerHint}>泵站子类与机组身份须经登记核实（后端接口依赖）；未确认的设备不计入机组，运行/停止/未知不做猜测。本页面只读，不提供控制操作。</p></>}</div>;
+  if(activeTab==='operation'){
+   if(demo)return <div className={styles.detailTabBody}><p className={styles.businessLead}>{item.detail}</p><p className={styles.metric}>{item.status} · 演示状态</p></div>;
+   if(cls==='gate')return <div className={styles.detailTabBody}>
+    {measurementSection('运行信息',orderGateMetrics(detail.pointViews))}
+    {detail.pointViews.some(point=>point.metric==='set_opening')&&<p className={styles.detailContext}>设置开度为设备上报的设置值，不代表本平台下发指令；未安装、未配置的指标不生成卡片。</p>}
+    <p className={styles.drawerHint}>本页面只读，不提供控制操作。</p>
+   </div>;
+   return <div className={styles.detailTabBody}>
+    <p className={styles.businessLead}>机组：暂无已核实的机组档案。</p>
+    <p className={styles.drawerHint}>泵站机组身份与运行反馈契约待后端落地（接口依赖已登记）；网关、控制器不计入机组，无证据状态保持未知。</p>
+    <section className={styles.detailSection}><h3>站级监测</h3>{measurementSection('站级监测')}</section>
+    <p className={styles.drawerHint}>本页面只读，不提供控制操作。</p>
+   </div>;
+  }
   if(activeTab==='devices')return <div className={styles.detailTabBody}>{item.kind==='facility'&&<p className={styles.detailContext}>设施对象与实体设备须分别登记；设备详情进入设备台账核对。</p>}{measurementSection('关联设备')}{item.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div>;
   return null;
  })();

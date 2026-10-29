@@ -5,13 +5,19 @@ export type BusinessClass='farm'|'field'|'pond'|'gate'|'pump_station'|'mobile'|'
 export type DetailTabId='basic'|'production'|'monitoring'|'operation'|'devices'|'records';
 export type RecordFilter='all'|'operation'|'inspection'|'alert'|'maintenance';
 
-export type ClassifiedItem={kind:string;symbol?:string|null};
+export type ClassifiedItem={kind:string;symbol?:string|null;facility_subtype?:string|null;subtype_verified?:boolean|null};
 
 export function resolveBusinessClass(item:ClassifiedItem,demo:boolean):BusinessClass{
   if(item.kind==='facility'){
     if(demo){
       if(item.symbol==='gate')return 'gate';
       if(item.symbol==='pump')return 'pump_station';
+      return 'generic';
+    }
+    // 真实模式仅采信后端已核实的子类字段（F05）；未提供或未核实回退通用设施。
+    if(item.subtype_verified===true){
+      if(item.facility_subtype==='gate')return 'gate';
+      if(item.facility_subtype==='pump_station')return 'pump_station';
     }
     return 'generic';
   }

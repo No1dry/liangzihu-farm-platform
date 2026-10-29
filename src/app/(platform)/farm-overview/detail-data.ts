@@ -73,3 +73,25 @@ export function currentBatch(rows:ApiBatch[],objectId:string):{batch:ApiBatch|nu
 export function pickTrustedIndicators(views:PointView[],limit=2):PointView[]{
   return views.filter(view=>view.fact==='trusted').slice(0,limit);
 }
+
+// F05 设施业务子类：仅采信后端已核实的子类字段；未知/未核实一律回退（不名称猜测）。
+export function trustedSubtype(subtype:string|null|undefined,verified:boolean|null|undefined):'gate'|'pump_station'|null{
+  if(verified!==true)return null;
+  if(subtype==='gate')return 'gate';
+  if(subtype==='pump_station')return 'pump_station';
+  return null;
+}
+
+// F05 水闸实际开度摘要：仅取 metric='opening' 的可信值；多个可信开度测点且无代表点时不合成；set_opening 永不参与。
+export function selectOpeningView(views:PointView[]):{kind:'none'|'single'|'multiple';view:PointView|null}{
+  const opening=views.filter(view=>view.metric==='opening'&&view.fact==='trusted');
+  if(opening.length===0)return{kind:'none',view:null};
+  if(opening.length===1)return{kind:'single',view:opening[0]};
+  return{kind:'multiple',view:null};
+}
+
+// F05 水闸运行信息排序：实际开度第一、设置开度第二，其余保持登记顺序。
+export function orderGateMetrics(views:PointView[]):PointView[]{
+  const rank=(metric:string)=>metric==='opening'?0:metric==='set_opening'?1:2;
+  return views.map((view,index)=>({view,index})).sort((a,b)=>rank(a.view.metric)-rank(b.view.metric)||a.index-b.index).map(row=>row.view);
+}
