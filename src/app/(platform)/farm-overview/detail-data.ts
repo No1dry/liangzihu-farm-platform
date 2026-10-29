@@ -56,6 +56,11 @@ export function mapAlerts(rows:ApiAlert[]):AlertView[]{
   return rows.map(row=>({id:row.id,title:row.title,severity:row.severity,state:row.state==='open'?'open' as const:'recovered' as const,current:row.state==='open'}));
 }
 
+// F06 顶部当前重要告警：仅 open 事件；空数组只代表本次可信查询无当前告警。
+export function currentAlerts(views:AlertView[]):AlertView[]{
+  return views.filter(view=>view.current);
+}
+
 export const factLabels:Record<FactState,string>={unconfigured:'未配置',pending:'待核实',trusted:'可信',stale:'已过期',suspect:'质量存疑',conflict:'存在冲突'};
 
 // F04 生产批次适配：取当前对象最新未结束且未被更正的批次；verified=false 只作待核实展示。

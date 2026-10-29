@@ -1,10 +1,10 @@
 'use client';
 import Link from 'next/link';
-import {useMemo} from 'react';
+import {useEffect,useMemo,useState} from 'react';
 import {demoAlerts,demoTasks} from './demo-fixture';
 import KindIcon from './kind-icon';
 import {resolveBusinessClass,resolveActiveTab,tabsFor,classLabels,type BusinessClass,type DetailTabId,type RecordFilter} from './detail-classes';
-import {groupByMetric,factLabels,currentBatch,pickTrustedIndicators,selectOpeningView,orderGateMetrics,type PointView,type SectionRequestState} from './detail-data';
+import {groupByMetric,factLabels,currentBatch,pickTrustedIndicators,selectOpeningView,orderGateMetrics,currentAlerts,type PointView,type SectionRequestState} from './detail-data';
 import {boundaryAreaSqm,formatArea} from './detail-area';
 import {useObjectDetail} from './use-object-detail';
 import styles from './farm-overview.module.css';
@@ -26,6 +26,13 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
  const demo=mode==='demo';
  // F03：真实对象的测点/告警按需读取；演示对象不请求正式接口。
  const detail=useObjectDetail(item&&!demo?item.id:null,true);
+ // F06：记录展开属业务局部交互，一次一条，切换对象即清空（同类保留标签的规则在 F02 已落实）。
+ const [expandedRecordId,setExpandedRecordId]=useState<string|null>(null);
+ useEffect(()=>{setExpandedRecordId(null);},[item?.id]);
+ const openAlerts=currentAlerts(detail.alertViews);
+ const locateAlert=(id:string)=>{onTab('records');onRecordFilter('alert');setExpandedRecordId(id);};
+ // F06 顶部当前告警条：仅在可信查询成功且确有 open 事件时出现；读取失败明确「无法确认」，不冒充无告警。
+ const alertSlot=<>{detail.alertState==='ready'?openAlerts.length>0&&<div className={styles.attention}>当前告警 {openAlerts.length} 条：{openAlerts[0].title} <button type="button" onClick={()=>locateAlert(openAlerts[0].id)}>查看</button></div>:detail.alertState==='error'?<p className={styles.drawerHint}>当前重要告警状态无法确认（读取失败）。<button type="button" onClick={detail.retry}>重试</button></p>:null}</>;
  if(!item&&!region&&!mobile)return null;
  const title=item?.name??region?.name??mobile?.machine_name??'';
  const kindLabel=region?'片区':mobile?'机动设备':cls?classLabels[cls]:'农业对象';
@@ -60,6 +67,7 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
     {area&&<p className={styles.detailContext}>{item.boundary_status==='verified'?'按已核实登记边界计算':'按草稿边界计算，尚未核实'}；与 CAD 竣工图施工参考面积是不同口径。</p>}
     {detail.batchState==='loading'?<p className={styles.drawerHint}>正在读取生产批次…</p>:detail.batchState==='denied'?<p className={styles.drawerHint}>当前账号无权读取生产批次。</p>:detail.batchState==='error'?<p className={styles.drawerHint}>生产批次读取失败。<button type="button" onClick={detail.retry}>重试</button></p>:batch.state==='trusted'&&batch.batch?<p className={styles.businessLead}>{cls==='field'?'当前生产':'当前养殖'}：{batch.batch.species}{batch.batch.variety?`（${batch.batch.variety}）`:''} · {batch.batch.stage}</p>:batch.state==='pending'&&batch.batch?<p className={styles.drawerHint}>{batch.reason}：{batch.batch.species} · {batch.batch.stage}；暂不作为可信生产信息。</p>:<p className={styles.drawerHint}>暂无生产批次登记。</p>}
     {cls==='pond'&&indicators.length>0&&<p className={styles.metric}>{indicators.map(point=>`${point.name} ${point.value} ${point.valueUnit??point.unit}`).join(' · ')}</p>}
+    {alertSlot}
     <Facts rows={[{label:'农事记录',value:summary?.record_count??0},{label:'关联测点',value:summary?.point_count??0}]}/>
    </>;
   }
@@ -69,10 +77,11 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
    return <>
     {detail.measurementState==='loading'?<p className={styles.drawerHint}>正在读取测点与当前值…</p>:opening.kind==='single'&&opening.view?<p className={styles.metric}>实际开度 {opening.view.value} {opening.view.valueUnit??'%'}{opening.view.sampledAt&&<><br/><small>采样 {time(opening.view.sampledAt)}</small></>}</p>:opening.kind==='multiple'?<p className={styles.drawerHint}>存在多个可信开度测点且未指定代表测点，请到「运行信息」逐项查看，此处不合成数值。</p>:<p className={styles.drawerHint}>实际开度：暂无已核实的代表开度测点。</p>}
     <p className={styles.detailContext}>数据上报：上报状态待确认（测点时效参数未随接口下发，缺口已登记）。</p>
+    {detail.alertState==='ready'?(openAlerts.length>0?alertSlot:<p className={styles.detailContext}>当前重要告警：暂无（仅表示本次可信查询无 open 事件，不代表设备正常）。</p>):alertSlot}
     <Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/>
    </>;
   }
-  if(cls==='pump_station')return <><p className={styles.drawerHint}>泵组运行概况：暂无已核实的机组档案；未确认的设备不计入机组，运行/停止/未知不做猜测。</p><p className={styles.detailContext}>数据上报：上报状态待确认（测点时效参数未随接口下发，缺口已登记）。</p><Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/></>;
+  if(cls==='pump_station')return <><p className={styles.drawerHint}>泵组运行概况：暂无已核实的机组档案；未确认的设备不计入机组，运行/停止/未知不做猜测。</p><p className={styles.detailContext}>数据上报：上报状态待确认（测点时效参数未随接口下发，缺口已登记）。</p>{detail.alertState==='ready'?(openAlerts.length>0?alertSlot:<p className={styles.detailContext}>当前重要告警：暂无（仅表示本次可信查询无 open 事件，不代表设备正常）。</p>):alertSlot}<Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/></>;
   return <Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/>;
  })();
 
@@ -142,7 +151,10 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
     if(alertState==='error')return <p className={styles.drawerHint}>相关记录读取失败。<button type="button" onClick={retry}>重试</button></p>;
     if(recordFilter!=='all'&&recordFilter!=='alert')return <p className={styles.drawerHint}>「{recordFilters.find(row=>row.id===recordFilter)?.label}」类别的按对象聚合接口尚未提供（F06 后端依赖）；暂不展示推断记录。</p>;
     if(!alertViews.length)return <p className={styles.drawerHint}>该类别暂无相关记录。</p>;
-    return <>{alertViews.map(row=><div key={row.id} className={styles.recordItem}><strong>{row.title}</strong><span>{row.severity} · {row.current?'当前告警':'已恢复'}</span></div>)}<p className={styles.drawerHint}>操作、巡检与维护类别及事件时间字段的聚合接口待提供（F06）；已恢复告警仅作历史展示。</p></>;
+    return <>{alertViews.map(row=><div key={row.id} className={styles.recordItem}>
+     <button type="button" className={styles.recordItemButton} aria-expanded={expandedRecordId===row.id} onClick={()=>setExpandedRecordId(expandedRecordId===row.id?null:row.id)}><strong>{row.title}</strong><span>{row.severity} · {row.current?'当前告警':'已恢复'}</span></button>
+     {expandedRecordId===row.id&&<div className={styles.recordDetail}><dl className={styles.detailList}><div><dt>类别</dt><dd>告警</dd></div><div><dt>业务状态</dt><dd>{row.current?'当前（open）':'已恢复（recovered）'}</dd></div><div><dt>严重程度</dt><dd>{row.severity}</dd></div><div><dt>事件编号</dt><dd>{row.id.slice(0,8)}…</dd></div><div><dt>事件时间</dt><dd>接口暂未提供（缺口已登记）</dd></div></dl><Link href={`/alerts/${row.id}`}>查看完整告警 ↗</Link></div>}
+    </div>)}<p className={styles.drawerHint}>操作、巡检与维护类别及事件时间字段的聚合接口待提供（F06 后端依赖）；已恢复告警仅作历史展示；每条记录可展开查看来源与完整业务入口，一次仅展开一条。</p></>;
    })()}
   </div>}
   <div className={styles.drawerActions}>{demo?<button type="button" onClick={onExitDemo}>退出演示，管理真实资料 ↗</button>:<>{item?.kind==='farm'&&<Link href="/objects">查看全部对象 ↗</Link>}{region&&canConfigure&&<button type="button" onClick={onManageRegion}>管理村庄与关联 ↗</button>}{item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>查看完整档案 ↗</Link>}{item&&['field','pond'].includes(item.kind)&&<Link href={`/map-editor?object=${item.id}`} onClick={onSaveReturn}>{item.geometry?'编辑边界':'登记边界'}</Link>}{item&&item.kind!=='farm'&&item.kind!=='mobile'&&<details className={styles.moreActions}><summary>更多</summary><div className={styles.drawerLinks}>{canConfigure&&item&&onChangeRegion&&<button type="button" onClick={()=>onChangeRegion(item)}>更改所属村庄</button>}{item?.kind==='field'&&<Link href="/records">查看农事记录 ↗</Link>}{item?.kind==='pond'&&<Link href="/alerts">查看告警与测点 ↗</Link>}{item?.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item?.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div></details>}{mobile&&<Link href="/machinery">打开农机业务 ↗</Link>}</>}</div>

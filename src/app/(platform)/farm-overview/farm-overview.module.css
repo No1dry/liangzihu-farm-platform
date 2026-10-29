@@ -291,3 +291,11 @@
 .recordItem{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid #e4ebdf;font-size:13px}
 .recordItem strong{font-weight:650;color:#203a2c}
 .recordItem span{flex:0 0 auto;font-size:11px;color:#718175}
+
+/* F06 业务记录展开 */
+.recordItemButton{display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;padding:0;background:transparent;border:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.recordItemButton strong{font-weight:650;color:#203a2c}
+.recordItemButton span{flex:0 0 auto;font-size:11px;color:#718175}
+.recordItemButton:hover strong{color:#17513b}
+.recordDetail{padding:8px 0 4px}
+.recordDetail a{display:inline-block;margin-top:6px;color:#225540;font-size:12px;font-weight:650}
