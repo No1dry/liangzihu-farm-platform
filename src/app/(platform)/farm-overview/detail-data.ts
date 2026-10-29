@@ -61,6 +61,18 @@ export function currentAlerts(views:AlertView[]):AlertView[]{
   return views.filter(view=>view.current);
 }
 
+// F07 历史趋势适配：与既有测点历史页同一映射口径——非正典或单位不符不取值，非 valid 或冲突标记为待核断点。
+export type ReadingRow={id:string;sampled_at:string;value:number|null;unit:string;quality:string;conflicted:boolean;canonical:boolean};
+export type TrendPoint={id:string;time:number;value:number|null;valid:boolean};
+export function toTrendPoints(rows:ReadingRow[],pointUnit:string):TrendPoint[]{
+  return rows.filter(row=>row.sampled_at&&Number.isFinite(Date.parse(row.sampled_at))).map(row=>({
+    id:row.id,
+    time:Date.parse(row.sampled_at),
+    value:row.canonical&&row.unit===pointUnit?row.value:null,
+    valid:row.canonical&&row.quality==='valid'&&!row.conflicted,
+  }));
+}
+
 export const factLabels:Record<FactState,string>={unconfigured:'未配置',pending:'待核实',trusted:'可信',stale:'已过期',suspect:'质量存疑',conflict:'存在冲突'};
 
 // F04 生产批次适配：取当前对象最新未结束且未被更正的批次；verified=false 只作待核实展示。

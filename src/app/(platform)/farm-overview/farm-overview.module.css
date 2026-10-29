@@ -299,3 +299,16 @@
 .recordItemButton:hover strong{color:#17513b}
 .recordDetail{padding:8px 0 4px}
 .recordDetail a{display:inline-block;margin-top:6px;color:#225540;font-size:12px;font-weight:650}
+
+/* F07 测点行与趋势预览 */
+.pointList{display:block;border-top:1px solid #e4ebdf}
+.pointRow{border-bottom:1px solid #e4ebdf}
+.pointRowButton{display:flex;justify-content:space-between;align-items:baseline;gap:14px;width:100%;padding:9px 0;background:transparent;border:0;font:inherit;font-size:12px;color:inherit;text-align:left}
+button.pointRowButton{cursor:pointer}
+button.pointRowButton:hover>span:first-child{color:#17513b}
+.pointRowButton>span:first-child{color:#718175}
+.pointRowButton>strong{margin:0;text-align:right;font-weight:500}
+.pointTime{display:block;font-size:10px;color:#98a398;font-weight:400}
+.trendBox{padding:8px 0 12px}
+.trendBox :global(.trend-chart){margin:8px 0;padding:12px}
+.trendBox :global(.section-heading h2){font-size:13px}

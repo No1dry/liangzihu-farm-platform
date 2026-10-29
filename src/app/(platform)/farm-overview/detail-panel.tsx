@@ -7,6 +7,8 @@ import {resolveBusinessClass,resolveActiveTab,tabsFor,classLabels,type BusinessC
 import {groupByMetric,factLabels,currentBatch,pickTrustedIndicators,selectOpeningView,orderGateMetrics,currentAlerts,type PointView,type SectionRequestState} from './detail-data';
 import {boundaryAreaSqm,formatArea} from './detail-area';
 import {useObjectDetail} from './use-object-detail';
+import {usePointHistory,type TrendWindow} from './use-point-history';
+import TimeSeries from '@/components/platform/time-series';
 import styles from './farm-overview.module.css';
 
 type Item={id:string;farm_id?:string;farmId?:string;symbol?:string;name:string;code:string;kind:string;version:number;boundary_status:string;geometry:unknown;object_source?:string;object_recorded_at?:string;boundary_source?:string|null;boundary_recorded_at?:string|null;regionId?:string;detail?:string;status?:string;metric?:string;sampledAt?:string};
@@ -16,6 +18,23 @@ type Summary={object_id:string;open_alerts:number;record_count:number;point_coun
 const recordFilters:{id:RecordFilter;label:string}[]=[{id:'all',label:'全部'},{id:'operation',label:'操作'},{id:'inspection',label:'巡检'},{id:'alert',label:'告警'},{id:'maintenance',label:'维护'}];
 function Facts({rows}:{rows:{value:string|number;label:string}[]}){return <div className={styles.detailFacts}>{rows.map(row=><div key={row.label}><strong>{row.value}</strong><span>{row.label}</span></div>)}</div>;}
 function time(value?:string|null){return value?new Date(value).toLocaleString('zh-CN'):'未提供';}
+
+// F07 单测点轻量趋势预览：24h/7d 切换、一次只展开一条、缺口断点与质量标识由 TimeSeries 承担。
+function PointTrend({point}:{point:PointView}){
+ const [win,setWin]=useState<TrendWindow>('24h');
+ const trend=usePointHistory(point.id,win);
+ return <div className={styles.trendBox}>
+  <div className={styles.recordFilters} role="group" aria-label="趋势时间范围">
+   <button type="button" aria-pressed={win==='24h'} className={win==='24h'?styles.activeFilter:''} onClick={()=>setWin('24h')}>24 小时</button>
+   <button type="button" aria-pressed={win==='7d'} className={win==='7d'?styles.activeFilter:''} onClick={()=>setWin('7d')}>7 天</button>
+  </div>
+  {trend.status==='loading'&&<p className={styles.drawerHint}>正在读取历史…</p>}
+  {trend.status==='denied'&&<p className={styles.drawerHint}>当前账号无权读取该测点历史。</p>}
+  {trend.status==='error'&&<p className={styles.drawerHint}>历史读取失败。<button type="button" onClick={trend.retry}>重试</button></p>}
+  {trend.status==='empty'&&<p className={styles.drawerHint}>该时段暂无监测记录{win==='24h'?'；可切换 7 天查看':''}。</p>}
+  {trend.status==='ready'&&<TimeSeries points={trend.points} unit={trend.unit||point.unit} maxGapMs={trend.maxGapMs} title={point.name}/>}
+ </div>;
+}
 
 // 统一右侧详情框架（F01）：身份标题 + 业务摘要插槽 + 三标签 + 真实完整档案入口。
 // 只做展示分发；缺少后端可信数据时显示明确空态，不伪造数值。
@@ -28,7 +47,8 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
  const detail=useObjectDetail(item&&!demo?item.id:null,true);
  // F06：记录展开属业务局部交互，一次一条，切换对象即清空（同类保留标签的规则在 F02 已落实）。
  const [expandedRecordId,setExpandedRecordId]=useState<string|null>(null);
- useEffect(()=>{setExpandedRecordId(null);},[item?.id]);
+ const [expandedPointId,setExpandedPointId]=useState<string|null>(null);
+ useEffect(()=>{setExpandedRecordId(null);setExpandedPointId(null);},[item?.id]);
  const openAlerts=currentAlerts(detail.alertViews);
  const locateAlert=(id:string)=>{onTab('records');onRecordFilter('alert');setExpandedRecordId(id);};
  // F06 顶部当前告警条：仅在可信查询成功且确有 open 事件时出现；读取失败明确「无法确认」，不冒充无告警。
@@ -86,7 +106,7 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
  })();
 
  // F03 测量分区：按「指标→测点」展示，局部失败隔离与重试，不重置地图。
- const measurementSection=(title:string,ordered?:PointView[])=>{
+ const measurementSection=(title:string,ordered?:PointView[],expandable=true)=>{
   const {measurementState,pointViews,retry}=detail;
   const views=ordered??pointViews;
   if(measurementState==='loading')return <p className={styles.drawerHint}>正在读取测点与当前值…</p>;
@@ -95,7 +115,10 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
   if(!views.length)return <p className={styles.drawerHint}>暂无已登记的关联测点；{title}不展示任何推断数值。</p>;
   return <>
    {measurementState==='partial'&&<p className={styles.drawerHint}>部分数据读取失败，当前值可能不完整。<button type="button" onClick={retry}>重试</button></p>}
-   {groupByMetric(views).map(group=><section key={group.metric} className={styles.detailSection}><h3>{group.metric}</h3><dl className={styles.detailList}>{group.points.map(point=><div key={point.id}><dt>{point.name}</dt><dd>{point.fact==='trusted'?<>{point.value} {point.valueUnit??point.unit}{point.sampledAt&&<><br/><small>采样 {time(point.sampledAt)}</small></>}</>:<span className={styles.factReason} data-fact={point.fact}>{point.reason}</span>}</dd></div>)}</dl></section>)}
+   {groupByMetric(views).map(group=><section key={group.metric} className={styles.detailSection}><h3>{group.metric}</h3><div className={styles.pointList}>{group.points.map(point=><div key={point.id} className={styles.pointRow}>
+    {expandable?<button type="button" className={styles.pointRowButton} aria-expanded={expandedPointId===point.id} onClick={()=>setExpandedPointId(expandedPointId===point.id?null:point.id)}><span>{point.name}</span><strong>{point.fact==='trusted'?<>{point.value} {point.valueUnit??point.unit}{point.sampledAt&&<small className={styles.pointTime}>采样 {time(point.sampledAt)}</small>}</>:point.reason}</strong></button>:<div className={styles.pointRowButton}><span>{point.name}</span><strong>{point.fact==='trusted'?<>{point.value} {point.valueUnit??point.unit}{point.sampledAt&&<small className={styles.pointTime}>采样 {time(point.sampledAt)}</small>}</>:point.reason}</strong></div>}
+    {expandable&&expandedPointId===point.id&&<PointTrend point={point}/>}
+   </div>)}</div></section>)}
   </>;
  };
 
@@ -124,7 +147,7 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
     <p className={styles.drawerHint}>本页面只读，不提供控制操作。</p>
    </div>;
   }
-  if(activeTab==='devices')return <div className={styles.detailTabBody}>{item.kind==='facility'&&<p className={styles.detailContext}>设施对象与实体设备须分别登记；设备详情进入设备台账核对。</p>}{measurementSection('关联设备')}{item.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div>;
+  if(activeTab==='devices')return <div className={styles.detailTabBody}>{item.kind==='facility'&&<p className={styles.detailContext}>设施对象与实体设备须分别登记；设备详情进入设备台账核对。</p>}{measurementSection('关联设备',undefined,false)}{item.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div>;
   return null;
  })();
 
