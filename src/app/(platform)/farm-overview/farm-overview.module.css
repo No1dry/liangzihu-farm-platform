@@ -278,3 +278,9 @@
 
 /* CAD 竣工图参考图层 */
 .cadLegendNote{margin:0 0 8px;font-size:11px;color:#8a6a3c;line-height:1.5}
+
+/* F01 统一详情框架：相关记录类别筛选 */
+.recordFilters{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 12px}
+.recordFilters button{min-height:28px;padding:4px 10px;border:1px solid #d7e1d0;border-radius:99px;background:#fff;color:#536a51;font-size:12px;cursor:pointer}
+.recordFilters button:hover{background:#f2f7ed}
+.recordFilters button.activeFilter{background:var(--forest,#163a2d);color:#fff;border-color:var(--forest,#163a2d)}

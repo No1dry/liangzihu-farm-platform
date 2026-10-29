@@ -20,7 +20,7 @@ import Stroke from 'ol/style/Stroke.js';
 import {useApi} from '@/components/platform/use-api';
 import {tiandituWmtsUrls,validBrowserKey} from '@/modules/map-prototype/tianditu';
 import styles from './farm-overview.module.css';
-import OverviewDetail from './overview-detail';
+import DetailPanel from './detail-panel';
 import KindIcon from './kind-icon';
 import ManagementDrawer from './management-drawer';
 import ResourceTree from './resource-tree';
@@ -218,7 +218,7 @@ export default function FarmOverview(){
      {mapMessage&&<p className={styles.mapMessage} role="status">{mapMessage}<button type="button" aria-label="关闭提示" onClick={()=>setMapMessage('')}>×</button></p>}
    </div>
     {drawerView===null&&cadSelectedFeature&&<CadReferenceCard feature={cadSelectedFeature} onClose={()=>{clearCadSelection();fitCadExtent();}}/>}
-    {drawerView===null&&!cadSelectedFeature&&<OverviewDetail mode={mode} item={selected} region={regions.find(row=>row.id===selectedRegionId)??null} mobile={mobileDevices.find(row=>row.binding_id===selectedMobileId)??null} items={items} regions={regions} summaries={mode==='real'?displayData?.summaries??[]:[]} mobileDevices={mobileDevices} canConfigure={canConfigure} onClose={close} onExitDemo={()=>switchMode('real')} onManageRegion={openRegionManager} onSaveReturn={saveReturnState} onChangeRegion={item=>{setDrawerView('change-region');setDrawerObjectId(item.id);setDrawerRegionId(null);setDirectoryOpen(false);}}/>}
+    {drawerView===null&&!cadSelectedFeature&&<DetailPanel mode={mode} item={selected} region={regions.find(row=>row.id===selectedRegionId)??null} mobile={mobileDevices.find(row=>row.binding_id===selectedMobileId)??null} items={items} regions={regions} summaries={mode==='real'?displayData?.summaries??[]:[]} mobileDevices={mobileDevices} canConfigure={canConfigure} onClose={close} onExitDemo={()=>switchMode('real')} onManageRegion={openRegionManager} onSaveReturn={saveReturnState} onChangeRegion={item=>{setDrawerView('change-region');setDrawerObjectId(item.id);setDrawerRegionId(null);setDirectoryOpen(false);}}/>}
     {drawerView!==null&&(()=>{const drawerObject=drawerObjectId?items.find(i=>i.id===drawerObjectId)??null:null;return<ManagementDrawer view={drawerView} onClose={()=>{setDrawerView(null);setDrawerRegionId(null);setDrawerObjectId(null);}} onSaved={result=>{void reload();void configure.reload();if(result.view==='new-object'&&result.drawNow){saveReturnState();window.location.assign(`/map-editor?object=${result.id}&from=farm-overview`);return;}if(result.view==='new-village'){setSelectedRegionId(result.id);setSelectedId(null);setDirectoryCollapsed(false);}if(result.view==='new-object'){setSelectedId(result.id);setSelectedRegionId(null);}if(result.view==='recycle-bin'){setSelectedId(null);setSelectedRegionId(null);}setDrawerView(null);setDrawerRegionId(null);setDrawerObjectId(null);}} regions={regions} configurable={configurable} allConfigurable={configure.data?.items??[]} defaultRegionId={drawerRegionId??undefined} objectId={drawerObjectId??undefined} objectFarmId={drawerObject?(drawerObject.farm_id??drawerObject.farmId??undefined):undefined} currentRegionId={drawerObjectId?(regions.find(r=>r.links.some(l=>l.objectId===drawerObjectId))?.id??undefined):undefined} mode={mode} demoReadOnly={mode==='demo'} onSwitchMode={()=>switchMode('real')}/>;})()}
    </div><p className={styles.footerNote}>{mode==='demo'?'演示几何仅用于界面体验，不代表测绘界址、设备 GPS 或真实告警；不会写入正式业务库。':'地图仅供浏览。没有边界的对象不生成虚构坐标；地图邻近不证明设备归属。当前列表使用既有地图授权结果，最多展示 500 个对象。'}</p></section>;
 }
