@@ -1,25 +1,22 @@
 'use client';
 import Link from 'next/link';
-import {useMemo,useState} from 'react';
+import {useMemo} from 'react';
 import {demoAlerts,demoTasks} from './demo-fixture';
 import KindIcon from './kind-icon';
-import {resolveBusinessClass,resolveActiveTab,tabsFor,classLabels,type BusinessClass,type DetailTabId} from './detail-classes';
+import {resolveBusinessClass,resolveActiveTab,tabsFor,classLabels,type BusinessClass,type DetailTabId,type RecordFilter} from './detail-classes';
 import styles from './farm-overview.module.css';
 
 type Item={id:string;farm_id?:string;farmId?:string;symbol?:string;name:string;code:string;kind:string;version:number;boundary_status:string;geometry:unknown;object_source?:string;object_recorded_at?:string;boundary_source?:string|null;boundary_recorded_at?:string|null;regionId?:string;detail?:string;status?:string;metric?:string;sampledAt?:string};
 type Region={id:string;farmId:string;name:string;links:{objectId:string}[]};
 type Mobile={binding_id:string;object_id:string;machine_name:string;terminal_name:string;valid_until:string};
 type Summary={object_id:string;open_alerts:number;record_count:number;point_count:number};
-type RecordFilter='all'|'operation'|'inspection'|'alert'|'maintenance';
 const recordFilters:{id:RecordFilter;label:string}[]=[{id:'all',label:'全部'},{id:'operation',label:'操作'},{id:'inspection',label:'巡检'},{id:'alert',label:'告警'},{id:'maintenance',label:'维护'}];
 function Facts({rows}:{rows:{value:string|number;label:string}[]}){return <div className={styles.detailFacts}>{rows.map(row=><div key={row.label}><strong>{row.value}</strong><span>{row.label}</span></div>)}</div>;}
 function time(value?:string|null){return value?new Date(value).toLocaleString('zh-CN'):'未提供';}
 
 // 统一右侧详情框架（F01）：身份标题 + 业务摘要插槽 + 三标签 + 真实完整档案入口。
 // 只做展示分发；缺少后端可信数据时显示明确空态，不伪造数值。
-export default function DetailPanel({mode,item,region,mobile,items,regions,summaries,mobileDevices,canConfigure,onClose,onExitDemo,onManageRegion,onSaveReturn,onChangeRegion}:{mode:'real'|'demo';item:Item|null;region:Region|null;mobile:Mobile|null;items:Item[];regions:Region[];summaries:Summary[];mobileDevices:Mobile[];canConfigure:boolean;onClose:()=>void;onExitDemo:()=>void;onManageRegion:()=>void;onSaveReturn:()=>void;onChangeRegion?:(item:Item)=>void}){
- const [tab,setTab]=useState<DetailTabId>('basic');
- const [recordFilter,setRecordFilter]=useState<RecordFilter>('all');
+export default function DetailPanel({mode,item,region,mobile,items,regions,summaries,mobileDevices,canConfigure,tab,recordFilter,onTab,onRecordFilter,onClose,onExitDemo,onManageRegion,onSaveReturn,onChangeRegion}:{mode:'real'|'demo';item:Item|null;region:Region|null;mobile:Mobile|null;items:Item[];regions:Region[];summaries:Summary[];mobileDevices:Mobile[];canConfigure:boolean;tab:DetailTabId;recordFilter:RecordFilter;onTab:(tab:DetailTabId)=>void;onRecordFilter:(filter:RecordFilter)=>void;onClose:()=>void;onExitDemo:()=>void;onManageRegion:()=>void;onSaveReturn:()=>void;onChangeRegion?:(item:Item)=>void}){
  const cls:BusinessClass|null=item?resolveBusinessClass(item,mode==='demo'):null;
  const tabs=useMemo(()=>{if(region||mobile)return[{id:'basic' as const,label:'基本信息'},{id:'records' as const,label:'相关记录'}];return cls?tabsFor(cls):[];},[cls,region,mobile]);
  const activeTab=cls?resolveActiveTab(tab,cls):'basic';
@@ -67,7 +64,7 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
   <p className={styles.detailContext}>{demo?'合成示例 · 非真实现场':region?'经营分组，不代表行政村边界':item&&regionForItem?`所属 ${regionForItem.name}`:mobile?'绑定归属来自原农机业务':cls==='generic'&&item?.kind==='facility'?'设施业务子类尚未核实，按通用设施概要显示':'仅当前账号获授权资料'}</p>
   {summarySlot}
   <div className={styles.detailTabs} role="tablist" aria-label="对象资料分区">
-   {tabs.map(row=><button key={row.id} type="button" role="tab" aria-selected={activeTab===row.id} className={activeTab===row.id?styles.activeTab:''} onClick={()=>setTab(row.id)}>{row.label}</button>)}
+   {tabs.map(row=><button key={row.id} type="button" role="tab" aria-selected={activeTab===row.id} className={activeTab===row.id?styles.activeTab:''} onClick={()=>onTab(row.id)}>{row.label}</button>)}
   </div>
   {activeTab==='basic'&&<div className={styles.detailTabBody}>
    {(item||region)&&<section className={styles.detailSection}><div className={styles.detailSectionHeader}><h3>基本信息</h3>{!demo&&item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>编辑</Link>}</div><dl className={styles.detailList}>{item&&<div><dt>对象编号</dt><dd>{item.code}</dd></div>}{ownerFarm&&<div><dt>所属农场</dt><dd>{ownerFarm.name}</dd></div>}{regionForItem&&<div><dt>所属村庄</dt><dd>{regionForItem.name}</dd></div>}<div><dt>对象名称</dt><dd>{title}</dd></div>{item&&<div><dt>边界状态</dt><dd>{demo?'演示区域（非测绘边界）':boundaryStatus}</dd></div>}{item&&<div><dt>登记依据</dt><dd>{item.boundary_source??item.object_source??'未提供'}</dd></div>}</dl></section>}
@@ -76,7 +73,7 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
   </div>}
   {middleTabBody}
   {activeTab==='records'&&<div className={styles.detailTabBody}>
-   <div className={styles.recordFilters} role="group" aria-label="记录类别筛选">{recordFilters.map(row=><button key={row.id} type="button" className={recordFilter===row.id?styles.activeFilter:''} aria-pressed={recordFilter===row.id} onClick={()=>setRecordFilter(row.id)}>{row.label}</button>)}</div>
+   <div className={styles.recordFilters} role="group" aria-label="记录类别筛选">{recordFilters.map(row=><button key={row.id} type="button" className={recordFilter===row.id?styles.activeFilter:''} aria-pressed={recordFilter===row.id} onClick={()=>onRecordFilter(row.id)}>{row.label}</button>)}</div>
    {demo?(shownRecords.length?shownRecords.map(row=><p key={row.id} className={styles.drawerHint}>{row.text}</p>):<p className={styles.drawerHint}>该类别暂无演示记录。</p>):<p className={styles.drawerHint}>按对象聚合操作、巡检、告警与维护事件的只读接口尚未提供（已登记为后端接口依赖，F06）；此处不展示任何推断记录。原始业务记录仍可从下方真实业务入口查看。</p>}
   </div>}
   <div className={styles.drawerActions}>{demo?<button type="button" onClick={onExitDemo}>退出演示，管理真实资料 ↗</button>:<>{item?.kind==='farm'&&<Link href="/objects">查看全部对象 ↗</Link>}{region&&canConfigure&&<button type="button" onClick={onManageRegion}>管理村庄与关联 ↗</button>}{item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>查看完整档案 ↗</Link>}{item&&['field','pond'].includes(item.kind)&&<Link href={`/map-editor?object=${item.id}`} onClick={onSaveReturn}>{item.geometry?'编辑边界':'登记边界'}</Link>}{item&&item.kind!=='farm'&&item.kind!=='mobile'&&<details className={styles.moreActions}><summary>更多</summary><div className={styles.drawerLinks}>{canConfigure&&item&&onChangeRegion&&<button type="button" onClick={()=>onChangeRegion(item)}>更改所属村庄</button>}{item?.kind==='field'&&<Link href="/records">查看农事记录 ↗</Link>}{item?.kind==='pond'&&<Link href="/alerts">查看告警与测点 ↗</Link>}{item?.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item?.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div></details>}{mobile&&<Link href="/machinery">打开农机业务 ↗</Link>}</>}</div>

@@ -3,6 +3,7 @@
 // 真实模式一律回退通用设施；演示模式的 symbol 仅用于演示骨架，不构成正式业务身份。
 export type BusinessClass='farm'|'field'|'pond'|'gate'|'pump_station'|'mobile'|'generic';
 export type DetailTabId='basic'|'production'|'monitoring'|'operation'|'devices'|'records';
+export type RecordFilter='all'|'operation'|'inspection'|'alert'|'maintenance';
 
 export type ClassifiedItem={kind:string;symbol?:string|null};
 
@@ -39,4 +40,14 @@ export function tabsFor(cls:BusinessClass):{id:DetailTabId;label:string}[]{
 // 同类切换保留标签、跨类重置的规则在 F02 完善；此处保证当前标签在新对象上一定合法。
 export function resolveActiveTab(current:DetailTabId,cls:BusinessClass):DetailTabId{
   return tabsFor(cls).some(tab=>tab.id===current)?current:'basic';
+}
+
+export type SelectionClass=BusinessClass|'region'|null;
+
+// F02 跨对象切换规则：首次建立选择（含会话恢复）不重置；同类切换保留当前标签；跨类（含 gate↔pump、含进出片区/设备）回「基本信息」。
+export function nextTabOnSelection(prev:SelectionClass,next:SelectionClass,current:DetailTabId):DetailTabId{
+  if(next===null)return current;
+  if(prev===null)return current;
+  if(prev===next)return next==='region'?current:resolveActiveTab(current,next);
+  return 'basic';
 }

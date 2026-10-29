@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveBusinessClass,tabsFor,resolveActiveTab} from '../../src/app/(platform)/farm-overview/detail-classes';
+import {resolveBusinessClass,tabsFor,resolveActiveTab,nextTabOnSelection} from '../../src/app/(platform)/farm-overview/detail-classes';
 
 test('详情框架业务类型分发：正式对象按 kind，设施回退通用，演示 symbol 不构成正式身份',()=>{
   assert.equal(resolveBusinessClass({kind:'field'},false),'field');
@@ -36,4 +36,23 @@ test('详情框架标签合法性：当前标签对新业务类失效时回退�
   assert.equal(resolveActiveTab('operation','gate'),'operation');
   assert.equal(resolveActiveTab('operation','generic'),'basic');
   assert.equal(resolveActiveTab('records','farm'),'records');
+});
+
+test('F02 跨对象切换标签规则：首次不重置、同类保留、跨类回基本信息',()=>{
+  // 首次建立选择（含会话恢复）：保留当前标签
+  assert.equal(nextTabOnSelection(null,'field','records'),'records');
+  // 同类 A→B：保留适用标签
+  assert.equal(nextTabOnSelection('field','field','production'),'production');
+  assert.equal(nextTabOnSelection('gate','gate','operation'),'operation');
+  // 跨类：回基本信息（含 gate↔pump 同 kind 不同业务类）
+  assert.equal(nextTabOnSelection('field','pond','production'),'basic');
+  assert.equal(nextTabOnSelection('gate','pump_station','operation'),'basic');
+  assert.equal(nextTabOnSelection('field','generic','production'),'basic');
+  // 进出片区/机动设备视为跨类
+  assert.equal(nextTabOnSelection('region','field','records'),'basic');
+  assert.equal(nextTabOnSelection('field','region','production'),'basic');
+  // 同类但标签失效时回退合法标签
+  assert.equal(nextTabOnSelection('generic','generic','production'),'basic');
+  // 选择清空：不重置
+  assert.equal(nextTabOnSelection('field',null,'records'),'records');
 });
