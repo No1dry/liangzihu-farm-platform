@@ -57,3 +57,19 @@ export function mapAlerts(rows:ApiAlert[]):AlertView[]{
 }
 
 export const factLabels:Record<FactState,string>={unconfigured:'未配置',pending:'待核实',trusted:'可信',stale:'已过期',suspect:'质量存疑',conflict:'存在冲突'};
+
+// F04 生产批次适配：取当前对象最新未结束且未被更正的批次；verified=false 只作待核实展示。
+export type ApiBatch={id:string;object_id:string;code:string;species:string;variety:string|null;stage:string;source:string;verified:boolean;started_at:string;ended_at:string|null;supersedes_id:string|null};
+export function currentBatch(rows:ApiBatch[],objectId:string):{batch:ApiBatch|null;state:'trusted'|'pending'|'none';reason:string}{
+  const superseded=new Set(rows.map(row=>row.supersedes_id).filter((id):id is string=>!!id));
+  const active=rows.filter(row=>row.object_id===objectId&&!row.ended_at&&!superseded.has(row.id));
+  if(!active.length)return{batch:null,state:'none',reason:'暂无生产批次登记'};
+  const latest=active[0];
+  if(!latest.verified)return{batch:latest,state:'pending',reason:'生产批次已登记，尚未核实'};
+  return{batch:latest,state:'trusted',reason:''};
+}
+
+// F04 塘口摘要：最多取两个可信水体指标，逐点展示，不合并不平均。
+export function pickTrustedIndicators(views:PointView[],limit=2):PointView[]{
+  return views.filter(view=>view.fact==='trusted').slice(0,limit);
+}

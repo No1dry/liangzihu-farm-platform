@@ -4,7 +4,8 @@ import {useMemo} from 'react';
 import {demoAlerts,demoTasks} from './demo-fixture';
 import KindIcon from './kind-icon';
 import {resolveBusinessClass,resolveActiveTab,tabsFor,classLabels,type BusinessClass,type DetailTabId,type RecordFilter} from './detail-classes';
-import {groupByMetric,factLabels,type PointView,type SectionRequestState} from './detail-data';
+import {groupByMetric,factLabels,currentBatch,pickTrustedIndicators,type PointView,type SectionRequestState} from './detail-data';
+import {boundaryAreaSqm,formatArea} from './detail-area';
 import {useObjectDetail} from './use-object-detail';
 import styles from './farm-overview.module.css';
 
@@ -49,7 +50,19 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
   if(!item||!cls)return null;
   if(cls==='farm')return <><Facts rows={farmFacts}/>{demo?<div className={styles.attention}>关注事项 · {farmAlerts.length} 条演示提醒{farmAlerts[0]&&<><br/>{farmAlerts[0].text}</>}</div>:<p className={styles.drawerHint}>本农场已授权对象中有 {summaries.filter(row=>farmItemIds.has(row.object_id)).reduce((n,row)=>n+row.open_alerts,0)} 条未关闭告警；仅统计已有授权概要。</p>}</>;
   if(demo)return <><p className={styles.businessLead}>{item.detail}</p>{item.metric&&<p className={styles.metric}>{item.metric}</p>}{item.sampledAt&&<p className={styles.detailContext}>演示采样时间：{time(item.sampledAt)} · 非现场遥测</p>}{item.status&&cls!=='field'&&cls!=='pond'&&<p className={styles.detailContext}>{item.status} · 演示状态</p>}</>;
-  if(cls==='field'||cls==='pond')return <><Facts rows={[{label:'农事记录',value:summary?.record_count??0},{label:'关联测点',value:summary?.point_count??0}]}/></>;
+  if(cls==='field'||cls==='pond'){
+   // F04：管理范围面积（登记边界计算）与生产批次/当前养殖、至多两个可信水体指标。
+   const area=formatArea(boundaryAreaSqm(item.geometry));
+   const batch=currentBatch(detail.batches,item.id);
+   const indicators=cls==='pond'?pickTrustedIndicators(detail.pointViews,2):[];
+   return <>
+    {area&&<p className={styles.metric}>管理范围面积 {area.mu}<small>（{area.sqm}）</small></p>}
+    {area&&<p className={styles.detailContext}>{item.boundary_status==='verified'?'按已核实登记边界计算':'按草稿边界计算，尚未核实'}；与 CAD 竣工图施工参考面积是不同口径。</p>}
+    {detail.batchState==='loading'?<p className={styles.drawerHint}>正在读取生产批次…</p>:detail.batchState==='denied'?<p className={styles.drawerHint}>当前账号无权读取生产批次。</p>:detail.batchState==='error'?<p className={styles.drawerHint}>生产批次读取失败。<button type="button" onClick={detail.retry}>重试</button></p>:batch.state==='trusted'&&batch.batch?<p className={styles.businessLead}>{cls==='field'?'当前生产':'当前养殖'}：{batch.batch.species}{batch.batch.variety?`（${batch.batch.variety}）`:''} · {batch.batch.stage}</p>:batch.state==='pending'&&batch.batch?<p className={styles.drawerHint}>{batch.reason}：{batch.batch.species} · {batch.batch.stage}；暂不作为可信生产信息。</p>:<p className={styles.drawerHint}>暂无生产批次登记。</p>}
+    {cls==='pond'&&indicators.length>0&&<p className={styles.metric}>{indicators.map(point=>`${point.name} ${point.value} ${point.valueUnit??point.unit}`).join(' · ')}</p>}
+    <Facts rows={[{label:'农事记录',value:summary?.record_count??0},{label:'关联测点',value:summary?.point_count??0}]}/>
+   </>;
+  }
   return <Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/>;
  })();
 
@@ -68,7 +81,14 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
 
  const middleTabBody=(()=>{
   if(!item||!cls)return null;
-  if(activeTab==='production')return <div className={styles.detailTabBody}><p className={styles.businessLead}>{demo?item.detail??'演示生产资料':'暂无可信作物或生长阶段资料；进入原农事模块核对。'}</p>{!demo&&<p className={styles.detailContext}>{summary?`农事记录 ${summary.record_count} · 关联测点 ${summary.point_count}`:'暂无关联记录'}</p>}<p className={styles.drawerHint}>经核实的地块面积口径与生产阶段由后续任务（F04）接入；当前不展示推断数值。</p></div>;
+  if(activeTab==='production'){
+   if(demo)return <div className={styles.detailTabBody}><p className={styles.businessLead}>{item.detail??'演示生产资料'}</p></div>;
+   const batch=currentBatch(detail.batches,item.id);
+   return <div className={styles.detailTabBody}>
+    {detail.batchState==='loading'?<p className={styles.drawerHint}>正在读取生产批次…</p>:detail.batchState==='denied'?<p className={styles.drawerHint}>当前账号无权读取生产批次。</p>:detail.batchState==='error'?<p className={styles.drawerHint}>生产批次读取失败。<button type="button" onClick={detail.retry}>重试</button></p>:batch.state==='trusted'&&batch.batch?<dl className={styles.detailList}><div><dt>当前作物</dt><dd>{batch.batch.species}{batch.batch.variety?`（${batch.batch.variety}）`:''}</dd></div><div><dt>生长阶段</dt><dd>{batch.batch.stage}</dd></div><div><dt>批次编号</dt><dd>{batch.batch.code}</dd></div><div><dt>开始时间</dt><dd>{time(batch.batch.started_at)}</dd></div><div><dt>登记来源</dt><dd>{batch.batch.source}</dd></div></dl>:batch.state==='pending'&&batch.batch?<p className={styles.drawerHint}>{batch.reason}：{batch.batch.species} · {batch.batch.stage}；暂不作为可信生产信息。</p>:<p className={styles.drawerHint}>暂无生产批次登记；不展示推断的作物或阶段。</p>}
+    <p className={styles.detailContext}>{summary?`农事记录 ${summary.record_count} · 关联测点 ${summary.point_count}`:'暂无关联记录'}</p>
+   </div>;
+  }
   if(activeTab==='monitoring')return <div className={styles.detailTabBody}>{demo?<><p className={styles.businessLead}>{item.detail??'演示水体资料'}</p>{item.metric&&<p className={styles.metric}>{item.metric}</p>}</>:measurementSection('水体监测')}{!demo&&<p className={styles.drawerHint}>同指标多测点不会自动合并或平均；没有可信当前值时不显示数值。</p>}</div>;
   if(activeTab==='operation')return <div className={styles.detailTabBody}>{demo?<><p className={styles.businessLead}>{item.detail}</p><p className={styles.metric}>{item.status} · 演示状态</p></>:cls==='gate'?<><p className={styles.businessLead}>实际开度：暂无已核实的代表开度测点。</p><p className={styles.detailContext}>数据上报：上报状态待确认。</p><p className={styles.drawerHint}>水闸子类身份、代表测点与上报周期须经登记核实（后端接口依赖）；未经核实不显示开度数值。本页面只读，不提供控制操作。</p></>:<><p className={styles.businessLead}>泵组运行概况：暂无已核实的机组档案。</p><p className={styles.detailContext}>数据上报：上报状态待确认。</p><p className={styles.drawerHint}>泵站子类与机组身份须经登记核实（后端接口依赖）；未确认的设备不计入机组，运行/停止/未知不做猜测。本页面只读，不提供控制操作。</p></>}</div>;
   if(activeTab==='devices')return <div className={styles.detailTabBody}>{item.kind==='facility'&&<p className={styles.detailContext}>设施对象与实体设备须分别登记；设备详情进入设备台账核对。</p>}{measurementSection('关联设备')}{item.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div>;
