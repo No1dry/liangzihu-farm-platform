@@ -284,3 +284,10 @@
 .recordFilters button{min-height:28px;padding:4px 10px;border:1px solid #d7e1d0;border-radius:99px;background:#fff;color:#536a51;font-size:12px;cursor:pointer}
 .recordFilters button:hover{background:#f2f7ed}
 .recordFilters button.activeFilter{background:var(--forest,#163a2d);color:#fff;border-color:var(--forest,#163a2d)}
+
+/* F03 只读展示适配：测点事实状态与记录项 */
+.factReason{font-size:11px;color:#8a6a3c}
+.factReason[data-fact='stale']{color:#943c31}
+.recordItem{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 0;border-bottom:1px solid #e4ebdf;font-size:13px}
+.recordItem strong{font-weight:650;color:#203a2c}
+.recordItem span{flex:0 0 auto;font-size:11px;color:#718175}

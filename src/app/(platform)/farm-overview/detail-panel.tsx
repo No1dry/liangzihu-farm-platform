@@ -4,6 +4,8 @@ import {useMemo} from 'react';
 import {demoAlerts,demoTasks} from './demo-fixture';
 import KindIcon from './kind-icon';
 import {resolveBusinessClass,resolveActiveTab,tabsFor,classLabels,type BusinessClass,type DetailTabId,type RecordFilter} from './detail-classes';
+import {groupByMetric,factLabels,type PointView,type SectionRequestState} from './detail-data';
+import {useObjectDetail} from './use-object-detail';
 import styles from './farm-overview.module.css';
 
 type Item={id:string;farm_id?:string;farmId?:string;symbol?:string;name:string;code:string;kind:string;version:number;boundary_status:string;geometry:unknown;object_source?:string;object_recorded_at?:string;boundary_source?:string|null;boundary_recorded_at?:string|null;regionId?:string;detail?:string;status?:string;metric?:string;sampledAt?:string};
@@ -20,8 +22,10 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
  const cls:BusinessClass|null=item?resolveBusinessClass(item,mode==='demo'):null;
  const tabs=useMemo(()=>{if(region||mobile)return[{id:'basic' as const,label:'基本信息'},{id:'records' as const,label:'相关记录'}];return cls?tabsFor(cls):[];},[cls,region,mobile]);
  const activeTab=cls?resolveActiveTab(tab,cls):'basic';
- if(!item&&!region&&!mobile)return null;
  const demo=mode==='demo';
+ // F03：真实对象的测点/告警按需读取；演示对象不请求正式接口。
+ const detail=useObjectDetail(item&&!demo?item.id:null,true);
+ if(!item&&!region&&!mobile)return null;
  const title=item?.name??region?.name??mobile?.machine_name??'';
  const kindLabel=region?'片区':mobile?'机动设备':cls?classLabels[cls]:'农业对象';
  const regionForItem=item&&regions.find(row=>row.links.some(link=>link.objectId===item.id));
@@ -49,12 +53,25 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
   return <Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/>;
  })();
 
+ // F03 测量分区：按「指标→测点」展示，局部失败隔离与重试，不重置地图。
+ const measurementSection=(title:string)=>{
+  const {measurementState,pointViews,retry}=detail;
+  if(measurementState==='loading')return <p className={styles.drawerHint}>正在读取测点与当前值…</p>;
+  if(measurementState==='denied')return <p className={styles.drawerHint}>当前账号无权读取该对象的测点资料。</p>;
+  if(measurementState==='error')return <p className={styles.drawerHint}>测点资料读取失败。<button type="button" onClick={retry}>重试</button></p>;
+  if(!pointViews.length)return <p className={styles.drawerHint}>暂无已登记的关联测点；{title}不展示任何推断数值。</p>;
+  return <>
+   {measurementState==='partial'&&<p className={styles.drawerHint}>部分数据读取失败，当前值可能不完整。<button type="button" onClick={retry}>重试</button></p>}
+   {groupByMetric(pointViews).map(group=><section key={group.metric} className={styles.detailSection}><h3>{group.metric}</h3><dl className={styles.detailList}>{group.points.map(point=><div key={point.id}><dt>{point.name}</dt><dd>{point.fact==='trusted'?<>{point.value} {point.valueUnit??point.unit}{point.sampledAt&&<><br/><small>采样 {time(point.sampledAt)}</small></>}</>:<span className={styles.factReason} data-fact={point.fact}>{point.reason}</span>}</dd></div>)}</dl></section>)}
+  </>;
+ };
+
  const middleTabBody=(()=>{
   if(!item||!cls)return null;
   if(activeTab==='production')return <div className={styles.detailTabBody}><p className={styles.businessLead}>{demo?item.detail??'演示生产资料':'暂无可信作物或生长阶段资料；进入原农事模块核对。'}</p>{!demo&&<p className={styles.detailContext}>{summary?`农事记录 ${summary.record_count} · 关联测点 ${summary.point_count}`:'暂无关联记录'}</p>}<p className={styles.drawerHint}>经核实的地块面积口径与生产阶段由后续任务（F04）接入；当前不展示推断数值。</p></div>;
-  if(activeTab==='monitoring')return <div className={styles.detailTabBody}><p className={styles.businessLead}>{demo?item.detail??'演示水体资料':'暂无已核实的水体监测指标配置。'}</p>{demo&&item.metric&&<p className={styles.metric}>{item.metric}</p>}<p className={styles.drawerHint}>水体指标按「指标→测点」读取（F03/F04）；同指标多测点不会自动合并或平均；没有可信当前值时不显示数值。</p></div>;
+  if(activeTab==='monitoring')return <div className={styles.detailTabBody}>{demo?<><p className={styles.businessLead}>{item.detail??'演示水体资料'}</p>{item.metric&&<p className={styles.metric}>{item.metric}</p>}</>:measurementSection('水体监测')}{!demo&&<p className={styles.drawerHint}>同指标多测点不会自动合并或平均；没有可信当前值时不显示数值。</p>}</div>;
   if(activeTab==='operation')return <div className={styles.detailTabBody}>{demo?<><p className={styles.businessLead}>{item.detail}</p><p className={styles.metric}>{item.status} · 演示状态</p></>:cls==='gate'?<><p className={styles.businessLead}>实际开度：暂无已核实的代表开度测点。</p><p className={styles.detailContext}>数据上报：上报状态待确认。</p><p className={styles.drawerHint}>水闸子类身份、代表测点与上报周期须经登记核实（后端接口依赖）；未经核实不显示开度数值。本页面只读，不提供控制操作。</p></>:<><p className={styles.businessLead}>泵组运行概况：暂无已核实的机组档案。</p><p className={styles.detailContext}>数据上报：上报状态待确认。</p><p className={styles.drawerHint}>泵站子类与机组身份须经登记核实（后端接口依赖）；未确认的设备不计入机组，运行/停止/未知不做猜测。本页面只读，不提供控制操作。</p></>}</div>;
-  if(activeTab==='devices')return <div className={styles.detailTabBody}>{summary&&<p className={styles.drawerHint}>关联测点 {summary.point_count} · 农事记录 {summary.record_count}</p>}{item.kind==='facility'&&<p className={styles.detailContext}>设施对象与实体设备须分别登记；设备详情进入设备台账核对。</p>}{item.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div>;
+  if(activeTab==='devices')return <div className={styles.detailTabBody}>{item.kind==='facility'&&<p className={styles.detailContext}>设施对象与实体设备须分别登记；设备详情进入设备台账核对。</p>}{measurementSection('关联设备')}{item.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div>;
   return null;
  })();
 
@@ -74,7 +91,15 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
   {middleTabBody}
   {activeTab==='records'&&<div className={styles.detailTabBody}>
    <div className={styles.recordFilters} role="group" aria-label="记录类别筛选">{recordFilters.map(row=><button key={row.id} type="button" className={recordFilter===row.id?styles.activeFilter:''} aria-pressed={recordFilter===row.id} onClick={()=>onRecordFilter(row.id)}>{row.label}</button>)}</div>
-   {demo?(shownRecords.length?shownRecords.map(row=><p key={row.id} className={styles.drawerHint}>{row.text}</p>):<p className={styles.drawerHint}>该类别暂无演示记录。</p>):<p className={styles.drawerHint}>按对象聚合操作、巡检、告警与维护事件的只读接口尚未提供（已登记为后端接口依赖，F06）；此处不展示任何推断记录。原始业务记录仍可从下方真实业务入口查看。</p>}
+   {demo?(shownRecords.length?shownRecords.map(row=><p key={row.id} className={styles.drawerHint}>{row.text}</p>):<p className={styles.drawerHint}>该类别暂无演示记录。</p>):(()=>{
+    const {alertState,alertViews,retry}=detail;
+    if(alertState==='loading')return <p className={styles.drawerHint}>正在读取相关记录…</p>;
+    if(alertState==='denied')return <p className={styles.drawerHint}>当前账号无权读取该对象的相关记录。</p>;
+    if(alertState==='error')return <p className={styles.drawerHint}>相关记录读取失败。<button type="button" onClick={retry}>重试</button></p>;
+    if(recordFilter!=='all'&&recordFilter!=='alert')return <p className={styles.drawerHint}>「{recordFilters.find(row=>row.id===recordFilter)?.label}」类别的按对象聚合接口尚未提供（F06 后端依赖）；暂不展示推断记录。</p>;
+    if(!alertViews.length)return <p className={styles.drawerHint}>该类别暂无相关记录。</p>;
+    return <>{alertViews.map(row=><div key={row.id} className={styles.recordItem}><strong>{row.title}</strong><span>{row.severity} · {row.current?'当前告警':'已恢复'}</span></div>)}<p className={styles.drawerHint}>操作、巡检与维护类别及事件时间字段的聚合接口待提供（F06）；已恢复告警仅作历史展示。</p></>;
+   })()}
   </div>}
   <div className={styles.drawerActions}>{demo?<button type="button" onClick={onExitDemo}>退出演示，管理真实资料 ↗</button>:<>{item?.kind==='farm'&&<Link href="/objects">查看全部对象 ↗</Link>}{region&&canConfigure&&<button type="button" onClick={onManageRegion}>管理村庄与关联 ↗</button>}{item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>查看完整档案 ↗</Link>}{item&&['field','pond'].includes(item.kind)&&<Link href={`/map-editor?object=${item.id}`} onClick={onSaveReturn}>{item.geometry?'编辑边界':'登记边界'}</Link>}{item&&item.kind!=='farm'&&item.kind!=='mobile'&&<details className={styles.moreActions}><summary>更多</summary><div className={styles.drawerLinks}>{canConfigure&&item&&onChangeRegion&&<button type="button" onClick={()=>onChangeRegion(item)}>更改所属村庄</button>}{item?.kind==='field'&&<Link href="/records">查看农事记录 ↗</Link>}{item?.kind==='pond'&&<Link href="/alerts">查看告警与测点 ↗</Link>}{item?.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item?.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div></details>}{mobile&&<Link href="/machinery">打开农机业务 ↗</Link>}</>}</div>
  </aside>;
