@@ -3,7 +3,13 @@
 本文件记录平台每次调整，最新记录在前。README 说明当前能力，本文件说明改了什么、为什么改、验证了什么以及对使用和升级的影响；完整证据保留在 [docs](docs/README.md)。
 
 从 2026-10-04 起，每次代码、配置、依赖、数据库或文档调整均须随交付更新本文件。同一任务的连续修改合为一条，同日不同任务另起条目；历史补记注明来源。日期采用北京时间，序号只区分当天记录，不是软件版本号。
-## 2026-10-28 · 02 · CAD 竣工图参考图层前端集成
+
+## 2026-10-29 · 01 · M2 工程集成基线合并与本地验证
+
+- **改动与原因**：按《M2-工程集成基线方案》在独立 worktree 创建 `m2-integration` 分支（基于 `cad-completion-demo` c02e403），以 `--no-ff` 合入 `origin/main`（59c17c3）闸门只读采集线，解除 M2 四类详情开发的 P0-1 基线分裂。实际冲突与方案预测一致，仅 `CHANGELOG.md`、`README.md`、`pnpm-lock.yaml` 三处：文档条目双方保留并按日期倒序交织，同日序号续排（闸门线 10-14 条目改为 03–07、10-18 README 条目改为 02）；锁文件取 GIS 侧后经 `pnpm install` 重生成，加入 `mqtt` 依赖族。`package.json`、`docs/README.md`、`telemetry/queries.ts`、设备页等自动合并无冲突。`No1dry` 仓库 main（113e6491）经只读核验为无共同祖先的 10-14 旧快照导入，不影响本基线。
+- **影响范围**：仅新增 `m2-integration` 分支（合并提交 48b5235）；`main` 与 `cad-completion-demo` 未移动；未推送远端、未切换 luminous 3200 服务、未执行数据库迁移、未启用真实闸门 worker。
+- **验证**：本地与 luminous（/data/wfx/liangzihu-m2int 隔离 worktree）双端 `tsc --noEmit` 与 `next build` 通过；luminous 单测 113 项（基线 104 + 闸门线 9），112/113，唯一失败为既有并发竞态 flake（verification-hardening S1，单文件重跑 2/2 通过，CHANGELOG 2026-10-19 已记录同款现象）；`db:status` 迁移 48 个全应用、无待迁移；gate-mqtt 集成 1/1、identity-http 验收 2/2、migration-compat 1/1 通过。
+- **运行影响**：无；浏览器回归（5 个 GIS 用例串行）与 luminous 演示切换留待部署阶段执行。
 
 - **改动与原因**：在 `cad-completion-demo` 分支的 `/farm-overview` 增加真实 CAD 竣工图参考图层，供会议演示和地图对照，不写入正式农业资产库。新增可重复转换脚本 `tools/cad/convert_completion_reference.py`，从 EPSG:4547 GeoPackage 筛出土地平整范围 67 条、生产道路 37 条、农渠与排水沟 70 条并转换为 EPSG:4326；异常面、重复线、田埂/施工边界和 279 个未核实设施插入点未导入。新增登录保护接口 `/api/v1/cad-completion-reference` 和三个 OpenLayers 参考图层，置于正式农业对象图层下方；图层面板提供三类开关，工具栏提供“竣工图范围”定位。点击 CAD 要素打开轻量信息卡，展示类别、竣工图、原始图层、handle、面积/长度、可信度及“来源于竣工图，尚未核实为正式农业资产”提示，不触发正式对象详情/归档/编辑。
 - **影响范围**：新增 `data/cad-reference/completion-reference.json`、`src/app/api/v1/cad-completion-reference/route.ts`、`src/app/(platform)/farm-overview/cad-reference-card.tsx`、`tests/acceptance/cad-completion-browser.test.ts`；修改 `farm-overview.tsx`、`layer-panel.tsx`、`farm-overview.module.css` 及两处旧浏览器断言。未修改数据库、依赖、闸门/摄像头代码，未合并 `main`。
