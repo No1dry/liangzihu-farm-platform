@@ -162,6 +162,7 @@ test('D3.1 演示隔离、差异化详情、真实新增路径和权限', {timeo
    await deviceForm.getByLabel('登记依据').fill('D3.1 隔离测试');
    await deviceForm.getByRole('button',{name:'登记实体设备'}).click();
    await deviceForm.getByText('已保存').waitFor();
+   await page.locator('details summary',{hasText:'完整设备台账'}).click();
    await page.getByRole('cell',{name:'隔离验收无人机'}).waitFor();
    assert.equal((await pool.query("SELECT kind,verified FROM devices WHERE external_id='SYNTH-U01'")).rows[0].verified,false);
    const workerContext=await browser.newContext();try{await workerContext.addCookies([{name:'agri_session',value:await app.authenticate(worker),url:app.origin}]);const workerPage=await workerContext.newPage();await workerPage.goto(app.origin+'/farm-overview');await workerPage.getByRole('button',{name:'合成测试农场',exact:true}).waitFor();await workerPage.getByRole('button',{name:'＋ 新增/管理'}).click();assert.equal(await workerPage.getByRole('button',{name:'新增农业对象'}).count(),0);const denied=await workerContext.request.post(app.origin+'/api/v1/objects',{headers:{Origin:app.origin},data:{parentId:farm,kind:'field',code:'DENIED',name:'越权',source:'测试'}});assert.equal(denied.status(),403);}finally{await workerContext.close();}
