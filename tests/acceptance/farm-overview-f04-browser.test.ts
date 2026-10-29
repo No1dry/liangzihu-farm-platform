@@ -21,8 +21,8 @@ test('F04 农田面积口径、塘口当前养殖与水体指标摘要',{timeout
  const bindingDo=await bind(pointDo);await bind(pointWt);await bind(pointPh);
  const raw=(await pool.query("INSERT INTO raw_receipts(source_id,received_at,body,sha256,synthetic) VALUES($1,now(),'{}',repeat('a',64),true) RETURNING id",[source])).rows[0].id;
  const put=async(point:string,binding:string,hash:string,value:number,unit:string)=>{
-  const head=(await pool.query("INSERT INTO observation_heads(identity_hash,point_id) VALUES(repeat($2,64),$1) RETURNING id",[point,hash])).rows[0].id;
-  const obs=(await pool.query("INSERT INTO observations(head_id,content_hash,source_id,external_device_id,point_id,object_id,binding_id,metric,sampled_at,received_at,raw_value,value,unit,quality,reasons,origin,raw_ref) VALUES($1,repeat($7,64),$2,'F04-D1',$3,$4,$5,'m',now()-interval '2 minutes',now(),to_jsonb($6::float8),$6,$8,'valid','{}','live',$9) RETURNING id",[head,source,point,pond,binding,value,hash+'v',unit,raw])).rows[0].id;
+  const head=(await pool.query("INSERT INTO observation_heads(identity_hash,point_id) VALUES(md5($2),$1) RETURNING id",[point,hash])).rows[0].id;
+  const obs=(await pool.query("INSERT INTO observations(head_id,content_hash,source_id,external_device_id,point_id,object_id,binding_id,metric,sampled_at,received_at,raw_value,value,unit,quality,reasons,origin,raw_ref) VALUES($1,md5($7),$2,'F04-D1',$3,$4,$5,'m',now()-interval '2 minutes',now(),to_jsonb($6::float8),$6,$8,'valid','{}','live',$9) RETURNING id",[head,source,point,pond,binding,value,hash+'v',unit,raw])).rows[0].id;
   await pool.query("INSERT INTO point_current(point_id,observation_id,sampled_at,quality,reasons) VALUES($1,$2,now()-interval '2 minutes','valid','{}')",[point,obs]);
  };
  await put(pointDo,bindingDo,'d',6.1,'mg/L');await put(pointWt,await (await pool.query("SELECT id FROM point_bindings WHERE point_id=$1",[pointWt])).rows[0].id,'e',25.1,'°C');
