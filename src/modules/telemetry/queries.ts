@@ -6,6 +6,35 @@ import { listAccessibleObjects } from '../identity/access';
 import { denied, uuid } from '../identity/common';
 import { freshness } from './quality';
 import { resolvePointBinding } from '../registry/points';
+export function readableCurrent(ids: string[], binding: { objectId: string; bindingId: string; verified: boolean } | null, conflict: boolean, current: { objectId: string; bindingId: string } | null): boolean {
+    return !conflict && !!binding?.verified && ids.includes(binding.objectId) && !!current && current.bindingId === binding.bindingId && ids.includes(current.objectId);
+}
+export async function getPointsCurrent(c: PoolClient, actor: Actor, at = new Date()) {
+    const ids = await listAccessibleObjects(c, actor, 'read');
+    const rows = (await c.query(`SELECT p.id AS point_id,b.binding_id,b.object_id,b.verified,b.conflict,pc.quality,pc.reasons,pc.sampled_at,o.value::float8,o.unit,o.object_id AS current_object_id,o.binding_id AS current_binding_id
+    FROM points p JOIN devices d ON d.id=p.device_id
+    LEFT JOIN LATERAL(SELECT b2.id AS binding_id,b2.object_id,b2.verified,count(*) OVER ()>1 AS conflict FROM point_bindings b2
+    WHERE b2.point_id=p.id AND b2.valid_from<=$2 AND (b2.valid_to IS NULL OR $2<b2.valid_to) ORDER BY b2.valid_from DESC) b ON true
+    LEFT JOIN point_current pc ON pc.point_id=p.id LEFT JOIN observations o ON o.id=pc.observation_id
+    WHERE d.object_id=ANY($1::uuid[]) OR EXISTS(SELECT 1 FROM point_bindings pb WHERE pb.point_id=p.id AND pb.object_id=ANY($1::uuid[]))`, [ids, at.toISOString()])).rows;
+    const byPoint = new Map<string, {
+        pointId: string;
+        current: {
+            value: number | null;
+            unit: string | null;
+            quality: string | null;
+            sampledAt: string | null;
+            reasons: string[] | null;
+        } | null;
+    }>();
+    for (const row of rows) {
+        if (byPoint.has(row.point_id))
+            continue;
+        const binding = row.binding_id ? { objectId: row.object_id, bindingId: row.binding_id, verified: row.verified } : null, current = row.current_binding_id ? { objectId: row.current_object_id, bindingId: row.current_binding_id } : null;
+        byPoint.set(row.point_id, { pointId: row.point_id, current: readableCurrent(ids, binding, row.conflict === true, current) ? { value: row.value, unit: row.unit, quality: row.quality, sampledAt: row.sampled_at, reasons: row.reasons } : null });
+    }
+    return [...byPoint.values()];
+}
 export async function getPointHistory(c: PoolClient, actor: Actor, pointId: string, query: {
     from: string;
     to: string;

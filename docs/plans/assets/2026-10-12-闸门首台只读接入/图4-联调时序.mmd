@@ -1,0 +1,24 @@
+sequenceDiagram
+  autonumber
+  participant M as 厂家（三诚 高工/倪工）
+  participant P as 我方平台（开发/运维）
+  participant D as 闸门设备 hbdxscz001（控制器+DTU）
+  Note over P: 准备阶段：pnpm registry:gate 登记来源/DTU/闸门/6 个测点<br/>verified 全部 false
+  P->>M: 提供我方 broker 地址、端口、客户端 ID 规则（凭据经安全渠道单独交付）
+  M->>M: 核对设备档案（SN、主题尾号 001）
+  P->>P: 配置 .env.local（GATE_* 变量与凭据）与私有契约文件 GATE_CONTRACT_FILE
+  Note over M,D: 约定切换窗口：DTU 指向切换后厂家平台即断连（单中心限制）
+  M->>D: 修改 DTU 平台接入信息，指向我方 broker
+  D-->>P: 首条上行报文（publish 主题，params/dir=up）
+  P->>P: worker 启动（pnpm worker:gate，取 advisory lock）并解析入库
+  Note over P: 检查点：raw_receipts 有原文、observations 有 6 测点观测
+  P->>P: 离线回放核对（worker:gate --replay 契约文件 报文信封文件）
+  P->>M: 约现场读数比对：闸门开度 / 水位与平台数值逐项对照
+  M-->>P: 现场确认读数一致
+  P->>P: 授权人员核实后将来源与测点 verified 置真
+  Note over P: 检查点：point_current 更新，/devices 页面自动展示数值与曲线
+  P->>M: 首台通过后按同法复制到 hbdxscz002..029（先核对台账）
+  opt 任一检查点不通过
+    P->>M: 请求回退：DTU 指回厂家 broker 参数
+    M->>D: 恢复厂家平台指向
+  end

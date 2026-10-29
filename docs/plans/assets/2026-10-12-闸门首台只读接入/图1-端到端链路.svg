@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2439.897 224.7" width="2439.897" height="224.7" style="--bg:#FFFFFF;--fg:#27272A;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<g class="subgraph" data-id="FIELD" data-label="现场（每台闸门）">
+  <rect x="40" y="47" width="638.576" height="130.7" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="40" y="47" width="638.576" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="52" y="61" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">现场（每台闸门）</text>
+</g>
+<g class="subgraph" data-id="NET" data-label="公网传输">
+  <rect x="913.282" y="63.89999999999999" width="151.755" height="96.9" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="913.282" y="63.89999999999999" width="151.755" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="925.282" y="77.89999999999999" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">公网传输</text>
+</g>
+<g class="subgraph" data-id="PLAT" data-label="我方平台">
+  <rect x="1117.037" y="40" width="1282.8600000000001" height="144.7" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="1117.037" y="40" width="1282.8600000000001" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="1129.037" y="54" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">我方平台</text>
+</g>
+<polyline class="edge" data-from="DTU" data-to="G4" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="MQTT over 4G
+每台一个上行 publish 主题" points="662.576,126.35 929.282,126.35" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="G4" data-to="BRK" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1049.037,126.35 1133.037,126.35" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CTRL" data-to="DTU" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="RS-485
+Modbus RTU 9600/8/N/1 从站1" points="272.826,126.35 502.06600000000003,126.35" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="BRK" data-to="WRK" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="MQTT 订阅
+上行主题（只读）" points="1318.741,126.35 1503.431,126.35" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="WRK" data-to="DB" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="SQL 幂等入库" points="1649.862,126.35 1810.198,126.35" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="DB" data-to="WEB" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="HTTP 页面读取" points="2017.391,126.35 2184.8550000000005,126.35" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="DTU" data-to="G4" data-label="MQTT over 4G
+每台一个上行 publish 主题">
+  <rect x="720.576" y="103.35" width="150.70600000000005" height="44.6" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="795.9290000000001" y="125.64999999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)"><tspan x="795.9290000000001" dy="-3.3000000000000007">MQTT over 4G</tspan><tspan x="795.9290000000001" dy="14.3">每台一个上行 publish 主题</tspan></text>
+</g>
+<g class="edge-label" data-from="CTRL" data-to="DTU" data-label="RS-485
+Modbus RTU 9600/8/N/1 从站1">
+  <rect x="308.826" y="103.35000000000001" width="157.23999999999998" height="44.6" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="387.446" y="125.65" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)"><tspan x="387.446" dy="-3.3000000000000007">RS-485</tspan><tspan x="387.446" dy="14.3">Modbus RTU 9600/8/N/1 从站1</tspan></text>
+</g>
+<g class="edge-label" data-from="BRK" data-to="WRK" data-label="MQTT 订阅
+上行主题（只读）">
+  <rect x="1354.741" y="103.35" width="112.69000000000001" height="44.6" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1411.086" y="125.64999999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)"><tspan x="1411.086" dy="-3.3000000000000007">MQTT 订阅</tspan><tspan x="1411.086" dy="14.3">上行主题（只读）</tspan></text>
+</g>
+<g class="edge-label" data-from="WRK" data-to="DB" data-label="SQL 幂等入库">
+  <rect x="1685.8620000000003" y="110.35" width="88.336" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1730.0300000000002" y="125.5" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">SQL 幂等入库</text>
+</g>
+<g class="edge-label" data-from="DB" data-to="WEB" data-label="HTTP 页面读取">
+  <rect x="2053.391" y="110.35" width="95.46400000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2101.123" y="125.5" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">HTTP 页面读取</text>
+</g>
+<g class="node" data-id="CTRL" data-label="闸门控制器
+三诚 SCZM-LG 单螺杆300型
+hbdxscz001" data-shape="rectangle">
+  <rect x="56" y="91" width="216.826" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="164.413" y="126.35" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="164.413" dy="-12.350000000000001">闸门控制器</tspan><tspan x="164.413" dy="16.900000000000002">三诚 SCZM-LG 单螺杆300型</tspan><tspan x="164.413" dy="16.900000000000002">hbdxscz001</tspan></text>
+</g>
+<g class="node" data-id="DTU" data-label="4G DTU
+单中心上报
+只能指向一个平台" data-shape="rectangle">
+  <rect x="502.06600000000003" y="91" width="160.51" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="582.321" y="126.35" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="582.321" dy="-12.350000000000001">4G DTU</tspan><tspan x="582.321" dy="16.900000000000002">单中心上报</tspan><tspan x="582.321" dy="16.900000000000002">只能指向一个平台</tspan></text>
+</g>
+<g class="node" data-id="G4" data-label="4G 移动网络" data-shape="rectangle">
+  <rect x="929.282" y="107.89999999999999" width="119.755" height="36.900000000000006" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="989.1595" y="126.35" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)" dy="4.55">4G 移动网络</text>
+</g>
+<g class="node" data-id="BRK" data-label="MQTT Broker
+1883 普通 / 8883 MQTTS
+TLS 默认不启用" data-shape="rectangle">
+  <rect x="1133.037" y="91" width="185.70399999999998" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1225.8890000000001" y="126.35" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1225.8890000000001" dy="-12.350000000000001">MQTT Broker</tspan><tspan x="1225.8890000000001" dy="16.900000000000002">1883 普通 / 8883 MQTTS</tspan><tspan x="1225.8890000000001" dy="16.900000000000002">TLS 默认不启用</tspan></text>
+</g>
+<g class="node" data-id="WRK" data-label="采集进程
+workers/gate.ts
+pnpm worker:gate" data-shape="rectangle">
+  <rect x="1503.431" y="91" width="146.43099999999998" height="70.7" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1576.6465" y="126.35" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1576.6465" dy="-12.350000000000001">采集进程</tspan><tspan x="1576.6465" dy="16.900000000000002">workers/gate.ts</tspan><tspan x="1576.6465" dy="16.900000000000002">pnpm worker:gate</tspan></text>
+</g>
+<g class="node" data-id="DB" data-label="PostgreSQL
+raw_receipts / observations
+point_current 等" data-shape="cylinder">
+  <rect x="1810.198" y="91" width="207.19299999999996" height="70.7" fill="var(--_node-fill)" stroke="none" />
+  <line x1="1810.198" y1="91" x2="1810.198" y2="161.7" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <line x1="2017.391" y1="91" x2="2017.391" y2="161.7" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="1913.7945" cy="161.7" rx="103.59649999999998" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <ellipse cx="1913.7945" cy="91" rx="103.59649999999998" ry="7" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="1913.7945" y="126.35" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="1913.7945" dy="-12.350000000000001">PostgreSQL</tspan><tspan x="1913.7945" dy="16.900000000000002">raw_receipts / observations</tspan><tspan x="1913.7945" dy="16.900000000000002">point_current 等</tspan></text>
+</g>
+<g class="node" data-id="WEB" data-label="网页展示
+/devices 设备与测点详情" data-shape="rectangle">
+  <rect x="2184.8550000000005" y="99.45" width="199.04199999999994" height="53.800000000000004" rx="0" ry="0" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="2284.3760000000007" y="126.35000000000001" text-anchor="middle" font-size="13" font-weight="500" fill="var(--_text)"><tspan x="2284.3760000000007" dy="-3.9000000000000012">网页展示</tspan><tspan x="2284.3760000000007" dy="16.900000000000002">/devices 设备与测点详情</tspan></text>
+</g>
+</svg>

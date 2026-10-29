@@ -1,0 +1,20 @@
+flowchart LR
+  subgraph FIELD["现场（每台闸门）"]
+    CTRL["闸门控制器<br/>三诚 SCZM-LG 单螺杆300型<br/>hbdxscz001"]
+    DTU["4G DTU<br/>单中心上报<br/>只能指向一个平台"]
+  end
+  subgraph NET["公网传输"]
+    G4["4G 移动网络"]
+  end
+  subgraph PLAT["我方平台"]
+    BRK["MQTT Broker<br/>1883 普通 / 8883 MQTTS<br/>TLS 默认不启用"]
+    WRK["采集进程<br/>workers/gate.ts<br/>pnpm worker:gate"]
+    DB[("PostgreSQL<br/>raw_receipts / observations<br/>point_current 等")]
+    WEB["网页展示<br/>/devices 设备与测点详情"]
+  end
+  CTRL -- "RS-485<br/>Modbus RTU 9600/8/N/1 从站1" --> DTU
+  DTU -- "MQTT over 4G<br/>每台一个上行 publish 主题" --> G4
+  G4 --> BRK
+  BRK -- "MQTT 订阅<br/>上行主题（只读）" --> WRK
+  WRK -- "SQL 幂等入库" --> DB
+  DB -- "HTTP 页面读取" --> WEB

@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840.7935000000002 863" width="840.7935000000002" height="863" style="--bg:#FFFFFF;--fg:#27272A;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="seq-arrow" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" />
+  </marker>
+  <marker id="seq-arrow-open" markerWidth="8" markerHeight="5" refX="8" refY="2.5" orient="auto-start-reverse">
+    <polyline points="0 0, 8 2.5, 0 5" fill="none" stroke="var(--_arrow)" stroke-width="1" />
+  </marker>
+</defs>
+<g class="block" data-type="opt" data-label="任一检查点不通过">
+  <rect x="30" y="713" width="747.2259999999999" height="100" rx="0" ry="0" fill="none" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="30" y="713" width="147.67" height="18" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="36" y="722" font-size="11" font-weight="600" fill="var(--_text-sec)" dy="3.8499999999999996">opt [任一检查点不通过]</text>
+</g>
+<line class="lifeline" data-actor="M" x1="134.039" y1="70" x2="134.039" y2="833" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="P" x1="361.0055" y1="70" x2="361.0055" y2="833" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<line class="lifeline" data-actor="D" x1="630.5794999999999" y1="70" x2="630.5794999999999" y2="833" stroke="var(--_line)" stroke-width="0.75" stroke-dasharray="6 4" />
+<g class="message" data-from="P" data-to="M" data-label="提供我方 broker 地址、端口、客户端 ID 规则（凭据经安全渠道单独交付）" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="361.0055" y1="90" x2="134.039" y2="90" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="247.52224999999999" y="80" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">提供我方 broker 地址、端口、客户端 ID 规则（凭据经安全渠道单独交付）</text>
+</g>
+<g class="message" data-from="M" data-to="M" data-label="核对设备档案（SN、主题尾号 001）" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="134.039,130 164.039,130 164.039,150 134.039,150" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="172.039" y="140" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">核对设备档案（SN、主题尾号 001）</text>
+</g>
+<g class="message" data-from="P" data-to="P" data-label="配置 .env.local（GATE_* 变量与凭据）与私有契约文件 GATE_CONTRACT_FILE" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="361.0055,200 391.0055,200 391.0055,220 361.0055,220" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="399.0055" y="210" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">配置 .env.local（GATE_* 变量与凭据）与私有契约文件 GATE_CONTRACT_FILE</text>
+</g>
+<g class="message" data-from="M" data-to="D" data-label="修改 DTU 平台接入信息，指向我方 broker" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="134.039" y1="285" x2="630.5794999999999" y2="285" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="382.30924999999996" y="275" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">修改 DTU 平台接入信息，指向我方 broker</text>
+</g>
+<g class="message" data-from="D" data-to="P" data-label="首条上行报文（publish 主题，params/dir=up）" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="630.5794999999999" y1="325" x2="361.0055" y2="325" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="495.79249999999996" y="315" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">首条上行报文（publish 主题，params/dir=up）</text>
+</g>
+<g class="message" data-from="P" data-to="P" data-label="worker 启动（pnpm worker:gate，取 advisory lock）并解析入库" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="361.0055,365 391.0055,365 391.0055,385 361.0055,385" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="399.0055" y="375" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">worker 启动（pnpm worker:gate，取 advisory lock）并解析入库</text>
+</g>
+<g class="message" data-from="P" data-to="P" data-label="离线回放核对（worker:gate --replay 契约文件 报文信封文件）" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="361.0055,450 391.0055,450 391.0055,470 361.0055,470" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="399.0055" y="460" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">离线回放核对（worker:gate --replay 契约文件 报文信封文件）</text>
+</g>
+<g class="message" data-from="P" data-to="M" data-label="约现场读数比对：闸门开度 / 水位与平台数值逐项对照" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="361.0055" y1="520" x2="134.039" y2="520" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="247.52224999999999" y="510" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">约现场读数比对：闸门开度 / 水位与平台数值逐项对照</text>
+</g>
+<g class="message" data-from="M" data-to="P" data-label="现场确认读数一致" data-line-style="dashed" data-arrow-head="filled" data-self="false">
+  <line x1="134.039" y1="560" x2="361.0055" y2="560" stroke="var(--_line)" stroke-width="1" stroke-dasharray="6 4" marker-end="url(#seq-arrow)" />
+  <text x="247.52224999999999" y="550" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">现场确认读数一致</text>
+</g>
+<g class="message" data-from="P" data-to="P" data-label="授权人员核实后将来源与测点 verified 置真" data-line-style="solid" data-arrow-head="filled" data-self="true">
+  <polyline points="361.0055,600 391.0055,600 391.0055,620 361.0055,620" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="399.0055" y="610" font-size="11" text-anchor="start" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">授权人员核实后将来源与测点 verified 置真</text>
+</g>
+<g class="message" data-from="P" data-to="M" data-label="首台通过后按同法复制到 hbdxscz002..029（先核对台账）" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="361.0055" y1="685" x2="134.039" y2="685" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="247.52224999999999" y="675" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">首台通过后按同法复制到 hbdxscz002..029（先核对台账）</text>
+</g>
+<g class="message" data-from="P" data-to="M" data-label="请求回退：DTU 指回厂家 broker 参数" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="361.0055" y1="753" x2="134.039" y2="753" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="247.52224999999999" y="743" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">请求回退：DTU 指回厂家 broker 参数</text>
+</g>
+<g class="message" data-from="M" data-to="D" data-label="恢复厂家平台指向" data-line-style="solid" data-arrow-head="filled" data-self="false">
+  <line x1="134.039" y1="793" x2="630.5794999999999" y2="793" stroke="var(--_line)" stroke-width="1" marker-end="url(#seq-arrow)" />
+  <text x="382.30924999999996" y="783" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">恢复厂家平台指向</text>
+</g>
+<g class="note" data-position="over" data-actors="M,D">
+  <polygon points="203.46124999999998,238 555.15725,238 561.15725,244 561.15725,261 203.46124999999998,261" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="555.15725,238 561.15725,244 555.15725,244" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="382.30924999999996" y="249.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">约定切换窗口：DTU 指向切换后厂家平台即断连（单中心限制）</text>
+</g>
+<g class="note" data-position="over" data-actors="P">
+  <polygon points="201.46250000000003,403 514.5484999999999,403 520.5484999999999,409 520.5484999999999,426 201.46250000000003,426" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="514.5484999999999,403 520.5484999999999,409 514.5484999999999,409" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="361.0055" y="414.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">检查点：raw_receipts 有原文、observations 有 6 测点观测</text>
+</g>
+<g class="note" data-position="over" data-actors="P">
+  <polygon points="186.9095,638 529.1015,638 535.1015,644 535.1015,661 186.9095,661" fill="var(--bg)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <polygon points="529.1015,638 535.1015,644 529.1015,644" fill="var(--_inner-stroke)" stroke="var(--_node-stroke)" stroke-width="0.75" />
+  <text x="361.0055" y="649.5" font-size="11" text-anchor="middle" font-weight="400" fill="var(--_text-muted)" dy="3.8499999999999996">检查点：point_current 更新，/devices 页面自动展示数值与曲线</text>
+</g>
+<g class="actor" data-id="M" data-label="厂家（三诚 高工/倪工）" data-type="participant">
+  <rect x="39.999999999999986" y="30" width="188.078" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="134.039" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">厂家（三诚 高工/倪工）</text>
+</g>
+<g class="actor" data-id="P" data-label="我方平台（开发/运维）" data-type="participant">
+  <rect x="268.078" y="30" width="185.855" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="361.0055" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">我方平台（开发/运维）</text>
+</g>
+<g class="actor" data-id="D" data-label="闸门设备 hbdxscz001（控制器+DTU）" data-type="participant">
+  <rect x="493.933" y="30" width="273.29299999999995" height="40" rx="4" ry="4" fill="var(--_node-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="630.5794999999999" y="50" font-size="13" text-anchor="middle" font-weight="500" fill="var(--_text)" dy="4.55">闸门设备 hbdxscz001（控制器+DTU）</text>
+</g>
+</svg>

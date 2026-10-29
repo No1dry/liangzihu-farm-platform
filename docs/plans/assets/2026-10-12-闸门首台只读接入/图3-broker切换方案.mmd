@@ -1,0 +1,20 @@
+flowchart LR
+  subgraph NOW["现状"]
+    D0["DTU 当前指向厂家平台<br/>数据只上厂家平台"]
+  end
+  subgraph A["方案 A（建议首选）<br/>厂家把 DTU 指到我方 broker"]
+    A1["厂家远程或现场修改<br/>DTU 的平台接入信息"]
+    A2["DTU 断连厂家平台<br/>改连我方 broker"]
+    A3["我方 worker 收到上行报文"]
+    A1 --> A2 --> A3
+  end
+  subgraph B["方案 B（备选）<br/>厂家平台转发给我们"]
+    B1["厂家平台保留设备连接"]
+    B2["厂家平台经 API 或 MQTT<br/>把上行数据推送给我方<br/>需厂家开发支持，待确认"]
+    B3["我方新增接收适配<br/>报文格式以厂家转发为准"]
+    B1 --> B2 --> B3
+  end
+  D0 -. "单中心限制：<br/>DTU 只能指向一个平台，<br/>切换后厂家平台即断连" .-> A1
+  D0 -.-> B1
+  A3 --> ROLL["回退方案：<br/>DTU 指回厂家 broker 参数<br/>切换窗口与现场/厂家事先约定"]
+  B3 --> ROLL
