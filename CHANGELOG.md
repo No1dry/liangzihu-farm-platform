@@ -4,6 +4,12 @@
 
 从 2026-10-04 起，每次代码、配置、依赖、数据库或文档调整均须随交付更新本文件。同一任务的连续修改合为一条，同日不同任务另起条目；历史补记注明来源。日期采用北京时间，序号只区分当天记录，不是软件版本号。
 
+## 2026-10-29 · 05 · M2 F03 只读 API 展示适配与局部失败隔离
+
+- **改动与原因**：按任务拆解 F03 实施。新增纯函数适配层 `detail-data.ts`：请求状态（loading/ready/partial/error/denied）与事实状态（trusted/stale/suspect/pending/unconfigured/conflict）严格分离，0 不等于缺失、读成功不代表可信、空数组只代表可信空查询。新增 `use-object-detail` 钩子：`/api/v1/objects/[id]`（测点+告警）与 `/api/v1/points/current`（批量当前值）双源合成测量分区，请求带对象作用域（切换对象丢弃旧响应），局部重试不重置地图。塘口「水体监测」与通用设施「关联设备」按「指标→测点」展示可信当前值（含采样时间）或明确原因；相关记录接入真实告警并区分 当前(open)/已恢复(recovered)，操作/巡检/维护类别保留 F06 空态。时效判定所需 `max_age_ms` 暂未随测点接口下发，已登记为后端接口缺口，前端不擅自判过期。
+- **影响范围**：新增 `detail-data.ts`、`use-object-detail.ts`、`tests/unit/detail-data.test.ts`、`tests/acceptance/farm-overview-f03-browser.test.ts`；`detail-panel.tsx` 接入测量分区与真实告警；CSS 追加事实状态与记录项样式。无数据库、API、依赖变更。
+- **验证**：适配单测 4/4；F03 浏览器用例（真实测点当前值/待核实测点原因/告警两态/类别空态/无测点设施）1/1；luminous 全量单测 120/121（唯一失败为既有 S1 flake）；既有 6 个 GIS 浏览器用例回归见实施报告。
+
 ## 2026-10-29 · 04 · M2 F02 统一跨对象导航与返回上下文
 
 - **改动与原因**：按任务拆解 F02 实施。详情标签与记录筛选从 `detail-panel` 内部状态上移为 `farm-overview` 受控状态并纳入会话返回状态；`SavedState` 扩展 `detailTab`/`recordFilter`/`annotationsVisible`/`cadVisibility`（含校验回退）。切换规则抽为纯函数 `nextTabOnSelection`：首次建立选择（含会话恢复）不重置、同类对象保留标签与适用筛选、跨类（含 gate↔pump、进出片区/机动设备）回「基本信息」；切换 effect 在 effect 时刻求值且仅在实际变化时 setState，修复恢复上下文被挂载期空判定覆盖的缺陷。地图/目录/CAD/演示逻辑未动，无数据库与 API 变更。
