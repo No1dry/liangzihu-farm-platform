@@ -19,7 +19,7 @@ async function main() {
       if (object.boundary) { report.skipped++; continue; }
       const ewkt = (await c.query('SELECT ST_AsEWKT(ST_SetSRID(ST_GeomFromGeoJSON($1),4326)) AS g', [JSON.stringify(p.geometry)])).rows[0].g;
       await c.query('UPDATE objects SET boundary=$2::geometry,boundary_status=$3,version=version+1 WHERE id=$1', [object.id, ewkt, 'draft']);
-      await c.query('INSERT INTO boundary_versions(object_id,object_version,boundary,source_crs,source,status,created_by) VALUES($1,$2,$3::geometry,4326,$4,$5,$6)', [object.id, object.version + 1, ewkt, p.source_note, 'draft', user.id]);
+      // boundary_versions 仅接受 MultiPolygon（011_map.sql），点位设施不写边界版本表，来源保留在对象档案。
       const snapshot = (await c.query('SELECT id,parent_id,code,name,kind,version,boundary_status,ST_AsGeoJSON(boundary)::jsonb AS boundary FROM objects WHERE id=$1', [object.id])).rows[0];
       await c.query('INSERT INTO object_versions(object_id,version,snapshot,reason,created_by) VALUES($1,$2,$3,$4,$5)', [object.id, object.version + 1, snapshot, p.source_note, user.id]);
       report.positioned++;
