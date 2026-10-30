@@ -1,0 +1,377 @@
+{
+ "positions": [
+  {
+   "code": "CAD-MXL-SZ01",
+   "name": "庙下流水闸01",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62097995,
+     30.24742342
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-MXL-SZ02",
+   "name": "庙下流水闸02",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.6217781,
+     30.25049235
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-MXL-SZ03",
+   "name": "庙下流水闸03",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62214869,
+     30.24918655
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-MXL-SZ04",
+   "name": "庙下流水闸04",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62236688,
+     30.25140034
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-MXL-SZ05",
+   "name": "庙下流水闸05",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62432108,
+     30.24855697
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-MXL-SZ06",
+   "name": "庙下流水闸06",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62465428,
+     30.25003869
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-MXL-SZ07",
+   "name": "庙下流水闸07",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62490837,
+     30.2507792
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-MXL-SZ08",
+   "name": "庙下流水闸08",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62501013,
+     30.25133918
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-MXL-BZ01",
+   "name": "庙下流泵站01",
+   "type_label": "泵站",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62770923,
+     30.25018646
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-MXL-BZ02",
+   "name": "庙下流泵站02",
+   "type_label": "泵站",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62771766,
+     30.25030946
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（庙下流）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-SZ01",
+   "name": "新屋湾毛家湾水闸01",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.61335905,
+     30.25357752
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-SZ02",
+   "name": "新屋湾毛家湾水闸02",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.6141671,
+     30.25429613
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-SZ03",
+   "name": "新屋湾毛家湾水闸03",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62390085,
+     30.25828789
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-SZ04",
+   "name": "新屋湾毛家湾水闸04",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62437632,
+     30.2581465
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-SZ05",
+   "name": "新屋湾毛家湾水闸05",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62512664,
+     30.2584179
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-SZ06",
+   "name": "新屋湾毛家湾水闸06",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62613003,
+     30.25811278
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-SZ07",
+   "name": "新屋湾毛家湾水闸07",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62625032,
+     30.25798736
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-SZ08",
+   "name": "新屋湾毛家湾水闸08",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62640613,
+     30.25792534
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-BZ01",
+   "name": "新屋湾毛家湾泵站01",
+   "type_label": "泵站",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.61602736,
+     30.25684806
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-BZ02",
+   "name": "新屋湾毛家湾泵站02",
+   "type_label": "泵站",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62390256,
+     30.25795321
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-XSC01",
+   "name": "新屋湾毛家湾蓄水池01",
+   "type_label": "蓄水池",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62274652,
+     30.25900336
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-XSC02",
+   "name": "新屋湾毛家湾蓄水池02",
+   "type_label": "蓄水池",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62282423,
+     30.25881209
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-XWM-XSC03",
+   "name": "新屋湾毛家湾蓄水池03",
+   "type_label": "蓄水池",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62438517,
+     30.25810217
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.4.16竣工图（新屋湾、毛家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-ZJW-SZ01",
+   "name": "张家湾水闸01",
+   "type_label": "水闸",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.61944642,
+     30.24651498
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.8.10竣工图（张家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-ZJW-XSC01",
+   "name": "张家湾蓄水池01",
+   "type_label": "蓄水池",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.6200043,
+     30.25010308
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.8.10竣工图（张家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-ZJW-XSC02",
+   "name": "张家湾蓄水池02",
+   "type_label": "蓄水池",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62011148,
+     30.2508873
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.8.10竣工图（张家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-ZJW-XSC03",
+   "name": "张家湾蓄水池03",
+   "type_label": "蓄水池",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62019972,
+     30.25147608
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.8.10竣工图（张家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  },
+  {
+   "code": "CAD-ZJW-XSC04",
+   "name": "张家湾蓄水池04",
+   "type_label": "蓄水池",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     114.62048284,
+     30.24919156
+    ]
+   },
+   "source_note": "位置取自 CAD 图面标注文字（2026.8.10竣工图（张家湾）.dxf），为设施旁标注位置而非本体插入点，待现场核实"
+  }
+ ],
+ "unmatched": [
+  "CAD-XWM-SZ09",
+  "CAD-XWM-SZ10",
+  "CAD-XWM-BZ03",
+  "CAD-ZJW-BZ01",
+  "CAD-ZJW-BZ02",
+  "CAD-ZJW-XSC05",
+  "CAD-TSW-BZ01"
+ ]
+}
