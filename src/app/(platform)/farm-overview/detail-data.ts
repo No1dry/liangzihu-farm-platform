@@ -21,10 +21,14 @@ export function classifyCurrent(current:ApiCurrentValue|null|undefined,opts:{max
   const sampledAt=current.sampledAt??null;
   if(current.quality==='invalid')return {...none,sampledAt,fact:'suspect' as const,reason:`测值质量无效${current.reasons?.length?`（${current.reasons.join('、')}）`:''}，不作为当前值`};
   if(current.quality==='suspect')return {...none,sampledAt,fact:'suspect' as const,reason:`测值质量存疑${current.reasons?.length?`（${current.reasons.join('、')}）`:''}，不作为当前值`};
+  if(current.quality!=='valid')return {...none,sampledAt,fact:'suspect' as const,reason:`测值质量未确认（${current.quality??'未标注'}），不作为当前值`};
   if(current.value===null||current.value===undefined)return {...none,sampledAt,fact:'pending' as const,reason:'当前值缺失'};
   if(!sampledAt)return {...none,fact:'pending' as const,reason:'缺少可信采样时间，不作为当前值'};
-  if(!opts.maxAgeMs)return {...none,sampledAt,fact:'pending' as const,reason:'时效依据缺失，不作为当前值'};
-  const age=(opts.now??Date.now())-Date.parse(sampledAt);
+  const time=Date.parse(sampledAt);
+  if(!Number.isFinite(time))return {...none,fact:'pending' as const,reason:'采样时间无法解析，不作为当前值'};
+  if(!opts.maxAgeMs||!Number.isFinite(opts.maxAgeMs)||opts.maxAgeMs<=0)return {...none,sampledAt,fact:'pending' as const,reason:'时效依据缺失，不作为当前值'};
+  const age=(opts.now??Date.now())-time;
+  if(age<0)return {...none,sampledAt,fact:'suspect' as const,reason:'采样时间在未来，待核，不作为当前值'};
   if(age>opts.maxAgeMs)return {...none,sampledAt,fact:'stale' as const,reason:'数据过期，不作为当前值'};
   return {fact:'trusted' as const,value:current.value,valueUnit:current.unit,sampledAt,reason:''};
 }
