@@ -32,7 +32,7 @@ test('R02-B 冻结偏差修复：顶部顺序与独立卡片、类别筛选、�
    // 农田 A（已核实批次）：面积在前，当前生产与生长阶段为独立两行；范围已核实徽标
    await page.getByRole('button',{name:'自营田A',exact:true}).click();
    await detail.getByRole('heading',{name:'自营田A'}).waitFor();
-   await detail.getByText('范围已核实',{exact:true}).waitFor();
+   await detail.getByText('范围已核实',{exact:true}).first().waitFor();
    const area=await detail.getByText(/管理范围面积 .* 亩/).textContent();
    await detail.getByText('当前生产：水稻（甬优）',{exact:true}).waitFor();
    await detail.getByText('生长阶段：分蘖期',{exact:true}).waitFor();
@@ -48,7 +48,7 @@ test('R02-B 冻结偏差修复：顶部顺序与独立卡片、类别筛选、�
    // 农田 B（未核实批次）：顶部不得出现具体作物与阶段
    await page.getByRole('button',{name:'自营田B',exact:true}).click();
    await detail.getByRole('heading',{name:'自营田B'}).waitFor();
-   await detail.getByText('范围待核对',{exact:true}).waitFor();
+   await detail.getByText('范围待核对',{exact:true}).first().waitFor();
    await detail.getByText('当前生产：资料待核实',{exact:true}).waitFor();
    await detail.getByText('生长阶段：资料待核实',{exact:true}).waitFor();
    assert.equal(await detail.getByText(/小麦/).count(),0,'未核实批次品种不得上顶部');
@@ -57,7 +57,7 @@ test('R02-B 冻结偏差修复：顶部顺序与独立卡片、类别筛选、�
    // 塘口：筛选为养殖；徽标范围待核对
    await page.getByRole('button',{name:'南塘口',exact:true}).click();
    await detail.getByRole('heading',{name:'南塘口'}).waitFor();
-   await detail.getByText('范围待核对',{exact:true}).waitFor();
+   await detail.getByText('范围待核对',{exact:true}).first().waitFor();
    await detail.getByRole('tab',{name:'相关记录',exact:true}).click();
    await detail.getByRole('button',{name:'养殖',exact:true}).waitFor();
    assert.equal(await detail.getByRole('button',{name:'操作',exact:true}).count(),0,'塘口不得出现操作筛选');
@@ -65,7 +65,7 @@ test('R02-B 冻结偏差修复：顶部顺序与独立卡片、类别筛选、�
    // 固定设施：位置状态徽标；筛选为操作
    await page.getByRole('button',{name:'一号闸',exact:true}).click();
    await detail.getByRole('heading',{name:'一号闸'}).waitFor();
-   await detail.getByText('位置待核对',{exact:true}).waitFor();
+   await detail.getByText('位置待核对',{exact:true}).first().waitFor();
    assert.equal(await detail.getByText('范围待核对',{exact:true}).count(),0,'设施不得误用范围语义');
    await detail.getByRole('tab',{name:'相关记录',exact:true}).click();
    await detail.getByRole('button',{name:'操作',exact:true}).waitFor();
