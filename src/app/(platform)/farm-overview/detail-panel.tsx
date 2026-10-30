@@ -29,7 +29,7 @@ function PointTrend({point}:{point:PointView}){
    <button type="button" aria-pressed={win==='7d'} className={win==='7d'?styles.activeFilter:''} onClick={()=>setWin('7d')}>7 天</button>
   </div>
   {trend.status==='loading'&&<p className={styles.drawerHint}>正在读取历史…</p>}
-  {trend.status==='denied'&&<p className={styles.drawerHint}>当前账号无权读取该测点历史。</p>}
+  {trend.status==='denied'&&<p className={styles.drawerHint}>暂不可查看：没有该测点历史的查看权限。</p>}
   {trend.status==='error'&&<p className={styles.drawerHint}>历史读取失败。<button type="button" onClick={trend.retry}>重试</button></p>}
   {trend.status==='empty'&&<p className={styles.drawerHint}>该时段暂无监测记录{win==='24h'?'；可切换 7 天查看':''}。</p>}
   {trend.status==='ready'&&<TimeSeries points={trend.points} unit={trend.unit||point.unit} maxGapMs={trend.maxGapMs} title={point.name}/>}
@@ -84,11 +84,11 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
    const batch=currentBatch(detail.batches,item.id);
    const indicators=cls==='pond'?pickTrustedIndicators(detail.pointViews,2):[];
    return <>
-    {area&&areaText&&<p className={styles.metric}>{areaText.label} {area.mu}<small>（{area.sqm}）</small></p>}
-    {area&&areaText&&<p className={styles.detailContext}>{areaText.note}</p>}
-    {detail.batchState==='loading'?<p className={styles.drawerHint}>正在读取生产批次…</p>:detail.batchState==='denied'?<p className={styles.drawerHint}>当前账号无权读取生产批次。</p>:detail.batchState==='error'?<p className={styles.drawerHint}>生产批次读取失败。<button type="button" onClick={detail.retry}>重试</button></p>:batch.state==='trusted'&&batch.batch?<p className={styles.businessLead}>{cls==='field'?'当前生产':'当前养殖'}：{batch.batch.species}{batch.batch.variety?`（${batch.batch.variety}）`:''} · {batch.batch.stage}</p>:batch.state==='pending'&&batch.batch?<p className={styles.drawerHint}>{batch.reason}：{batch.batch.species} · {batch.batch.stage}；暂不作为可信生产信息。</p>:<p className={styles.drawerHint}>暂无生产批次登记。</p>}
+    {detail.batchState==='loading'?<p className={styles.drawerHint}>正在读取生产批次…</p>:detail.batchState==='denied'?<p className={styles.drawerHint}>当前账号无权读取生产批次。</p>:detail.batchState==='error'?<p className={styles.drawerHint}>生产批次读取失败。<button type="button" onClick={detail.retry}>重试</button></p>:batch.state==='trusted'&&batch.batch?<p className={styles.businessLead}>{cls==='field'?'当前生产':'当前养殖'}：{batch.batch.species}{batch.batch.variety?`（${batch.batch.variety}）`:''} · {batch.batch.stage}</p>:batch.state==='pending'&&batch.batch?<p className={styles.drawerHint}>{batch.reason}：{batch.batch.species} · {batch.batch.stage}。</p>:<p className={styles.drawerHint}>暂无生产批次登记。</p>}
     {cls==='pond'&&indicators.length>0&&<p className={styles.metric}>{indicators.map(point=>`${point.name} ${point.value} ${point.valueUnit??point.unit}`).join(' · ')}</p>}
     {alertSlot}
+    {area&&areaText&&<p className={styles.metric}>{areaText.label} {area.mu}<small>（{area.sqm}）</small></p>}
+    {area&&areaText&&<p className={styles.detailContext}>{areaText.note}</p>}
     <Facts rows={[{label:'农事记录',value:summary?.record_count??0},{label:'关联测点',value:summary?.point_count??0}]}/>
    </>;
   }
@@ -97,12 +97,12 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
    const opening=selectOpeningView(detail.pointViews);
    return <>
     {detail.measurementState==='loading'?<p className={styles.drawerHint}>正在读取测点与当前值…</p>:opening.kind==='single'&&opening.view?<p className={styles.metric}>实际开度 {opening.view.value} {opening.view.valueUnit??'%'}{opening.view.sampledAt&&<><br/><small>采样 {time(opening.view.sampledAt)}</small></>}</p>:opening.kind==='multiple'?<p className={styles.drawerHint}>存在多个可信开度测点且未指定代表测点，请到「运行信息」逐项查看，此处不合成数值。</p>:<p className={styles.drawerHint}>实际开度：暂无已核实的代表开度测点。</p>}
-    <p className={styles.detailContext}>数据上报：上报状态待确认（测点时效参数未随接口下发，缺口已登记）。</p>
+    <p className={styles.detailContext}>数据上报：待确认</p>
     {detail.alertState==='ready'?(openAlerts.length>0?alertSlot:<p className={styles.detailContext}>当前重要告警：暂无（仅表示本次可信查询无 open 事件，不代表设备正常）。</p>):alertSlot}
     <Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/>
    </>;
   }
-  if(cls==='pump_station')return <><p className={styles.drawerHint}>泵组运行概况：暂无已核实的机组档案；未确认的设备不计入机组，运行/停止/未知不做猜测。</p><p className={styles.detailContext}>数据上报：上报状态待确认（测点时效参数未随接口下发，缺口已登记）。</p>{detail.alertState==='ready'?(openAlerts.length>0?alertSlot:<p className={styles.detailContext}>当前重要告警：暂无（仅表示本次可信查询无 open 事件，不代表设备正常）。</p>):alertSlot}<Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/></>;
+  if(cls==='pump_station')return <><p className={styles.drawerHint}>泵组运行概况：机组档案尚未核实，暂不统计运行台数。</p><p className={styles.detailContext}>数据上报：待确认</p>{detail.alertState==='ready'?(openAlerts.length>0?alertSlot:<p className={styles.detailContext}>当前重要告警：暂无（仅表示本次可信查询无 open 事件，不代表设备正常）。</p>):alertSlot}<Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/></>;
   return <Facts rows={[{label:'关联测点',value:summary?.point_count??0}]}/>;
  })();
 
@@ -111,9 +111,9 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
   const {measurementState,pointViews,retry}=detail;
   const views=ordered??pointViews;
   if(measurementState==='loading')return <p className={styles.drawerHint}>正在读取测点与当前值…</p>;
-  if(measurementState==='denied')return <p className={styles.drawerHint}>当前账号无权读取该对象的测点资料。</p>;
+  if(measurementState==='denied')return <p className={styles.drawerHint}>暂不可查看：没有该对象测点的查看权限。</p>;
   if(measurementState==='error')return <p className={styles.drawerHint}>测点资料读取失败。<button type="button" onClick={retry}>重试</button></p>;
-  if(!views.length)return <p className={styles.drawerHint}>暂无已登记的关联测点；{title}不展示任何推断数值。</p>;
+  if(!views.length)return <p className={styles.drawerHint}>暂无关联测点。</p>;
   return <>
    {measurementState==='partial'&&<p className={styles.drawerHint}>部分数据读取失败，当前值可能不完整。<button type="button" onClick={retry}>重试</button></p>}
    {groupByMetric(views).map(group=><section key={group.metric} className={styles.detailSection}><h3>{group.metric}</h3><div className={styles.pointList}>{group.points.map(point=><div key={point.id} className={styles.pointRow}>
@@ -129,21 +129,21 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
    if(demo)return <div className={styles.detailTabBody}><p className={styles.businessLead}>{item.detail??'演示生产资料'}</p></div>;
    const batch=currentBatch(detail.batches,item.id);
    return <div className={styles.detailTabBody}>
-    {detail.batchState==='loading'?<p className={styles.drawerHint}>正在读取生产批次…</p>:detail.batchState==='denied'?<p className={styles.drawerHint}>当前账号无权读取生产批次。</p>:detail.batchState==='error'?<p className={styles.drawerHint}>生产批次读取失败。<button type="button" onClick={detail.retry}>重试</button></p>:batch.state==='trusted'&&batch.batch?<dl className={styles.detailList}><div><dt>当前作物</dt><dd>{batch.batch.species}{batch.batch.variety?`（${batch.batch.variety}）`:''}</dd></div><div><dt>生长阶段</dt><dd>{batch.batch.stage}</dd></div><div><dt>批次编号</dt><dd>{batch.batch.code}</dd></div><div><dt>开始时间</dt><dd>{time(batch.batch.started_at)}</dd></div><div><dt>登记来源</dt><dd>{batch.batch.source}</dd></div></dl>:batch.state==='pending'&&batch.batch?<p className={styles.drawerHint}>{batch.reason}：{batch.batch.species} · {batch.batch.stage}；暂不作为可信生产信息。</p>:<p className={styles.drawerHint}>暂无生产批次登记；不展示推断的作物或阶段。</p>}
+    {detail.batchState==='loading'?<p className={styles.drawerHint}>正在读取生产批次…</p>:detail.batchState==='denied'?<p className={styles.drawerHint}>当前账号无权读取生产批次。</p>:detail.batchState==='error'?<p className={styles.drawerHint}>生产批次读取失败。<button type="button" onClick={detail.retry}>重试</button></p>:batch.state==='trusted'&&batch.batch?<dl className={styles.detailList}><div><dt>当前作物</dt><dd>{batch.batch.species}{batch.batch.variety?`（${batch.batch.variety}）`:''}</dd></div><div><dt>生长阶段</dt><dd>{batch.batch.stage}</dd></div><div><dt>批次编号</dt><dd>{batch.batch.code}</dd></div><div><dt>开始时间</dt><dd>{time(batch.batch.started_at)}</dd></div><div><dt>登记来源</dt><dd>{batch.batch.source}</dd></div></dl>:batch.state==='pending'&&batch.batch?<p className={styles.drawerHint}>{batch.reason}：{batch.batch.species} · {batch.batch.stage}。</p>:<p className={styles.drawerHint}>暂无生产批次登记。</p>}
     <p className={styles.detailContext}>{summary?`农事记录 ${summary.record_count} · 关联测点 ${summary.point_count}`:'暂无关联记录'}</p>
    </div>;
   }
-  if(activeTab==='monitoring')return <div className={styles.detailTabBody}>{demo?<><p className={styles.businessLead}>{item.detail??'演示水体资料'}</p>{item.metric&&<p className={styles.metric}>{item.metric}</p>}</>:measurementSection('水体监测')}{!demo&&<p className={styles.drawerHint}>同指标多测点不会自动合并或平均；没有可信当前值时不显示数值。</p>}</div>;
+  if(activeTab==='monitoring')return <div className={styles.detailTabBody}>{demo?<><p className={styles.businessLead}>{item.detail??'演示水体资料'}</p>{item.metric&&<p className={styles.metric}>{item.metric}</p>}</>:measurementSection('水体监测')}{!demo&&<p className={styles.drawerHint}>同一指标的多个测点分别显示，不做合并。</p>}</div>;
   if(activeTab==='operation'){
    if(demo)return <div className={styles.detailTabBody}><p className={styles.businessLead}>{item.detail}</p><p className={styles.metric}>{item.status} · 演示状态</p></div>;
    if(cls==='gate')return <div className={styles.detailTabBody}>
     {measurementSection('运行信息',orderGateMetrics(detail.pointViews))}
-    {detail.pointViews.some(point=>point.metric==='set_opening')&&<p className={styles.detailContext}>设置开度为设备上报的设置值，不代表本平台下发指令；未安装、未配置的指标不生成卡片。</p>}
+    {detail.pointViews.some(point=>point.metric==='set_opening')&&<p className={styles.detailContext}>设置开度为设备上报的设置值，不代表本平台下发指令；未安装的指标不显示。</p>}
     <p className={styles.drawerHint}>本页面只读，不提供控制操作。</p>
    </div>;
    return <div className={styles.detailTabBody}>
-    <p className={styles.businessLead}>机组：暂无已核实的机组档案。</p>
-    <p className={styles.drawerHint}>泵站机组身份与运行反馈契约待后端落地（接口依赖已登记）；网关、控制器不计入机组，无证据状态保持未知。</p>
+    <p className={styles.businessLead}>机组：档案尚未核实，暂不统计运行台数。</p>
+    <p className={styles.drawerHint}>未确认的设备不计入机组；无证据的状态保持未知。</p>
     <section className={styles.detailSection}><h3>站级监测</h3>{measurementSection('站级监测')}</section>
     <p className={styles.drawerHint}>本页面只读，不提供控制操作。</p>
    </div>;
@@ -155,15 +155,15 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
  return <aside className={styles.drawer} aria-label="对象详情" aria-live="polite">
   <div className={styles.drawerTop}><div className={styles.detailHeading}><KindIcon kind={cls==='gate'||cls==='pump_station'?'facility':item?.kind??(region?'region':undefined)} className={styles.detailKindIcon}/><h2>{title}</h2></div><button type="button" onClick={onClose} aria-label="关闭对象详情" title="收起右侧详情栏">×</button></div>
   <div className={styles.detailBadges}><span className={styles.kind}>{kindLabel}{demo?' · 演示':''}</span>{item&&<span className={styles.statusBadge} data-status={item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'}>{item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'}</span>}{cls==='generic'&&item?.kind==='facility'&&!demo&&<span className={styles.statusBadge} data-status="待登记">子类未核实</span>}</div>
-  <p className={styles.detailContext}>{demo?'合成示例 · 非真实现场':region?'经营分组，不代表行政村边界':item&&regionForItem?`所属 ${regionForItem.name}`:mobile?'绑定归属来自原农机业务':cls==='generic'&&item?.kind==='facility'?'设施业务子类尚未核实，按通用设施概要显示':'仅当前账号获授权资料'}</p>
+  <p className={styles.detailContext}>{demo?'合成示例 · 非真实现场':region?'经营分组，不代表行政村边界':item&&regionForItem?`所属 ${regionForItem.name}`:mobile?'绑定归属来自原农机业务':cls==='generic'&&item?.kind==='facility'?'设施类型尚未核实，按通用设施显示':'仅当前账号获授权资料'}</p>
   {summarySlot}
   <div className={styles.detailTabs} role="tablist" aria-label="对象资料分区">
    {tabs.map(row=><button key={row.id} type="button" role="tab" aria-selected={activeTab===row.id} className={activeTab===row.id?styles.activeTab:''} onClick={()=>onTab(row.id)}>{row.label}</button>)}
   </div>
   {activeTab==='basic'&&<div className={styles.detailTabBody}>
-   {(item||region)&&<section className={styles.detailSection}><div className={styles.detailSectionHeader}><h3>基本信息</h3>{!demo&&item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>编辑</Link>}</div><dl className={styles.detailList}>{item&&<div><dt>对象编号</dt><dd>{item.code}</dd></div>}{ownerFarm&&<div><dt>所属农场</dt><dd>{ownerFarm.name}</dd></div>}{regionForItem&&<div><dt>所属村庄</dt><dd>{regionForItem.name}</dd></div>}<div><dt>对象名称</dt><dd>{title}</dd></div>{item&&<div><dt>边界状态</dt><dd>{demo?'演示区域（非测绘边界）':boundaryStatus}</dd></div>}{item&&<div><dt>登记依据</dt><dd>{item.boundary_source??item.object_source??'未提供'}</dd></div>}</dl></section>}
+   {(item||region)&&<section className={styles.detailSection}><div className={styles.detailSectionHeader}><h3>基本信息</h3>{!demo&&item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>编辑</Link>}</div><dl className={styles.detailList}>{item&&<div><dt>对象编号</dt><dd>{item.code}</dd></div>}{ownerFarm&&<div><dt>所属农场</dt><dd>{ownerFarm.name}</dd></div>}{regionForItem&&<div><dt>所属村庄</dt><dd>{regionForItem.name}</dd></div>}<div><dt>对象名称</dt><dd>{title}</dd></div>{item&&<div><dt>边界状态</dt><dd>{demo?'演示区域（非测绘边界）':boundaryStatus}</dd></div>}</dl></section>}
    {mobile&&<section className={styles.detailSection}><h3>绑定信息</h3><p className={styles.businessLead}>机具与定位终端：{mobile.terminal_name}</p><p className={styles.detailContext}>绑定有效期至 {time(mobile.valid_until)}；绑定归属不等于当前位置。</p></section>}
-   {item&&<section className={styles.detailSection}><h3>档案元数据</h3><dl className={styles.detailList}><div><dt>版本</dt><dd>{item.version}</dd></div><div><dt>资料来源</dt><dd>{item.boundary_source??item.object_source??'未提供'}</dd></div><div><dt>记录时间</dt><dd>{time(item.boundary_recorded_at??item.object_recorded_at)}</dd></div><div><dt>资料范围</dt><dd>{demo?'只读合成演示，不写入业务库':'仅当前账号获授权内容'}</dd></div></dl></section>}
+   {item&&<details className={styles.moreActions}><summary>资料依据</summary><dl className={styles.detailList}><div><dt>登记依据</dt><dd>{item.boundary_source??item.object_source??'未提供'}</dd></div><div><dt>记录时间</dt><dd>{time(item.boundary_recorded_at??item.object_recorded_at)}</dd></div><div><dt>版本</dt><dd>{item.version}</dd></div></dl></details>}
   </div>}
   {middleTabBody}
   {activeTab==='records'&&<div className={styles.detailTabBody}>
@@ -173,12 +173,12 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
     if(alertState==='loading')return <p className={styles.drawerHint}>正在读取相关记录…</p>;
     if(alertState==='denied')return <p className={styles.drawerHint}>当前账号无权读取该对象的相关记录。</p>;
     if(alertState==='error')return <p className={styles.drawerHint}>相关记录读取失败。<button type="button" onClick={retry}>重试</button></p>;
-    if(recordFilter!=='all'&&recordFilter!=='alert')return <p className={styles.drawerHint}>「{recordFilters.find(row=>row.id===recordFilter)?.label}」类别的按对象聚合接口尚未提供（F06 后端依赖）；暂不展示推断记录。</p>;
+    if(recordFilter!=='all'&&recordFilter!=='alert')return <p className={styles.drawerHint}>该类别暂无相关记录。</p>;
     if(!alertViews.length)return <p className={styles.drawerHint}>该类别暂无相关记录。</p>;
     return <>{alertViews.map(row=><div key={row.id} className={styles.recordItem}>
      <button type="button" className={styles.recordItemButton} aria-expanded={expandedRecordId===row.id} onClick={()=>setExpandedRecordId(expandedRecordId===row.id?null:row.id)}><strong>{row.title}</strong><span>{row.severity} · {row.current?'当前告警':'已恢复'}</span></button>
-     {expandedRecordId===row.id&&<div className={styles.recordDetail}><dl className={styles.detailList}><div><dt>类别</dt><dd>告警</dd></div><div><dt>业务状态</dt><dd>{row.current?'当前（open）':'已恢复（recovered）'}</dd></div><div><dt>严重程度</dt><dd>{row.severity}</dd></div><div><dt>事件编号</dt><dd>{row.id.slice(0,8)}…</dd></div><div><dt>事件时间</dt><dd>接口暂未提供（缺口已登记）</dd></div></dl><Link href={`/alerts/${row.id}`}>查看完整告警 ↗</Link></div>}
-    </div>)}<p className={styles.drawerHint}>操作、巡检与维护类别及事件时间字段的聚合接口待提供（F06 后端依赖）；已恢复告警仅作历史展示；每条记录可展开查看来源与完整业务入口，一次仅展开一条。</p></>;
+     {expandedRecordId===row.id&&<div className={styles.recordDetail}><dl className={styles.detailList}><div><dt>类别</dt><dd>告警</dd></div><div><dt>业务状态</dt><dd>{row.current?'当前（open）':'已恢复（recovered）'}</dd></div><div><dt>严重程度</dt><dd>{row.severity}</dd></div></dl><Link href={`/alerts/${row.id}`}>查看完整告警 ↗</Link></div>}
+    </div>)}<p className={styles.drawerHint}>已恢复告警仅作历史展示；每条记录可展开查看详情，一次仅展开一条。</p></>;
    })()}
   </div>}
   <div className={styles.drawerActions}>{demo?<button type="button" onClick={onExitDemo}>退出演示，管理真实资料 ↗</button>:<>{item?.kind==='farm'&&<Link href="/objects">查看全部对象 ↗</Link>}{region&&canConfigure&&<button type="button" onClick={onManageRegion}>管理村庄与关联 ↗</button>}{item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>查看完整档案 ↗</Link>}{item&&['field','pond'].includes(item.kind)&&<Link href={`/map-editor?object=${item.id}`} onClick={onSaveReturn}>{item.geometry?'编辑边界':'登记边界'}</Link>}{item&&item.kind!=='farm'&&item.kind!=='mobile'&&<details className={styles.moreActions}><summary>更多</summary><div className={styles.drawerLinks}>{canConfigure&&item&&onChangeRegion&&<button type="button" onClick={()=>onChangeRegion(item)}>更改所属村庄</button>}{item?.kind==='field'&&<Link href="/records">查看农事记录 ↗</Link>}{item?.kind==='pond'&&<Link href="/alerts">查看告警与测点 ↗</Link>}{item?.kind==='facility'&&<Link href="/devices">查看关联设备 ↗</Link>}{canConfigure&&item?.kind==='facility'&&<Link href="/devices#register">登记关联实体设备 ↗</Link>}</div></details>}{mobile&&<Link href="/machinery">打开农机业务 ↗</Link>}</>}</div>

@@ -50,7 +50,7 @@ test('R01 当前值可信口径、面积口径与切换不残留',{timeout:18000
    await page.getByRole('button',{name:'南塘口A',exact:true}).click();
    await detail.getByRole('heading',{name:'南塘口A'}).waitFor();
    await detail.getByRole('tab',{name:'水体监测',exact:true}).click();
-   await detail.getByText('时效依据缺失，不作为当前值').waitFor();
+   await detail.getByText('尚未核实：缺少时效依据').waitFor();
    assert.equal(await detail.getByText(/6\.1 mg\/L/).count(),0,'缺时效依据不得显示当前值');
 
    // 快速切换不残留：批次与测点随对象清空
@@ -60,7 +60,7 @@ test('R01 当前值可信口径、面积口径与切换不残留',{timeout:18000
    await detail.getByRole('heading',{name:'北塘口B'}).waitFor();
    assert.equal(await detail.getByText(/克氏原螯虾/).count(),0,'切换后不得残留上一对象的批次');
    await detail.getByRole('tab',{name:'水体监测',exact:true}).click();
-   await detail.getByText(/暂无已登记的关联测点/).waitFor();
+   await detail.getByText(/暂无关联测点。/).waitFor();
    assert.equal(await detail.getByText('溶解氧',{exact:true}).count(),0,'切换后不得残留上一对象的测点');
    await page.screenshot({path:'docs/acceptance/m2r01/01-口径与切换不残留.png'});
    assert.deepEqual(errors,[],'页面不得出现脚本错误');

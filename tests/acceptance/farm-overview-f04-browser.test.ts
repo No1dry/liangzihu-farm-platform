@@ -46,7 +46,7 @@ test('F04 农田面积口径、塘口当前养殖与水体指标摘要',{timeout
    await detail.getByText(/按已核实登记边界计算/).waitFor();
    await detail.getByText('暂无生产批次登记。').waitFor();
    await detail.getByRole('tab',{name:'农事生产',exact:true}).click();
-   await detail.getByText(/暂无生产批次登记；不展示推断的作物或阶段/).waitFor();
+   assert.equal(await detail.getByText('暂无生产批次登记。').count(),2,'摘要与农事生产标签应一致显示批次空态');
    await page.screenshot({path:'docs/acceptance/m2f04/01-农田面积与生产空态.png'});
 
    // 塘口：当前养殖 + 至多两个可信水体指标 + 草稿边界口径
@@ -56,7 +56,7 @@ test('F04 农田面积口径、塘口当前养殖与水体指标摘要',{timeout
    await detail.getByText(/按草稿边界计算，尚未核实/).waitFor();
    assert.equal(await detail.getByText(/溶解氧 6\.1 mg\/L · 水温/).count(),0,'缺时效依据时摘要不得展示水体指标数值');
    await detail.getByRole('tab',{name:'水体监测',exact:true}).click();
-   await detail.getByText('时效依据缺失，不作为当前值').first().waitFor();
+   await detail.getByText('尚未核实：缺少时效依据').first().waitFor();
    await detail.getByText(/暂无可信当前值/).waitFor();
    await page.screenshot({path:'docs/acceptance/m2f04/02-塘口养殖与指标.png'});
    assert.deepEqual(errors,[],'页面不得出现脚本错误');

@@ -16,20 +16,20 @@ export type AlertView={id:string;title:string;severity:string;state:'open'|'reco
 // 过期、质量异常、读取失败、缺采样时间或缺时效参数一律不作为当前可信值。
 export function classifyCurrent(current:ApiCurrentValue|null|undefined,opts:{maxAgeMs?:number|null;now?:number}={}):{fact:FactState;value:number|null;valueUnit:string|null;sampledAt:string|null;reason:string}{
   const none={value:null,valueUnit:null,sampledAt:null};
-  if(current===undefined)return {...none,fact:'pending' as const,reason:'当前值接口未返回该测点'};
-  if(current===null)return {...none,fact:'pending' as const,reason:'暂无可信当前值（绑定未核实、存在冲突或暂无上报）'};
+  if(current===undefined)return {...none,fact:'pending' as const,reason:'暂无记录'};
+  if(current===null)return {...none,fact:'pending' as const,reason:'尚未核实：暂无可用当前值'};
   const sampledAt=current.sampledAt??null;
   if(current.quality==='invalid')return {...none,sampledAt,fact:'suspect' as const,reason:`测值质量无效${current.reasons?.length?`（${current.reasons.join('、')}）`:''}，不作为当前值`};
   if(current.quality==='suspect')return {...none,sampledAt,fact:'suspect' as const,reason:`测值质量存疑${current.reasons?.length?`（${current.reasons.join('、')}）`:''}，不作为当前值`};
   if(current.quality!=='valid')return {...none,sampledAt,fact:'suspect' as const,reason:`测值质量未确认（${current.quality??'未标注'}），不作为当前值`};
-  if(current.value===null||current.value===undefined)return {...none,sampledAt,fact:'pending' as const,reason:'当前值缺失'};
-  if(!sampledAt)return {...none,fact:'pending' as const,reason:'缺少可信采样时间，不作为当前值'};
+  if(current.value===null||current.value===undefined)return {...none,sampledAt,fact:'pending' as const,reason:'暂无记录'};
+  if(!sampledAt)return {...none,fact:'pending' as const,reason:'尚未核实：缺少采样时间'};
   const time=Date.parse(sampledAt);
-  if(!Number.isFinite(time))return {...none,fact:'pending' as const,reason:'采样时间无法解析，不作为当前值'};
-  if(!opts.maxAgeMs||!Number.isFinite(opts.maxAgeMs)||opts.maxAgeMs<=0)return {...none,sampledAt,fact:'pending' as const,reason:'时效依据缺失，不作为当前值'};
+  if(!Number.isFinite(time))return {...none,fact:'pending' as const,reason:'尚未核实：采样时间无法解析'};
+  if(!opts.maxAgeMs||!Number.isFinite(opts.maxAgeMs)||opts.maxAgeMs<=0)return {...none,sampledAt,fact:'pending' as const,reason:'尚未核实：缺少时效依据'};
   const age=(opts.now??Date.now())-time;
-  if(age<0)return {...none,sampledAt,fact:'suspect' as const,reason:'采样时间在未来，待核，不作为当前值'};
-  if(age>opts.maxAgeMs)return {...none,sampledAt,fact:'stale' as const,reason:'数据过期，不作为当前值'};
+  if(age<0)return {...none,sampledAt,fact:'suspect' as const,reason:'尚未核实：采样时间在未来'};
+  if(age>opts.maxAgeMs)return {...none,sampledAt,fact:'stale' as const,reason:'数据已过期，不作当前值'};
   return {fact:'trusted' as const,value:current.value,valueUnit:current.unit,sampledAt,reason:''};
 }
 
@@ -37,7 +37,7 @@ export function classifyCurrent(current:ApiCurrentValue|null|undefined,opts:{max
 export function buildPointViews(points:ApiPoint[],currentRows:ApiCurrentRow[]|null,opts:{maxAgeMs?:number|null;now?:number}={}):PointView[]{
   const byId=new Map((currentRows??[]).map(row=>[row.pointId,row.current]));
   return points.map(point=>{
-    if(currentRows===null)return {...point,fact:'pending' as const,value:null,valueUnit:null,sampledAt:null,reason:'当前值读取失败，可重试'};
+    if(currentRows===null)return {...point,fact:'pending' as const,value:null,valueUnit:null,sampledAt:null,reason:'读取失败，请重试'};
     const judged=classifyCurrent(byId.get(point.id),opts);
     return {...point,...judged};
   });

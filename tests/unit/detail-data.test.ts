@@ -20,7 +20,7 @@ test('F03 当前值事实判定：可信/质量/冲突/缺失/过期分类，0 �
   assert.equal(classifyCurrent({value:6.1,unit:'mg/L',quality:'valid',sampledAt:null,reasons:[]},{maxAgeMs:120000,now}).fact,'pending','无采样时间不作当前值');
   const noTiming=classifyCurrent({value:6.1,unit:'mg/L',quality:'valid',sampledAt:'2020-01-01T00:00:00Z',reasons:[]},{now});
   assert.equal(noTiming.fact,'pending','无时效参数不作当前值');
-  assert.equal(noTiming.reason,'时效依据缺失，不作为当前值');
+  assert.equal(noTiming.reason,'尚未核实：缺少时效依据');
 });
 
 test('F03 测点视图组装：当前值接口失败只降级不拖垮清单',()=>{
