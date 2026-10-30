@@ -40,7 +40,7 @@ test('F03 测点当前值事实展示、局部状态与相关记录告警',{time
    await detail.getByRole('tab',{name:'水体监测',exact:true}).click();
    await detail.getByText('溶解氧',{exact:true}).waitFor();
    await detail.getByText('尚未核实：缺少时效依据').waitFor();
-   await detail.getByText(/暂无可信当前值/).waitFor();
+   await detail.getByText(/尚未核实：暂无可用当前值/).waitFor();
    await page.screenshot({path:'docs/acceptance/m2f03/01-水体监测当前值.png'});
    await detail.getByRole('tab',{name:'相关记录',exact:true}).click();
    await detail.getByText('溶氧偏低',{exact:true}).waitFor();

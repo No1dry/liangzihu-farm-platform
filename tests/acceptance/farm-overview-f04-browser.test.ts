@@ -57,7 +57,7 @@ test('F04 农田面积口径、塘口当前养殖与水体指标摘要',{timeout
    assert.equal(await detail.getByText(/溶解氧 6\.1 mg\/L · 水温/).count(),0,'缺时效依据时摘要不得展示水体指标数值');
    await detail.getByRole('tab',{name:'水体监测',exact:true}).click();
    await detail.getByText('尚未核实：缺少时效依据').first().waitFor();
-   await detail.getByText(/暂无可信当前值/).waitFor();
+   await detail.getByText(/尚未核实：暂无可用当前值/).waitFor();
    await page.screenshot({path:'docs/acceptance/m2f04/02-塘口养殖与指标.png'});
    assert.deepEqual(errors,[],'页面不得出现脚本错误');
    await context.close();
