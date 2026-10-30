@@ -23,7 +23,8 @@ export function useObjectDetail(objectId:string|null,enabled:boolean){
 
   const load=useCallback(async(id:string,version:number)=>{
     const requestId=++requestRef.current;
-    setState(prev=>({...prev,pointsSource:'loading',currentSource:'loading',alertsSource:'loading',batchSource:'loading',version}));
+    // R01：新对象加载期间清空旧对象的测点/批次/告警，避免残留展示。
+    setState({points:[],current:null,alerts:[],batches:[],pointsSource:'loading',currentSource:'loading',alertsSource:'loading',batchSource:'loading',version});
     const [detail,current,batches]=await Promise.all([
       fetchJson(`/api/v1/objects/${id}`),
       fetchJson('/api/v1/points/current'),

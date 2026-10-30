@@ -12,7 +12,8 @@ export type ApiAlert={id:string;title:string;state:string;severity:string};
 export type PointView={id:string;name:string;code:string;metric:string;unit:string;fact:FactState;value:number|null;valueUnit:string|null;sampledAt:string|null;reason:string};
 export type AlertView={id:string;title:string;severity:string;state:'open'|'recovered';current:boolean};
 
-// 单测点当前值的事实判定。maxAgeMs 缺失时不擅自判定过期（时效口径属后端接口缺口，见实施报告）。
+// 单测点当前值的事实判定（R01 口径）：可信采样时间与时效依据缺一不可；
+// 过期、质量异常、读取失败、缺采样时间或缺时效参数一律不作为当前可信值。
 export function classifyCurrent(current:ApiCurrentValue|null|undefined,opts:{maxAgeMs?:number|null;now?:number}={}):{fact:FactState;value:number|null;valueUnit:string|null;sampledAt:string|null;reason:string}{
   const none={value:null,valueUnit:null,sampledAt:null};
   if(current===undefined)return {...none,fact:'pending' as const,reason:'当前值接口未返回该测点'};
@@ -21,7 +22,10 @@ export function classifyCurrent(current:ApiCurrentValue|null|undefined,opts:{max
   if(current.quality==='invalid')return {...none,sampledAt,fact:'suspect' as const,reason:`测值质量无效${current.reasons?.length?`（${current.reasons.join('、')}）`:''}，不作为当前值`};
   if(current.quality==='suspect')return {...none,sampledAt,fact:'suspect' as const,reason:`测值质量存疑${current.reasons?.length?`（${current.reasons.join('、')}）`:''}，不作为当前值`};
   if(current.value===null||current.value===undefined)return {...none,sampledAt,fact:'pending' as const,reason:'当前值缺失'};
-  if(opts.maxAgeMs&&sampledAt){const age=(opts.now??Date.now())-Date.parse(sampledAt);if(age>opts.maxAgeMs)return {...none,sampledAt,fact:'stale' as const,reason:'数据过期，不作为当前值'};}
+  if(!sampledAt)return {...none,fact:'pending' as const,reason:'缺少可信采样时间，不作为当前值'};
+  if(!opts.maxAgeMs)return {...none,sampledAt,fact:'pending' as const,reason:'时效依据缺失，不作为当前值'};
+  const age=(opts.now??Date.now())-Date.parse(sampledAt);
+  if(age>opts.maxAgeMs)return {...none,sampledAt,fact:'stale' as const,reason:'数据过期，不作为当前值'};
   return {fact:'trusted' as const,value:current.value,valueUnit:current.unit,sampledAt,reason:''};
 }
 

@@ -5,7 +5,7 @@ import {demoAlerts,demoTasks} from './demo-fixture';
 import KindIcon from './kind-icon';
 import {resolveBusinessClass,resolveActiveTab,tabsFor,classLabels,type BusinessClass,type DetailTabId,type RecordFilter} from './detail-classes';
 import {groupByMetric,factLabels,currentBatch,pickTrustedIndicators,selectOpeningView,orderGateMetrics,currentAlerts,type PointView,type SectionRequestState} from './detail-data';
-import {boundaryAreaSqm,formatArea} from './detail-area';
+import {boundaryAreaSqm,formatArea,areaPresentation} from './detail-area';
 import {useObjectDetail} from './use-object-detail';
 import {usePointHistory,type TrendWindow} from './use-point-history';
 import TimeSeries from '@/components/platform/time-series';
@@ -78,13 +78,14 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
   if(cls==='farm')return <><Facts rows={farmFacts}/>{demo?<div className={styles.attention}>关注事项 · {farmAlerts.length} 条演示提醒{farmAlerts[0]&&<><br/>{farmAlerts[0].text}</>}</div>:<p className={styles.drawerHint}>本农场已授权对象中有 {summaries.filter(row=>farmItemIds.has(row.object_id)).reduce((n,row)=>n+row.open_alerts,0)} 条未关闭告警；仅统计已有授权概要。</p>}</>;
   if(demo)return <><p className={styles.businessLead}>{item.detail}</p>{item.metric&&<p className={styles.metric}>{item.metric}</p>}{item.sampledAt&&<p className={styles.detailContext}>演示采样时间：{time(item.sampledAt)} · 非现场遥测</p>}{item.status&&cls!=='field'&&cls!=='pond'&&<p className={styles.detailContext}>{item.status} · 演示状态</p>}</>;
   if(cls==='field'||cls==='pond'){
-   // F04：管理范围面积（登记边界计算）与生产批次/当前养殖、至多两个可信水体指标。
+   // F04/R01：面积口径按 areaPresentation 区分管理范围与 CAD 施工参考；生产批次/当前养殖、至多两个可信水体指标。
    const area=formatArea(boundaryAreaSqm(item.geometry));
+   const areaText=area?areaPresentation(item):null;
    const batch=currentBatch(detail.batches,item.id);
    const indicators=cls==='pond'?pickTrustedIndicators(detail.pointViews,2):[];
    return <>
-    {area&&<p className={styles.metric}>管理范围面积 {area.mu}<small>（{area.sqm}）</small></p>}
-    {area&&<p className={styles.detailContext}>{item.boundary_status==='verified'?'按已核实登记边界计算':'按草稿边界计算，尚未核实'}；与 CAD 竣工图施工参考面积是不同口径。</p>}
+    {area&&areaText&&<p className={styles.metric}>{areaText.label} {area.mu}<small>（{area.sqm}）</small></p>}
+    {area&&areaText&&<p className={styles.detailContext}>{areaText.note}</p>}
     {detail.batchState==='loading'?<p className={styles.drawerHint}>正在读取生产批次…</p>:detail.batchState==='denied'?<p className={styles.drawerHint}>当前账号无权读取生产批次。</p>:detail.batchState==='error'?<p className={styles.drawerHint}>生产批次读取失败。<button type="button" onClick={detail.retry}>重试</button></p>:batch.state==='trusted'&&batch.batch?<p className={styles.businessLead}>{cls==='field'?'当前生产':'当前养殖'}：{batch.batch.species}{batch.batch.variety?`（${batch.batch.variety}）`:''} · {batch.batch.stage}</p>:batch.state==='pending'&&batch.batch?<p className={styles.drawerHint}>{batch.reason}：{batch.batch.species} · {batch.batch.stage}；暂不作为可信生产信息。</p>:<p className={styles.drawerHint}>暂无生产批次登记。</p>}
     {cls==='pond'&&indicators.length>0&&<p className={styles.metric}>{indicators.map(point=>`${point.name} ${point.value} ${point.valueUnit??point.unit}`).join(' · ')}</p>}
     {alertSlot}

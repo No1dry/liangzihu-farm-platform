@@ -16,8 +16,11 @@ test('F03 当前值事实判定：可信/质量/冲突/缺失/过期分类，0 �
   // 接口判空（绑定未核实/冲突/无数据）与未返回区分
   assert.equal(classifyCurrent(null,{now}).fact,'pending');
   assert.equal(classifyCurrent(undefined,{now}).fact,'pending');
-  // 未配置时效参数时不擅自判过期
-  assert.equal(classifyCurrent({value:6.1,unit:'mg/L',quality:'valid',sampledAt:'2020-01-01T00:00:00Z',reasons:[]},{now}).fact,'trusted');
+  // R01：缺采样时间或缺时效依据均不得标记 trusted
+  assert.equal(classifyCurrent({value:6.1,unit:'mg/L',quality:'valid',sampledAt:null,reasons:[]},{maxAgeMs:120000,now}).fact,'pending','无采样时间不作当前值');
+  const noTiming=classifyCurrent({value:6.1,unit:'mg/L',quality:'valid',sampledAt:'2020-01-01T00:00:00Z',reasons:[]},{now});
+  assert.equal(noTiming.fact,'pending','无时效参数不作当前值');
+  assert.equal(noTiming.reason,'时效依据缺失，不作为当前值');
 });
 
 test('F03 测点视图组装：当前值接口失败只降级不拖垮清单',()=>{
@@ -26,7 +29,7 @@ test('F03 测点视图组装：当前值接口失败只降级不拖垮清单',()
   assert.equal(failed.length,2);
   assert(failed.every(p=>p.fact==='pending'&&p.reason.includes('读取失败')));
   const rows=[{pointId:'p1',current:{value:6.1,unit:'mg/L',quality:'valid',sampledAt:'2026-10-29T11:59:00Z',reasons:[]}}];
-  const views=buildPointViews(points,rows,{now:Date.parse('2026-10-29T12:00:00Z')});
+  const views=buildPointViews(points,rows,{now:Date.parse('2026-10-29T12:00:00Z'),maxAgeMs:600000});
   assert.equal(views[0].fact,'trusted');
   assert.equal(views[1].fact,'pending','接口未返回的测点按待核实处理');
   const groups=groupByMetric(views);

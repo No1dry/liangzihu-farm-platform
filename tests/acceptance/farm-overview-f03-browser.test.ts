@@ -39,8 +39,7 @@ test('F03 测点当前值事实展示、局部状态与相关记录告警',{time
    await detail.getByRole('heading',{name:'南塘口'}).waitFor();
    await detail.getByRole('tab',{name:'水体监测',exact:true}).click();
    await detail.getByText('溶解氧',{exact:true}).waitFor();
-   await detail.getByText(/6\.1 mg\/L/).first().waitFor();
-   await detail.getByText(/采样 /).first().waitFor();
+   await detail.getByText('时效依据缺失，不作为当前值').waitFor();
    await detail.getByText(/暂无可信当前值/).waitFor();
    await page.screenshot({path:'docs/acceptance/m2f03/01-水体监测当前值.png'});
    await detail.getByRole('tab',{name:'相关记录',exact:true}).click();

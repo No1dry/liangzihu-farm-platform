@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {currentBatch,pickTrustedIndicators} from '../../src/app/(platform)/farm-overview/detail-data';
-import {formatArea} from '../../src/app/(platform)/farm-overview/detail-area';
+import {formatArea,areaPresentation} from '../../src/app/(platform)/farm-overview/detail-area';
 
 const batchRow={id:'b1',object_id:'o1',code:'PC-1',species:'水稻',variety:'甬优',stage:'分蘖期',source:'仅测试',verified:true,started_at:'2026-05-01T00:00:00Z',ended_at:null,supersedes_id:null};
 
@@ -37,4 +37,14 @@ test('F04 面积格式化：亩为主、㎡为辅，大数值降精度',()=>{
   assert.deepEqual(formatArea(1065000),{mu:'1597 亩',sqm:'约 106.5 万㎡'});
   assert.equal(formatArea(null),null);
   assert.equal(formatArea(0),null);
+});
+
+test('R01 面积口径：CAD 施工范围不得称管理范围，登记边界按核实状态标注',()=>{
+ const cad=areaPresentation({code:'CAD-MXL-T01',boundary_status:'draft'});
+ assert.equal(cad.label,'竣工图施工参考面积');
+ assert(!cad.label.includes('管理范围'),'CAD 施工范围不得称管理范围');
+ assert(cad.note.includes('尚未核实'));
+ assert.equal(areaPresentation({code:'cun-1',boundary_status:'verified'}).label,'管理范围面积');
+ assert.equal(areaPresentation({code:'cun-2',boundary_status:'draft'}).label,'管理范围面积');
+ assert(areaPresentation({code:'cun-2',boundary_status:'draft'}).note.includes('尚未核实'));
 });
