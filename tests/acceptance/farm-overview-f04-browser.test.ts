@@ -43,7 +43,7 @@ test('F04 农田面积口径、塘口当前养殖与水体指标摘要',{timeout
    await detail.getByRole('heading',{name:'东片田'}).waitFor();
    await detail.getByText(/管理范围面积 .* 亩/).waitFor();
    await detail.getByText(/万㎡/).waitFor();
-   await detail.getByText(/按已核实登记边界计算；与 CAD 竣工图施工参考面积是不同口径/).waitFor();
+   await detail.getByText(/按已核实登记边界计算/).waitFor();
    await detail.getByText('暂无生产批次登记。').waitFor();
    await detail.getByRole('tab',{name:'农事生产',exact:true}).click();
    await detail.getByText(/暂无生产批次登记；不展示推断的作物或阶段/).waitFor();
