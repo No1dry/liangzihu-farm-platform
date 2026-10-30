@@ -29,7 +29,7 @@ import type Tree from '@rc-component/tree';
 import { buildTreeData, getDefaultExpandedKeys, type TreeNodeData } from './resource-tree-helpers';
 import LayerPanel from './layer-panel';
 import {demoAlerts,demoItems,demoRegions,demoTasks,type DemoItem} from './demo-fixture';
-import {CATEGORY_ORDER,objectStyles,selectedStyles,demoStyles} from './map-symbols';
+import {CATEGORY_ORDER,objectStyles,selectedStyles,demoStyles,facilitySymbolFromCode} from './map-symbols';
 import CadReferenceCard,{type CadCategory,type CadFeatureProperties} from './cad-reference-card';
 
 type CadFeatureCollection={type:'FeatureCollection';features:{type:'Feature';id?:string;geometry:{type:string;coordinates:unknown}|null;properties:CadFeatureProperties}[]};
@@ -169,7 +169,7 @@ export default function FarmOverview(){
  },[basemap,annotationsVisible]);
  useEffect(()=>{visibilityRef.current=categoryVisibility;sourceRef.current?.changed();},[categoryVisibility]);
  useEffect(()=>{if(target.current)target.current.dataset.mode=mode;},[mode]);
- useEffect(()=>{const source=mode==='demo'?demoSourceRef.current:realSourceRef.current,map=mapRef.current;if(!source||!map)return;modeRef.current=mode;sourceRef.current=source;realLayerRef.current?.setVisible(mode==='real');demoLayerRef.current?.setVisible(mode==='demo');source.clear();const format=new GeoJSON();for(const item of items){if(!item.geometry)continue;try{const features=format.readFeatures(item.geometry,{dataProjection:'EPSG:4326',featureProjection:'EPSG:3857'});for(const feature of features){feature.set('objectId',item.id);feature.set('status',item.boundary_status);feature.set('kind',item.kind);feature.set('symbol',item.symbol??item.kind);source.addFeature(feature);}}catch{/* 无效几何不绘制，对象仍在目录 */}}
+ useEffect(()=>{const source=mode==='demo'?demoSourceRef.current:realSourceRef.current,map=mapRef.current;if(!source||!map)return;modeRef.current=mode;sourceRef.current=source;realLayerRef.current?.setVisible(mode==='real');demoLayerRef.current?.setVisible(mode==='demo');source.clear();const format=new GeoJSON();for(const item of items){if(!item.geometry)continue;try{const features=format.readFeatures(item.geometry,{dataProjection:'EPSG:4326',featureProjection:'EPSG:3857'});for(const feature of features){feature.set('objectId',item.id);feature.set('status',item.boundary_status);feature.set('kind',item.kind);feature.set('symbol',item.symbol??facilitySymbolFromCode(item.code)??item.kind);source.addFeature(feature);}}catch{/* 无效几何不绘制，对象仍在目录 */}}
   if(source.getFeatures().length){if(!skipInitialFit.current){const extent=source.getExtent();if(extent&&!isEmpty(extent))map.getView().fit(extent,{padding:[75,75,75,75],maxZoom:14,duration:0});}skipInitialFit.current=false;}
  },[items,mode]);
  useEffect(()=>{const data=cadData.data;if(!data)return;const format=new GeoJSON();const extent=createEmpty();let hasGeometry=false;for(const cat of cadLayerOrder){const src=cadSourceRefs[cat].current;if(!src)continue;src.clear();}

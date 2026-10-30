@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import Feature from 'ol/Feature.js';
 import Polygon from 'ol/geom/Polygon.js';
 import Point from 'ol/geom/Point.js';
-import {CATEGORY_ORDER,CATEGORY_LABELS,colorForKind,iconLabel,iconSvg,objectStyles,selectedStyles,demoStyles} from '../../src/app/(platform)/farm-overview/map-symbols';
+import {CATEGORY_ORDER,CATEGORY_LABELS,colorForKind,iconLabel,iconSvg,objectStyles,selectedStyles,demoStyles,facilitySymbolFromCode,pictogramSvg} from '../../src/app/(platform)/farm-overview/map-symbols';
 
 function feature(kind:string,boundary_status:string,geometryType:'Polygon'|'Point',symbol?:string){
  const geometry=geometryType==='Polygon'?new Polygon([[[0,0],[10,0],[10,10],[0,10],[0,0]]]):new Point([5,5]);
@@ -69,4 +69,21 @@ test('演示图层保持蓝色虚线面并复用图标',()=>{
  assert.deepEqual(ds[0].getStroke()?.getLineDash(),[8,6]);
  const point=feature('mobile','draft','Point','drone');
  const dp=demoStyles(point,visible,false);assert.ok(dp);assert.equal(dp.length,1);
+});
+
+test('设施图形图标：编号前缀映射与图样生成',()=>{
+ assert.equal(facilitySymbolFromCode('CAD-MXL-SZ01'),'gate');
+ assert.equal(facilitySymbolFromCode('CAD-ZJW-BZ02'),'pump');
+ assert.equal(facilitySymbolFromCode('CAD-XWM-XSC03'),'storage');
+ assert.equal(facilitySymbolFromCode('cun-1'),undefined);
+ assert.equal(facilitySymbolFromCode('CAD-MXL-T01'),undefined);
+ for(const symbol of ['gate','pump','storage']){
+  const svg=pictogramSvg(symbol);
+  assert(svg&&svg.includes('<svg'),`${symbol} 应生成图样`);
+  assert(!svg!.includes('<text'),`${symbol} 不应含文字`);
+ }
+ assert.equal(pictogramSvg('field'),null);
+ const gatePoint=new Feature({geometry:new Point([0,0])});gatePoint.set('kind','facility');gatePoint.set('symbol','gate');gatePoint.set('status','draft');
+ const styles=objectStyles(gatePoint as never,15,{});
+ assert(styles&&styles.length>0,'水闸点位应有样式');
 });

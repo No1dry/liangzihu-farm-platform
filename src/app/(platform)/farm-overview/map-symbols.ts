@@ -33,6 +33,25 @@ export function iconSvg(label:string,color:string,selected=false):string{
  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="${color}" stroke="white" stroke-width="${sw}"/><text x="${size/2}" y="${y}" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold" font-size="${font}">${label}</text></svg>`;
 }
 
+// 设施图形图标：水闸/泵站/蓄水池用图案代替文字圆点；编号前缀映射仅是展示层约定，待设施子类字段落地后替换。
+const PICTOGRAMS:Record<string,{color:string;body:string}>={
+ gate:{color:'#2f6fb2',body:'<rect x="12" y="11" width="16" height="3.5" rx="1"/><rect x="13.5" y="14.5" width="3" height="13"/><rect x="23.5" y="14.5" width="3" height="13"/><rect x="17.5" y="16" width="5" height="8"/><path d="M11 29.5q2.2-2 4.5 0t4.5 0t4.5 0t4.5 0" fill="none" stroke="#fff" stroke-width="1.6"/>'},
+ pump:{color:'#8e4da8',body:'<circle cx="20" cy="20" r="8" fill="none" stroke="#fff" stroke-width="2"/><path d="M20 20V13.5M20 20l5.8 3.4M20 20l-5.8 3.4" stroke="#fff" stroke-width="2" fill="none"/><circle cx="20" cy="20" r="1.8"/>'},
+ storage:{color:'#0f8b8d',body:'<path d="M12 15h16v8.5a3.5 3.5 0 0 1-3.5 3.5h-9A3.5 3.5 0 0 1 12 23.5z" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M14.5 20q1.4-1.4 2.8 0t2.9 0t2.9 0t2.9 0" fill="none" stroke="#fff" stroke-width="1.5"/><path d="M14.5 23.5q1.4-1.4 2.8 0t2.9 0t2.9 0t2.9 0" fill="none" stroke="#fff" stroke-width="1.5"/>'},
+};
+const CODE_SYMBOLS:Record<string,string>={SZ:'gate',BZ:'pump',XSC:'storage'};
+export function facilitySymbolFromCode(code?:string|null):string|undefined{
+ const match=code?.match(/-(SZ|BZ|XSC)\d{2}$/);
+ return match?CODE_SYMBOLS[match[1]]:undefined;
+}
+
+export function pictogramSvg(symbol:string,selected=false):string|null{
+ const pic=PICTOGRAMS[symbol];
+ if(!pic)return null;
+ const size=selected?46:40,r=selected?20:17,sw=selected?4:3,scale=size/40;
+ return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="${pic.color}" stroke="white" stroke-width="${sw}"/><g fill="#fff" transform="translate(${(size-40)/2},${(size-40)/2}) scale(${scale})">${pic.body}</g></svg>`;
+}
+
 function geometryForIcon(feature:FeatureLike){
  const geometry=(feature as Feature).getGeometry();
  return geometry?.getType()==='Polygon'?(geometry as Polygon).getInteriorPoint():geometry;
@@ -40,6 +59,14 @@ function geometryForIcon(feature:FeatureLike){
 
 export function iconStyle(label:string,color:string,selected=false):Style{
  return new Style({image:new Icon({src:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(iconSvg(label,color,selected)),anchor:[.5,.5],scale:selected?1:.85}),geometry:geometryForIcon});
+}
+
+// 点位图标：水闸/泵站/蓄水池用图形图标，其余沿用文字圆点。
+function pointIcon(feature:Feature,color:string,selected=false):Style{
+ const symbol=feature.get('symbol') as string|undefined;
+ const pictogram=symbol?pictogramSvg(symbol,selected):null;
+ const src=pictogram??iconSvg(iconLabel(symbol,feature.get('kind') as string|undefined),color,selected);
+ return new Style({image:new Icon({src:'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(src),anchor:[.5,.5],scale:selected?1:.85}),geometry:geometryForIcon});
 }
 
 export function objectStyles(feature:Feature,zoom:number,visible:Record<string,boolean>):Style[]|undefined{
@@ -51,7 +78,7 @@ export function objectStyles(feature:Feature,zoom:number,visible:Record<string,b
  const colors=colorForKind(kind);
  const geometry=feature.getGeometry();
  if(!geometry)return undefined;
- if(geometry.getType()==='Point')return [iconStyle(iconLabel(feature.get('symbol') as string|undefined,kind),colors.icon)];
+ if(geometry.getType()==='Point')return [pointIcon(feature,colors.icon)];
  const lineDash=draft?[8,5]:undefined;
  return [new Style({stroke:new Stroke({color:'#fff',width:colors.width+3})}),new Style({stroke:new Stroke({color:colors.stroke,width:colors.width,lineDash}),fill:new Fill({color:colors.fill})})];
 }
@@ -60,7 +87,7 @@ export function selectedStyles(feature:Feature):Style[]{
  const kind=feature.get('kind') as string;
  const colors=colorForKind(kind);
  const geometry=feature.getGeometry();
- if(geometry?.getType()==='Point')return [iconStyle(iconLabel(feature.get('symbol') as string|undefined,kind),colors.icon,true)];
+ if(geometry?.getType()==='Point')return [pointIcon(feature,colors.icon,true)];
  return [new Style({stroke:new Stroke({color:'#fff',width:6}),fill:new Fill({color:'rgba(146,195,49,.42)'})}),new Style({stroke:new Stroke({color:colors.stroke,width:3})})];
 }
 
@@ -74,8 +101,8 @@ export function demoStyles(feature:Feature,visible:Record<string,boolean>,select
  const geometry=feature.getGeometry();
  if(!geometry)return undefined;
  const label=iconLabel(feature.get('symbol') as string|undefined,kind);
- if(geometry.getType()==='Point')return [iconStyle(label,colors.icon,selected)];
- return [selected?demoSelectedAreaStyle:demoAreaStyle,iconStyle(label,colors.icon,selected)];
+ if(geometry.getType()==='Point')return [pointIcon(feature,colors.icon,selected)];
+ return [selected?demoSelectedAreaStyle:demoAreaStyle,pointIcon(feature,colors.icon,selected)];
 }
 
 export const realLegend=[
