@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {currentBatch,pickTrustedIndicators} from '../../src/app/(platform)/farm-overview/detail-data';
+import {currentBatch,buildTopIndicators} from '../../src/app/(platform)/farm-overview/detail-data';
 import {formatArea,areaPresentation} from '../../src/app/(platform)/farm-overview/detail-area';
 
 const batchRow={id:'b1',object_id:'o1',code:'PC-1',species:'水稻',variety:'甬优',stage:'分蘖期',source:'仅测试',verified:true,started_at:'2026-05-01T00:00:00Z',ended_at:null,supersedes_id:null};
@@ -18,18 +18,21 @@ test('F04 当前批次：取最新未结束未更正批次，未核实只作待�
   assert.equal(currentBatch([batchRow],'o2').state,'none','其他对象的批次不串用');
 });
 
-test('F04 摘要水体指标：最多两个可信值，不合并不跳过规则',()=>{
-  const views=[
-   {id:'p1',name:'溶解氧 1 号',code:'DO-1',metric:'dissolved_oxygen',unit:'mg/L',fact:'trusted' as const,value:6.1,valueUnit:'mg/L',sampledAt:null,reason:''},
-   {id:'p2',name:'溶解氧 2 号',code:'DO-2',metric:'dissolved_oxygen',unit:'mg/L',fact:'trusted' as const,value:5.8,valueUnit:'mg/L',sampledAt:null,reason:''},
-   {id:'p3',name:'水温',code:'WT-1',metric:'water_temp',unit:'°C',fact:'trusted' as const,value:25.1,valueUnit:'°C',sampledAt:null,reason:''},
-   {id:'p4',name:'pH',code:'PH-1',metric:'ph',unit:'',fact:'pending' as const,value:null,valueUnit:null,sampledAt:null,reason:'暂无可信当前值'},
-  ];
-  const picked=pickTrustedIndicators(views,2);
-  assert.equal(picked.length,2,'至多两个');
-  assert.deepEqual(picked.map(p=>p.id),['p1','p2'],'同指标多测点都保留、不合并');
-  assert(!picked.some(p=>p.fact!=='trusted'),'非可信值不进摘要');
-  assert.equal(pickTrustedIndicators([views[3]],2).length,0);
+test('R02-B 塘口顶部指标槽位：最多两个，多测点无代表不取值',()=>{
+ const p=(id:string,metric:string,fact:'trusted'|'pending',value:number|null)=>({id,name:id,code:id,metric,unit:'mg/L',fact,value,valueUnit:value===null?null:'mg/L',sampledAt:null,reason:''});
+ // 两个单测点指标 → 两个数值槽
+ let slots=buildTopIndicators([p('d1','dissolved_oxygen','trusted',6.1),p('w1','water_temp','trusted',25.1)]);
+ assert.deepEqual(slots.map(s=>s.kind),['single','single']);
+ // 同指标两个可信测点且无代表点 → 一个「多个测点」槽，不取值
+ slots=buildTopIndicators([p('d1','dissolved_oxygen','trusted',6.1),p('d2','dissolved_oxygen','trusted',5.8),p('w1','water_temp','trusted',25.1)]);
+ assert.equal(slots[0].kind,'multi');
+ assert(slots[0].kind==='multi'&&slots[0].count===2,'多测点槽应带测点数');
+ assert.equal(slots[1].kind,'single');
+ // 非可信测点不进槽位；无可信值时为空
+ assert.equal(buildTopIndicators([p('d1','dissolved_oxygen','pending',null)]).length,0);
+ // 最多两个指标位置
+ slots=buildTopIndicators([p('a','m1','trusted',1),p('b','m2','trusted',2),p('c','m3','trusted',3)]);
+ assert.equal(slots.length,2);
 });
 
 test('F04 面积格式化：亩为主、㎡为辅，大数值降精度',()=>{

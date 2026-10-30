@@ -3,8 +3,8 @@ import Link from 'next/link';
 import {useEffect,useMemo,useState} from 'react';
 import {demoAlerts,demoTasks} from './demo-fixture';
 import KindIcon from './kind-icon';
-import {resolveBusinessClass,resolveActiveTab,tabsFor,classLabels,type BusinessClass,type DetailTabId,type RecordFilter} from './detail-classes';
-import {groupByMetric,factLabels,currentBatch,pickTrustedIndicators,selectOpeningView,orderGateMetrics,currentAlerts,type PointView,type SectionRequestState} from './detail-data';
+import {resolveBusinessClass,resolveActiveTab,tabsFor,recordFiltersFor,scopeBadge,classLabels,type BusinessClass,type DetailTabId,type RecordFilter} from './detail-classes';
+import {groupByMetric,factLabels,currentBatch,buildTopIndicators,selectOpeningView,orderGateMetrics,currentAlerts,type PointView,type SectionRequestState} from './detail-data';
 import {boundaryAreaSqm,formatArea,areaPresentation} from './detail-area';
 import {useObjectDetail} from './use-object-detail';
 import {usePointHistory,type TrendWindow} from './use-point-history';
@@ -15,7 +15,7 @@ type Item={id:string;farm_id?:string;farmId?:string;symbol?:string;name:string;c
 type Region={id:string;farmId:string;name:string;links:{objectId:string}[]};
 type Mobile={binding_id:string;object_id:string;machine_name:string;terminal_name:string;valid_until:string};
 type Summary={object_id:string;open_alerts:number;record_count:number;point_count:number};
-const recordFilters:{id:RecordFilter;label:string}[]=[{id:'all',label:'全部'},{id:'operation',label:'操作'},{id:'inspection',label:'巡检'},{id:'alert',label:'告警'},{id:'maintenance',label:'维护'}];
+
 function Facts({rows}:{rows:{value:string|number;label:string}[]}){return <div className={styles.detailFacts}>{rows.map(row=><div key={row.label}><strong>{row.value}</strong><span>{row.label}</span></div>)}</div>;}
 function time(value?:string|null){return value?new Date(value).toLocaleString('zh-CN'):'未提供';}
 
@@ -67,7 +67,6 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
  const farmAlerts=demo?demoAlerts.filter(row=>farmItemIds.has(row.objectId)):[];
  const farmFacts=[{label:'片区',value:regions.filter(row=>row.farmId===farmId).length},{label:'农田',value:farmItems.filter(row=>row.kind==='field').length},{label:'塘口',value:farmItems.filter(row=>row.kind==='pond').length},{label:'固定设施',value:farmItems.filter(row=>row.kind==='facility').length},{label:'机动设备',value:demo?farmItems.filter(row=>row.kind==='mobile').length:mobileDevices.filter(row=>farmItemIds.has(row.object_id)).length}];
  const regionFacts=[{label:'农田',value:regionRows.filter(row=>row.kind==='field').length},{label:'塘口',value:regionRows.filter(row=>row.kind==='pond').length},{label:'固定设施',value:regionRows.filter(row=>row.kind==='facility').length}];
- const boundaryStatus=item?.geometry?(item.boundary_status==='verified'?'已核实':'草稿，尚未核实'):'边界待登记';
  const demoRecords=demo?[...demoAlerts.filter(row=>row.objectId===item?.id).map(row=>({id:row.id,cat:'alert' as const,text:row.text+' · 演示提醒'})),...demoTasks.filter(row=>row.regionId===(region?.id??item?.regionId)).map(row=>({id:row.id,cat:'inspection' as const,text:row.text}))]:[];
  const shownRecords=demoRecords.filter(row=>recordFilter==='all'||row.cat===recordFilter);
 
@@ -78,18 +77,22 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
   if(cls==='farm')return <><Facts rows={farmFacts}/>{demo?<div className={styles.attention}>关注事项 · {farmAlerts.length} 条演示提醒{farmAlerts[0]&&<><br/>{farmAlerts[0].text}</>}</div>:<p className={styles.drawerHint}>本农场已授权对象中有 {summaries.filter(row=>farmItemIds.has(row.object_id)).reduce((n,row)=>n+row.open_alerts,0)} 条未关闭告警；仅统计已有授权概要。</p>}</>;
   if(demo)return <><p className={styles.businessLead}>{item.detail}</p>{item.metric&&<p className={styles.metric}>{item.metric}</p>}{item.sampledAt&&<p className={styles.detailContext}>演示采样时间：{time(item.sampledAt)} · 非现场遥测</p>}{item.status&&cls!=='field'&&cls!=='pond'&&<p className={styles.detailContext}>{item.status} · 演示状态</p>}</>;
   if(cls==='field'||cls==='pond'){
-   // F04/R01：面积口径按 areaPresentation 区分管理范围与 CAD 施工参考；生产批次/当前养殖、至多两个可信水体指标。
+   // R02-B（V1 顺序）：面积主值 → 当前生产/当前养殖 → 生长阶段（农田独立卡片）→ 塘口指标 → 告警 → 计数。
    const area=formatArea(boundaryAreaSqm(item.geometry));
    const areaText=area?areaPresentation(item):null;
    const batch=currentBatch(detail.batches,item.id);
-   const indicators=cls==='pond'?pickTrustedIndicators(detail.pointViews,2):[];
+   const slots=cls==='pond'?buildTopIndicators(detail.pointViews,2):[];
+   const productionText=detail.batchState==='loading'?'正在读取生产批次…':detail.batchState==='denied'?'暂不可查看：没有生产批次的查看权限。':detail.batchState==='error'?'读取失败':batch.state==='trusted'&&batch.batch?`${batch.batch.species}${batch.batch.variety?`（${batch.batch.variety}）`:''}${cls==='pond'?` · ${batch.batch.stage}`:''}`:batch.state==='pending'?(cls==='field'?'资料待核实':'养殖资料待核实'):'暂无登记';
+   const stageText=detail.batchState==='loading'?'正在读取…':detail.batchState==='denied'?'暂不可查看':detail.batchState==='error'?'读取失败':batch.state==='trusted'&&batch.batch?batch.batch.stage:batch.state==='pending'?'资料待核实':'暂无登记';
    return <>
-    {detail.batchState==='loading'?<p className={styles.drawerHint}>正在读取生产批次…</p>:detail.batchState==='denied'?<p className={styles.drawerHint}>当前账号无权读取生产批次。</p>:detail.batchState==='error'?<p className={styles.drawerHint}>生产批次读取失败。<button type="button" onClick={detail.retry}>重试</button></p>:batch.state==='trusted'&&batch.batch?<p className={styles.businessLead}>{cls==='field'?'当前生产':'当前养殖'}：{batch.batch.species}{batch.batch.variety?`（${batch.batch.variety}）`:''} · {batch.batch.stage}</p>:batch.state==='pending'&&batch.batch?<p className={styles.drawerHint}>{batch.reason}：{batch.batch.species} · {batch.batch.stage}。</p>:<p className={styles.drawerHint}>暂无生产批次登记。</p>}
-    {cls==='pond'&&indicators.length>0&&<p className={styles.metric}>{indicators.map(point=>`${point.name} ${point.value} ${point.valueUnit??point.unit}`).join(' · ')}</p>}
-    {alertSlot}
     {area&&areaText&&<p className={styles.metric}>{areaText.label} {area.mu}<small>（{area.sqm}）</small></p>}
     {area&&areaText&&<p className={styles.detailContext}>{areaText.note}</p>}
-    <Facts rows={[{label:'农事记录',value:summary?.record_count??0},{label:'关联测点',value:summary?.point_count??0}]}/>
+    {!area&&<p className={styles.drawerHint}>{cls==='field'?'暂无参考面积':'暂无可信范围面积'}</p>}
+    <p className={styles.businessLead}>{cls==='field'?'当前生产':'当前养殖'}：{productionText}{detail.batchState==='error'&&<button type="button" onClick={detail.retry}>重试</button>}</p>
+    {cls==='field'&&<p className={styles.businessLead}>生长阶段：{stageText}</p>}
+    {cls==='pond'&&slots.map(slot=>slot.kind==='single'?<p key={slot.view.id} className={styles.metric}>{slot.view.name} {slot.view.value} {slot.view.valueUnit??slot.view.unit}{slot.view.sampledAt&&<><br/><small>采样 {time(slot.view.sampledAt)}</small></>}</p>:<p key={slot.metric} className={styles.drawerHint}>{slot.metric}：{slot.count} 个测点，未指定代表测点 <button type="button" onClick={()=>onTab('monitoring')}>查看详情</button></p>)}
+    {alertSlot}
+    {summary&&<Facts rows={[{label:'农事记录',value:summary.record_count},{label:'关联测点',value:summary.point_count}]}/>}
    </>;
   }
   if(cls==='gate'){
@@ -154,20 +157,20 @@ export default function DetailPanel({mode,item,region,mobile,items,regions,summa
 
  return <aside className={styles.drawer} aria-label="对象详情" aria-live="polite">
   <div className={styles.drawerTop}><div className={styles.detailHeading}><KindIcon kind={cls==='gate'||cls==='pump_station'?'facility':item?.kind??(region?'region':undefined)} className={styles.detailKindIcon}/><h2>{title}</h2></div><button type="button" onClick={onClose} aria-label="关闭对象详情" title="收起右侧详情栏">×</button></div>
-  <div className={styles.detailBadges}><span className={styles.kind}>{kindLabel}{demo?' · 演示':''}</span>{item&&<span className={styles.statusBadge} data-status={item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'}>{item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'}</span>}{cls==='generic'&&item?.kind==='facility'&&!demo&&<span className={styles.statusBadge} data-status="待登记">子类未核实</span>}</div>
+  <div className={styles.detailBadges}><span className={styles.kind}>{kindLabel}{demo?' · 演示':''}</span>{item&&cls&&<span className={styles.statusBadge} data-status={demo?(item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'):scopeBadge(cls,item).status}>{demo?(item.geometry?(item.boundary_status==='verified'?'已核实':'草稿'):'待登记'):scopeBadge(cls,item).text}</span>}{cls==='generic'&&item?.kind==='facility'&&!demo&&<span className={styles.statusBadge} data-status="待登记">子类未核实</span>}</div>
   <p className={styles.detailContext}>{demo?'合成示例 · 非真实现场':region?'经营分组，不代表行政村边界':item&&regionForItem?`所属 ${regionForItem.name}`:mobile?'绑定归属来自原农机业务':cls==='generic'&&item?.kind==='facility'?'设施类型尚未核实，按通用设施显示':'仅当前账号获授权资料'}</p>
   {summarySlot}
   <div className={styles.detailTabs} role="tablist" aria-label="对象资料分区">
    {tabs.map(row=><button key={row.id} type="button" role="tab" aria-selected={activeTab===row.id} className={activeTab===row.id?styles.activeTab:''} onClick={()=>onTab(row.id)}>{row.label}</button>)}
   </div>
   {activeTab==='basic'&&<div className={styles.detailTabBody}>
-   {(item||region)&&<section className={styles.detailSection}><div className={styles.detailSectionHeader}><h3>基本信息</h3>{!demo&&item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>编辑</Link>}</div><dl className={styles.detailList}>{item&&<div><dt>对象编号</dt><dd>{item.code}</dd></div>}{ownerFarm&&<div><dt>所属农场</dt><dd>{ownerFarm.name}</dd></div>}{regionForItem&&<div><dt>所属村庄</dt><dd>{regionForItem.name}</dd></div>}<div><dt>对象名称</dt><dd>{title}</dd></div>{item&&<div><dt>边界状态</dt><dd>{demo?'演示区域（非测绘边界）':boundaryStatus}</dd></div>}</dl></section>}
+   {(item||region)&&<section className={styles.detailSection}><div className={styles.detailSectionHeader}><h3>基本信息</h3>{!demo&&item&&item.kind!=='farm'&&<Link href={`/objects/${item.id}`} onClick={onSaveReturn}>编辑</Link>}</div><dl className={styles.detailList}>{item&&<div><dt>对象编号</dt><dd>{item.code}</dd></div>}{ownerFarm&&<div><dt>所属农场</dt><dd>{ownerFarm.name}</dd></div>}{regionForItem&&<div><dt>所属村庄</dt><dd>{regionForItem.name}</dd></div>}<div><dt>对象名称</dt><dd>{title}</dd></div>{item&&cls&&<div><dt>{cls==='gate'||cls==='pump_station'||cls==='generic'?'位置状态':'范围状态'}</dt><dd>{demo?'演示区域（非测绘边界）':scopeBadge(cls,item).text}</dd></div>}</dl></section>}
    {mobile&&<section className={styles.detailSection}><h3>绑定信息</h3><p className={styles.businessLead}>机具与定位终端：{mobile.terminal_name}</p><p className={styles.detailContext}>绑定有效期至 {time(mobile.valid_until)}；绑定归属不等于当前位置。</p></section>}
    {item&&<details className={styles.moreActions}><summary>资料依据</summary><dl className={styles.detailList}><div><dt>登记依据</dt><dd>{item.boundary_source??item.object_source??'未提供'}</dd></div><div><dt>记录时间</dt><dd>{time(item.boundary_recorded_at??item.object_recorded_at)}</dd></div><div><dt>版本</dt><dd>{item.version}</dd></div></dl></details>}
   </div>}
   {middleTabBody}
   {activeTab==='records'&&<div className={styles.detailTabBody}>
-   <div className={styles.recordFilters} role="group" aria-label="记录类别筛选">{recordFilters.map(row=><button key={row.id} type="button" className={recordFilter===row.id?styles.activeFilter:''} aria-pressed={recordFilter===row.id} onClick={()=>onRecordFilter(row.id)}>{row.label}</button>)}</div>
+   <div className={styles.recordFilters} role="group" aria-label="记录类别筛选">{recordFiltersFor(region?'region':mobile?'mobile':cls??'generic').map(row=><button key={row.id} type="button" className={recordFilter===row.id?styles.activeFilter:''} aria-pressed={recordFilter===row.id} onClick={()=>onRecordFilter(row.id)}>{row.label}</button>)}</div>
    {demo?(shownRecords.length?shownRecords.map(row=><p key={row.id} className={styles.drawerHint}>{row.text}</p>):<p className={styles.drawerHint}>该类别暂无演示记录。</p>):(()=>{
     const {alertState,alertViews,retry}=detail;
     if(alertState==='loading')return <p className={styles.drawerHint}>正在读取相关记录…</p>;

@@ -94,9 +94,22 @@ export function currentBatch(rows:ApiBatch[],objectId:string):{batch:ApiBatch|nu
   return{batch:latest,state:'trusted',reason:''};
 }
 
-// F04 塘口摘要：最多取两个可信水体指标，逐点展示，不合并不平均。
-export function pickTrustedIndicators(views:PointView[],limit=2):PointView[]{
-  return views.filter(view=>view.fact==='trusted').slice(0,limit);
+// 塘口顶部指标槽位（V1）：最多两个指标位置；同一指标多个可信测点且未经确认代表点时，
+// 不取任意值，显示「多个测点 · 查看详情」。
+export type IndicatorSlot={kind:'single';view:PointView}|{kind:'multi';metric:string;count:number};
+export function buildTopIndicators(views:PointView[],limit=2):IndicatorSlot[]{
+  const order:string[]=[];const byMetric=new Map<string,PointView[]>();
+  for(const view of views.filter(v=>v.fact==='trusted')){
+    if(!byMetric.has(view.metric)){byMetric.set(view.metric,[]);order.push(view.metric);}
+    byMetric.get(view.metric)!.push(view);
+  }
+  const slots:IndicatorSlot[]=[];
+  for(const metric of order){
+    if(slots.length>=limit)break;
+    const list=byMetric.get(metric)!;
+    slots.push(list.length===1?{kind:'single',view:list[0]}:{kind:'multi',metric,count:list.length});
+  }
+  return slots;
 }
 
 // F05 设施业务子类：仅采信后端已核实的子类字段；未知/未核实一律回退（不名称猜测）。

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveBusinessClass,tabsFor,resolveActiveTab,nextTabOnSelection} from '../../src/app/(platform)/farm-overview/detail-classes';
+import {resolveBusinessClass,tabsFor,resolveActiveTab,nextTabOnSelection,recordFiltersFor,scopeBadge} from '../../src/app/(platform)/farm-overview/detail-classes';
 
 test('详情框架业务类型分发：正式对象按 kind，设施回退通用，演示 symbol 不构成正式身份',()=>{
   assert.equal(resolveBusinessClass({kind:'field'},false),'field');
@@ -55,4 +55,20 @@ test('F02 跨对象切换标签规则：首次不重置、同类保留、跨类�
   assert.equal(nextTabOnSelection('generic','generic','production'),'basic');
   // 选择清空：不重置
   assert.equal(nextTabOnSelection('field',null,'records'),'records');
+});
+
+test('R02-B 记录筛选类别按业务类配置：塘口养殖、农田农事、水闸泵站操作',()=>{
+ assert.deepEqual(recordFiltersFor('field').map(f=>f.label),['全部','农事','巡检','告警']);
+ assert.deepEqual(recordFiltersFor('pond').map(f=>f.label),['全部','养殖','巡检','告警','维护']);
+ assert.deepEqual(recordFiltersFor('gate').map(f=>f.label),['全部','操作','巡检','告警','维护']);
+ assert.deepEqual(recordFiltersFor('pump_station').map(f=>f.label),['全部','操作','巡检','告警','维护']);
+});
+
+test('R02-B 空间状态徽标：农田塘口用范围、设施用位置，不从几何推断核实',()=>{
+ assert.deepEqual(scopeBadge('field',{geometry:null,boundary_status:'unknown'}),{text:'范围未登记',status:'待登记'});
+ assert.deepEqual(scopeBadge('pond',{geometry:{},boundary_status:'draft'}),{text:'范围待核对',status:'草稿'});
+ assert.deepEqual(scopeBadge('gate',{geometry:{},boundary_status:'draft'}),{text:'位置待核对',status:'草稿'});
+ assert.deepEqual(scopeBadge('pump_station',{geometry:{},boundary_status:'verified'}),{text:'位置已核实',status:'已核实'});
+ assert.deepEqual(scopeBadge('generic',{geometry:null,boundary_status:'unknown'}),{text:'位置未登记',status:'待登记'});
+ assert.deepEqual(scopeBadge('field',{geometry:{},boundary_status:'verified'}),{text:'范围已核实',status:'已核实'});
 });
