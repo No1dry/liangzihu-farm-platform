@@ -52,7 +52,7 @@ test('F03 测点当前值事实展示、局部状态与相关记录告警',{time
    await page.getByRole('button',{name:'测点房',exact:true}).click();
    await detail.getByRole('heading',{name:'测点房'}).waitFor();
    await detail.getByRole('tab',{name:'关联设备',exact:true}).click();
-   await detail.getByText(/暂无已登记的关联测点/).waitFor();
+   await detail.getByText(/暂无关联测点。/).waitFor();
    assert.deepEqual(errors,[],'页面不得出现脚本错误');
    await context.close();
   }finally{await browser.close();}
